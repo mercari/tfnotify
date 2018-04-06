@@ -1,0 +1,53 @@
+version: 2
+
+defaults: &defaults
+  working_directory: /go/src/github.com/mercari/tfnotify
+
+jobs:
+  build:
+    <<: *defaults
+    docker:
+      - image: golang:1.10-stretch
+    steps:
+      - checkout
+      - run:
+          name: Install dpendency tools and vendor
+          command: |
+            go get -u github.com/golang/dep/cmd/dep
+            dep ensure
+      - run:
+          name: Run test
+          command: |
+            make test
+      - run:
+          name: Run coverage
+          command: |
+            make coverage
+            bash <(curl -s https://codecov.io/bash)
+
+  lint:
+    <<: *defaults
+    docker:
+      - image: golang:1.10-stretch
+    steps:
+      - checkout
+      - run:
+          name: Install dpendency tools and vendor
+          command: |
+            make dep
+            dep ensure
+      - run:
+          name: Run lint
+          command: |
+            make reviewdog
+
+workflows:
+  version: 2
+  build-workflow:
+    jobs:
+      - build
+      - lint:
+          filters:
+            branches:
+              ignore:
+                - master
