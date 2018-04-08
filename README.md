@@ -1,7 +1,7 @@
 tfnotify
 ========
 
-[![][circleci-svg]][circleci] [![][codecov-svg]](codecov) [![][goreportcard-svg]][goreportcard]
+[![][codecov-svg]](codecov) [![][goreportcard-svg]][goreportcard]
 
 [circleci]: https://circleci.com/gh/mercari/tfnotify/tree/master
 [circleci-svg]: https://circleci.com/gh/mercari/tfnotify/tree/master.svg?style=svg
