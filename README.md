@@ -19,9 +19,9 @@ Terraform commands are often executed via CI like Circle CI, but in that case yo
 This is very troublesome. It is very efficient if you can check it with GitHub comments or Slack etc.
 You can do this by using this command.
 
-<img src="./misc/1.png" width="600">
+<img src="./misc/images/1.png" width="600">
 
-<img src="./misc/2.png" width="500">
+<img src="./misc/images/2.png" width="500">
 
 ## Installation
 

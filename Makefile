@@ -35,9 +35,9 @@ coverage: devel-deps
 
 .PHONY: release
 release: devel-deps
-	@./misc/bump-and-chglog.sh
-	@./misc/upload-artifacts.sh
+	@./misc/scripts/bump-and-chglog.sh
+	@./misc/scripts/upload-artifacts.sh
 
 .PHONY: devel-deps
 devel-deps:
-	@./misc/install-devel-deps.sh
+	@./misc/scripts/install-devel-deps.sh
