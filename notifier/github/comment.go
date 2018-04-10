@@ -3,7 +3,6 @@ package github
 import (
 	"context"
 	"fmt"
-	"regexp"
 
 	"github.com/google/go-github/github"
 )
@@ -73,14 +72,57 @@ func (g *CommentService) DeleteDuplicates(title string) {
 
 func (g *CommentService) getDuplicates(title string) []*github.IssueComment {
 	var dup []*github.IssueComment
-	re := regexp.MustCompile(`(?m)^(\n+)?` + title + `\n+` + g.client.Config.PR.Message + `\n+`)
-
 	comments, _ := g.client.Comment.List(g.client.Config.PR.Number)
 	for _, comment := range comments {
-		if re.MatchString(*comment.Body) {
+		if g.bodyMatchString(title, *comment.Body) {
 			dup = append(dup, comment)
 		}
 	}
 
 	return dup
+}
+
+// regexp.MustCompile(`(m?)^(\n+)?` + title + `\n+` + g.client.Config.PR.Message + `\n+`)
+func (g *CommentService) bodyMatchString(title, body string) bool {
+	pos := 0
+	blen := len(body)
+	// (\n+)?
+	for ; pos < blen; pos++ {
+		if body[pos] != '\n' {
+			break
+		}
+	}
+
+	// title
+	tlen := len(title)
+	idx := pos + tlen
+	if idx >= blen || body[pos:idx] != title {
+		return false
+	}
+	pos = idx
+
+	// \n+
+	if pos >= blen || body[pos] != '\n' {
+		return false
+	}
+	for ; pos < blen; pos++ {
+		if body[pos] != '\n' {
+			break
+		}
+	}
+
+	// g.client.Config.PR.Message
+	msg := g.client.Config.PR.Message
+	mlen := len(msg)
+	midx := pos + mlen
+	if midx >= blen || body[pos:midx] != msg {
+		return false
+	}
+	pos = midx
+
+	// \n+
+	if pos >= blen || body[pos] != '\n' {
+		return false
+	}
+	return true
 }

@@ -19,6 +19,8 @@ type PullRequest struct {
 	Number   int
 }
 
+var ciRegexp = regexp.MustCompile(`[1-9]\d*$`)
+
 func circleci() (ci CI, err error) {
 	ci.PR.Number = 0
 	ci.PR.Revision = os.Getenv("CIRCLE_SHA1")
@@ -33,8 +35,7 @@ func circleci() (ci CI, err error) {
 	if pr == "" {
 		return ci, nil
 	}
-	re := regexp.MustCompile(`[1-9]\d*$`)
-	ci.PR.Number, err = strconv.Atoi(re.FindString(pr))
+	ci.PR.Number, err = strconv.Atoi(ciRegexp.FindString(pr))
 	if err != nil {
 		return ci, fmt.Errorf("%v: cannot get env", pr)
 	}
