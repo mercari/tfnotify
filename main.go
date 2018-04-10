@@ -210,3 +210,6 @@ func cmdApply(ctx *cli.Context) error {
 	}
 	return t.Run()
 }
+
+func Do() {
+}
