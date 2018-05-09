@@ -102,12 +102,19 @@ func (p *PlanParser) Parse(body string) ParseResult {
 			Error:    fmt.Errorf("cannot parse plan result"),
 		}
 	}
-	var result string
 	lines := strings.Split(body, "\n")
-	for _, line := range lines {
+	var i int
+	var result, line string
+	for i, line = range lines {
 		if p.Pass.MatchString(line) || p.Fail.MatchString(line) {
-			result = line
+			break
 		}
+	}
+	switch {
+	case p.Pass.MatchString(line):
+		result = lines[i]
+	case p.Fail.MatchString(line):
+		result = strings.Join(trimLastNewline(lines[i:]), "\n")
 	}
 	return ParseResult{
 		Result:   result,
@@ -131,16 +138,20 @@ func (p *ApplyParser) Parse(body string) ParseResult {
 			Error:    fmt.Errorf("cannot parse apply result"),
 		}
 	}
-	var result string
 	lines := strings.Split(body, "\n")
 	var i int
-	for idx, line := range lines {
+	var result, line string
+	for i, line = range lines {
 		if p.Pass.MatchString(line) || p.Fail.MatchString(line) {
-			i = idx
 			break
 		}
 	}
-	result = strings.Join(trimLastNewline(lines[i:]), "\n")
+	switch {
+	case p.Pass.MatchString(line):
+		result = lines[i]
+	case p.Fail.MatchString(line):
+		result = strings.Join(trimLastNewline(lines[i:]), "\n")
+	}
 	return ParseResult{
 		Result:   result,
 		ExitCode: exitCode,

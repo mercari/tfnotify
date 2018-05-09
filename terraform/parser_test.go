@@ -76,7 +76,13 @@ const planFailureResult = `
 xxxxxxxxx
 xxxxxxxxx
 xxxxxxxxx
-Error: Required variable not set: my_service_dev_google_sql_user_proxyuser_password
+
+Error: Error refreshing state: 4 error(s) occurred:
+
+* google_sql_database.main: 1 error(s) occurred:
+
+* google_sql_database.main: google_sql_database.main: Error reading SQL Database "main" in instance "main-master-instance": googleapi: Error 409: The instance or operation is not in an appropriate state to handle the request., invalidState
+* google_sql_user.proxyuser_main: 1 error(s) occurred:
 `
 
 const planNoChanges = `
@@ -263,7 +269,12 @@ func TestPlanParserParse(t *testing.T) {
 			name: "plan ng pattern",
 			body: planFailureResult,
 			result: ParseResult{
-				Result:   "Error: Required variable not set: my_service_dev_google_sql_user_proxyuser_password",
+				Result: `Error: Error refreshing state: 4 error(s) occurred:
+
+* google_sql_database.main: 1 error(s) occurred:
+
+* google_sql_database.main: google_sql_database.main: Error reading SQL Database "main" in instance "main-master-instance": googleapi: Error 409: The instance or operation is not in an appropriate state to handle the request., invalidState
+* google_sql_user.proxyuser_main: 1 error(s) occurred:`,
 				ExitCode: 1,
 				Error:    nil,
 			},
