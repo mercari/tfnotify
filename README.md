@@ -87,13 +87,14 @@ notifier:
       name: "tfnotify"
 terraform:
   fmt:
-    {{ .Title }}
+    template: |
+      {{ .Title }}
 
-    {{ .Message }}
+      {{ .Message }}
 
-    {{ .Result }}
+      {{ .Result }}
 
-    {{ .Body }}
+      {{ .Body }}
   plan:
     template: |
       {{ .Title }}
@@ -128,7 +129,9 @@ terraform:
 ci: circleci
 notifier:
   slack:
-    token: $GITHUB_TOKEN
+    token: $SLACK_TOKEN
+    channel: $SLACK_CHANNEL_ID
+    bot: $SLACK_BOT_NAME
 terraform:
   plan:
     template: |
