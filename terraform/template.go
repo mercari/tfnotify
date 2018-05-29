@@ -88,6 +88,7 @@ type CommonTemplate struct {
 	Message string
 	Result  string
 	Body    string
+	Link    string
 }
 
 // DefaultTemplate is a default template for terraform commands
@@ -170,6 +171,7 @@ func (t *DefaultTemplate) Execute() (resp string, err error) {
 		"Message": t.Message,
 		"Result":  "",
 		"Body":    t.Result,
+		"Link":    t.Link,
 	}); err != nil {
 		return resp, err
 	}
@@ -189,6 +191,7 @@ func (t *FmtTemplate) Execute() (resp string, err error) {
 		"Message": t.Message,
 		"Result":  "",
 		"Body":    t.Result,
+		"Link":    t.Link,
 	}); err != nil {
 		return resp, err
 	}
@@ -208,6 +211,7 @@ func (t *PlanTemplate) Execute() (resp string, err error) {
 		"Message": t.Message,
 		"Result":  t.Result,
 		"Body":    t.Body,
+		"Link":    t.Link,
 	}); err != nil {
 		return resp, err
 	}
@@ -227,6 +231,7 @@ func (t *ApplyTemplate) Execute() (resp string, err error) {
 		"Message": t.Message,
 		"Result":  t.Result,
 		"Body":    t.Body,
+		"Link":    t.Link,
 	}); err != nil {
 		return resp, err
 	}

@@ -26,6 +26,7 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 		Message: cfg.PR.Message,
 		Result:  result.Result,
 		Body:    body,
+		Link:    cfg.CI,
 	})
 	body, err = template.Execute()
 	if err != nil {
