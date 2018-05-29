@@ -22,10 +22,8 @@ do
     shift
 done
 
-git commit -am "Bump version $next_version"
+git-chglog -o CHANGELOG.md --next-tag "v$next_version"
+git commit -am "Bump version $next_version and update changelog"
 git tag "v$next_version"
-
-git-chglog -o CHANGELOG.md
-git commit -am "Update changelog"
 
 git push && git push --tags
