@@ -70,6 +70,7 @@ Placeholder | Usage
 `{{ .Message }}` | A string that can be set from CLI with `--message` option
 `{{ .Result }}` | Matched result by parsing like `Plan: 1 to add` or `No changes`
 `{{ .Body }}` | The entire of Terraform execution result
+`{{ .Link }}` | The link of the build page on CI
 
 #### Template Examples
 
@@ -97,7 +98,7 @@ terraform:
       {{ .Body }}
   plan:
     template: |
-      {{ .Title }}
+      {{ .Title }} <sup>[CI link]( {{ .Link }} )</sup>
       {{ .Message }}
       {{if .Result}}
       <pre><code> {{ .Result }}
