@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"reflect"
+	"regexp"
 	"testing"
 
 	"github.com/google/go-github/github"
@@ -214,4 +215,139 @@ func TestCommentGetDuplicates(t *testing.T) {
 			t.Errorf("got %q but want %q", comments, testCase.comments)
 		}
 	}
+}
+
+func BenchmarkGetDuplicates(b *testing.B) {
+	// run the Fib function b.N times
+	for n := 0; n < b.N; n++ {
+		api := newFakeAPI()
+		api.FakeIssuesListComments = func(ctx context.Context, number int, opt *github.IssueListCommentsOptions) ([]*github.IssueComment, *github.Response, error) {
+			var comments []*github.IssueComment
+			comments = []*github.IssueComment{
+				&github.IssueComment{
+					ID:   github.Int64(371748792),
+					Body: github.String("## Plan result\nfoo message\n"),
+				},
+				&github.IssueComment{
+					ID:   github.Int64(371765743),
+					Body: github.String("## Plan result\nbar message\n"),
+				},
+				&github.IssueComment{
+					ID:   github.Int64(371765744),
+					Body: github.String("## Plan result\nbaz message\n"),
+				},
+			}
+			return comments, nil, nil
+		}
+
+		testCases := []struct {
+			title    string
+			message  string
+			comments []*github.IssueComment
+		}{
+			{
+				title:   "## Plan result",
+				message: "foo message",
+				comments: []*github.IssueComment{
+					&github.IssueComment{
+						ID:   github.Int64(371748792),
+						Body: github.String("## Plan result\nfoo message\n"),
+					},
+				},
+			},
+			{
+				title:    "## Plan result",
+				message:  "hoge message",
+				comments: nil,
+			},
+		}
+
+		for _, testCase := range testCases {
+			cfg := newFakeConfig()
+			cfg.PR.Message = testCase.message
+			client, err := NewClient(cfg)
+			if err != nil {
+				b.Fatal(err)
+			}
+			client.API = &api
+			comments := client.Comment.getDuplicates(testCase.title)
+			if !reflect.DeepEqual(comments, testCase.comments) {
+				b.Fatal("Does not match!!")
+			}
+		}
+	}
+}
+
+func BenchmarkOldGetDuplicates(b *testing.B) {
+	// run the Fib function b.N times
+	for n := 0; n < b.N; n++ {
+		api := newFakeAPI()
+		api.FakeIssuesListComments = func(ctx context.Context, number int, opt *github.IssueListCommentsOptions) ([]*github.IssueComment, *github.Response, error) {
+			var comments []*github.IssueComment
+			comments = []*github.IssueComment{
+				&github.IssueComment{
+					ID:   github.Int64(371748792),
+					Body: github.String("## Plan result\nfoo message\n"),
+				},
+				&github.IssueComment{
+					ID:   github.Int64(371765743),
+					Body: github.String("## Plan result\nbar message\n"),
+				},
+				&github.IssueComment{
+					ID:   github.Int64(371765744),
+					Body: github.String("## Plan result\nbaz message\n"),
+				},
+			}
+			return comments, nil, nil
+		}
+
+		testCases := []struct {
+			title    string
+			message  string
+			comments []*github.IssueComment
+		}{
+			{
+				title:   "## Plan result",
+				message: "foo message",
+				comments: []*github.IssueComment{
+					&github.IssueComment{
+						ID:   github.Int64(371748792),
+						Body: github.String("## Plan result\nfoo message\n"),
+					},
+				},
+			},
+			{
+				title:    "## Plan result",
+				message:  "hoge message",
+				comments: nil,
+			},
+		}
+
+		for _, testCase := range testCases {
+			cfg := newFakeConfig()
+			cfg.PR.Message = testCase.message
+			client, err := NewClient(cfg)
+			if err != nil {
+				b.Fatal(err)
+			}
+			client.API = &api
+			comments := client.Comment._getDuplicates(testCase.title)
+			if !reflect.DeepEqual(comments, testCase.comments) {
+				b.Fatal("Does not match!!")
+			}
+		}
+	}
+}
+
+func (g *CommentService) _getDuplicates(title string) []*github.IssueComment {
+	var dup []*github.IssueComment
+	re := regexp.MustCompile(`(m?)^(\n+)?` + title + `\n+` + g.client.Config.PR.Message + `\n+`)
+	comments, _ := g.client.Comment.List(g.client.Config.PR.Number)
+	for _, comment := range comments {
+		if re.MatchString(*comment.Body) {
+			dup = append(dup, comment)
+		}
+	}
+
+	return dup
 }
