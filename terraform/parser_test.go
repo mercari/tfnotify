@@ -195,6 +195,7 @@ func TestDefaultParserParse(t *testing.T) {
 			body: "",
 			result: ParseResult{
 				Result:   "",
+				Detail:   "",
 				ExitCode: 0,
 				Error:    nil,
 			},
@@ -219,6 +220,7 @@ func TestFmtParserParse(t *testing.T) {
 			body: fmtSuccessResult,
 			result: ParseResult{
 				Result:   "There is diff in your .tf file (need to be formatted)",
+				Detail:   "",
 				ExitCode: 1,
 				Error:    nil,
 			},
@@ -228,6 +230,7 @@ func TestFmtParserParse(t *testing.T) {
 			body: "",
 			result: ParseResult{
 				Result:   "",
+				Detail:   "",
 				ExitCode: 0,
 				Error:    nil,
 			},
@@ -251,7 +254,17 @@ func TestPlanParserParse(t *testing.T) {
 			name: "plan ok pattern",
 			body: planSuccessResult,
 			result: ParseResult{
-				Result:   "Plan: 1 to add, 0 to change, 0 to destroy.",
+				Result: "Plan: 1 to add, 0 to change, 0 to destroy.",
+				Detail: `Terraform will perform the following actions:
+
+  + google_compute_global_address.my_another_project
+      id:         <computed>
+      address:    <computed>
+      ip_version: "IPV4"
+      name:       "my-another-project"
+      project:    "my-project"
+      self_link:  <computed>
+`,
 				ExitCode: 0,
 				Error:    nil,
 			},
@@ -261,6 +274,7 @@ func TestPlanParserParse(t *testing.T) {
 			body: "",
 			result: ParseResult{
 				Result:   "",
+				Detail:   "",
 				ExitCode: 1,
 				Error:    errors.New("cannot parse plan result"),
 			},
@@ -269,8 +283,8 @@ func TestPlanParserParse(t *testing.T) {
 			name: "plan ng pattern",
 			body: planFailureResult,
 			result: ParseResult{
-				Result: `Error: Error refreshing state: 4 error(s) occurred:
-
+				Result: `Error: Error refreshing state: 4 error(s) occurred:`,
+				Detail: `
 * google_sql_database.main: 1 error(s) occurred:
 
 * google_sql_database.main: google_sql_database.main: Error reading SQL Database "main" in instance "main-master-instance": googleapi: Error 409: The instance or operation is not in an appropriate state to handle the request., invalidState
@@ -284,6 +298,7 @@ func TestPlanParserParse(t *testing.T) {
 			body: planNoChanges,
 			result: ParseResult{
 				Result:   "No changes. Infrastructure is up-to-date.",
+				Detail:   "",
 				ExitCode: 0,
 				Error:    nil,
 			},
@@ -308,6 +323,7 @@ func TestApplyParserParse(t *testing.T) {
 			body: "",
 			result: ParseResult{
 				Result:   "",
+				Detail:   "",
 				ExitCode: 1,
 				Error:    errors.New("cannot parse apply result"),
 			},
@@ -317,6 +333,7 @@ func TestApplyParserParse(t *testing.T) {
 			body: applySuccessResult,
 			result: ParseResult{
 				Result:   "Apply complete! Resources: 0 added, 0 changed, 0 destroyed.",
+				Detail:   "",
 				ExitCode: 0,
 				Error:    nil,
 			},
@@ -325,8 +342,8 @@ func TestApplyParserParse(t *testing.T) {
 			name: "apply ng pattern",
 			body: applyFailureResult,
 			result: ParseResult{
-				Result: `Error: Error applying plan:
-
+				Result: "Error: Error applying plan:",
+				Detail: `
 1 error(s) occurred:
 
 * google_compute_global_address.teams_web_tfnotify_in: 1 error(s) occurred:

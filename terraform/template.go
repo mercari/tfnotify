@@ -87,6 +87,7 @@ type CommonTemplate struct {
 	Title   string
 	Message string
 	Result  string
+	Detail  string
 	Body    string
 	Link    string
 }
@@ -170,6 +171,7 @@ func (t *DefaultTemplate) Execute() (resp string, err error) {
 		"Title":   t.Title,
 		"Message": t.Message,
 		"Result":  "",
+		"Detail":  "",
 		"Body":    t.Result,
 		"Link":    t.Link,
 	}); err != nil {
@@ -190,6 +192,7 @@ func (t *FmtTemplate) Execute() (resp string, err error) {
 		"Title":   t.Title,
 		"Message": t.Message,
 		"Result":  "",
+		"Detail":  "",
 		"Body":    t.Result,
 		"Link":    t.Link,
 	}); err != nil {
@@ -210,6 +213,7 @@ func (t *PlanTemplate) Execute() (resp string, err error) {
 		"Title":   t.Title,
 		"Message": t.Message,
 		"Result":  t.Result,
+		"Detail":  t.Detail,
 		"Body":    t.Body,
 		"Link":    t.Link,
 	}); err != nil {
@@ -230,6 +234,7 @@ func (t *ApplyTemplate) Execute() (resp string, err error) {
 		"Title":   t.Title,
 		"Message": t.Message,
 		"Result":  t.Result,
+		"Detail":  t.Detail,
 		"Body":    t.Body,
 		"Link":    t.Link,
 	}); err != nil {

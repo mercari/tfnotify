@@ -14,6 +14,7 @@ type Parser interface {
 // ParseResult represents the result of parsed terraform execution
 type ParseResult struct {
 	Result   string
+	Detail   string
 	ExitCode int
 	Error    error
 }
@@ -30,8 +31,9 @@ type FmtParser struct {
 
 // PlanParser is a parser for terraform plan
 type PlanParser struct {
-	Pass *regexp.Regexp
-	Fail *regexp.Regexp
+	PassResult      *regexp.Regexp
+	PassDetailStart *regexp.Regexp
+	Fail            *regexp.Regexp
 }
 
 // ApplyParser is a parser for terraform apply
@@ -55,8 +57,9 @@ func NewFmtParser() *FmtParser {
 // NewPlanParser is PlanParser initialized with its Regexp
 func NewPlanParser() *PlanParser {
 	return &PlanParser{
-		Pass: regexp.MustCompile(`(?m)^(Plan: \d|No changes.)`),
-		Fail: regexp.MustCompile(`(?m)^(Error: )`),
+		PassResult:      regexp.MustCompile(`(?m)^(Plan: \d|No changes.)`),
+		PassDetailStart: regexp.MustCompile(`(?m)^(Terraform will perform the following actions:)`),
+		Fail:            regexp.MustCompile(`(?m)^(Error: )`),
 	}
 }
 
@@ -72,6 +75,7 @@ func NewApplyParser() *ApplyParser {
 func (p *DefaultParser) Parse(body string) ParseResult {
 	return ParseResult{
 		Result:   body,
+		Detail:   "",
 		ExitCode: ExitPass,
 		Error:    nil,
 	}
@@ -82,6 +86,7 @@ func (p *FmtParser) Parse(body string) ParseResult {
 	result := ParseResult{}
 	if p.Fail.MatchString(body) {
 		result.Result = "There is diff in your .tf file (need to be formatted)"
+		result.Detail = ""
 		result.ExitCode = ExitFail
 	}
 	return result
@@ -91,33 +96,42 @@ func (p *FmtParser) Parse(body string) ParseResult {
 func (p *PlanParser) Parse(body string) ParseResult {
 	var exitCode int
 	switch {
-	case p.Pass.MatchString(body):
+	case p.PassResult.MatchString(body):
 		exitCode = ExitPass
 	case p.Fail.MatchString(body):
 		exitCode = ExitFail
 	default:
 		return ParseResult{
 			Result:   "",
+			Detail:   "",
 			ExitCode: ExitFail,
 			Error:    fmt.Errorf("cannot parse plan result"),
 		}
 	}
 	lines := strings.Split(body, "\n")
-	var i int
-	var result, line string
+	var i, detailStartLine int
+	var result, detail, line string
 	for i, line = range lines {
-		if p.Pass.MatchString(line) || p.Fail.MatchString(line) {
+		if p.PassDetailStart.MatchString(line) {
+			detailStartLine = i
+		}
+		if p.PassResult.MatchString(line) || p.Fail.MatchString(line) {
 			break
 		}
 	}
 	switch {
-	case p.Pass.MatchString(line):
+	case p.PassResult.MatchString(line):
 		result = lines[i]
+		if detailStartLine != 0 {
+			detail = strings.Join(trimLastNewline(lines[detailStartLine:i]), "\n")
+		}
 	case p.Fail.MatchString(line):
-		result = strings.Join(trimLastNewline(lines[i:]), "\n")
+		result = lines[i]
+		detail = strings.Join(trimLastNewline(lines[i+1:]), "\n")
 	}
 	return ParseResult{
 		Result:   result,
+		Detail:   detail,
 		ExitCode: exitCode,
 		Error:    nil,
 	}
@@ -134,13 +148,14 @@ func (p *ApplyParser) Parse(body string) ParseResult {
 	default:
 		return ParseResult{
 			Result:   "",
+			Detail:   "",
 			ExitCode: ExitFail,
 			Error:    fmt.Errorf("cannot parse apply result"),
 		}
 	}
 	lines := strings.Split(body, "\n")
 	var i int
-	var result, line string
+	var result, detail, line string
 	for i, line = range lines {
 		if p.Pass.MatchString(line) || p.Fail.MatchString(line) {
 			break
@@ -150,10 +165,12 @@ func (p *ApplyParser) Parse(body string) ParseResult {
 	case p.Pass.MatchString(line):
 		result = lines[i]
 	case p.Fail.MatchString(line):
-		result = strings.Join(trimLastNewline(lines[i:]), "\n")
+		result = lines[i]
+		detail = strings.Join(trimLastNewline(lines[i+1:]), "\n")
 	}
 	return ParseResult{
 		Result:   result,
+		Detail:   detail,
 		ExitCode: exitCode,
 		Error:    nil,
 	}
