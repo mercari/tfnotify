@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/mercari/tfnotify/notifier"
 )
 
 // Exit codes are int values for the exit code that shell interpreter can interpret
@@ -54,6 +56,11 @@ func (ee *ExitError) ExitCode() int {
 // This function is heavily inspired by urfave/cli.HandleExitCoder
 func HandleExit(err error) int {
 	if err == nil {
+		return ExitCodeOK
+	}
+
+	// Ignore nop
+	if err == notifier.ErrNop {
 		return ExitCodeOK
 	}
 

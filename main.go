@@ -73,6 +73,7 @@ func (t *tfnotify) Run() error {
 			CI:       ci.URL,
 			Parser:   t.parser,
 			Template: t.template,
+			Filters:  t.config.Notifier.Github.Filters,
 		})
 		if err != nil {
 			return err
@@ -87,6 +88,7 @@ func (t *tfnotify) Run() error {
 			CI:       ci.URL,
 			Parser:   t.parser,
 			Template: t.template,
+			Filters:  t.config.Notifier.Slack.Filters,
 		})
 		if err != nil {
 			return err

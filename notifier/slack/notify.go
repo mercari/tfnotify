@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/mercari/tfnotify/terraform"
 	"github.com/lestrrat-go/slack/objects"
+	"github.com/mercari/tfnotify/notifier"
+	"github.com/mercari/tfnotify/terraform"
 )
 
 // NotifyService handles communication with the notification related
@@ -17,6 +18,7 @@ func (s *NotifyService) Notify(body string) (exit int, err error) {
 	cfg := s.client.Config
 	parser := s.client.Config.Parser
 	template := s.client.Config.Template
+	filters := s.client.Config.Filters
 
 	if cfg.Channel == "" {
 		return terraform.ExitFail, errors.New("channel id is required")
@@ -28,6 +30,10 @@ func (s *NotifyService) Notify(body string) (exit int, err error) {
 	}
 	if result.Result == "" {
 		return result.ExitCode, result.Error
+	}
+
+	if !filters.Match(result.ExitCode) {
+		return result.ExitCode, notifier.ErrNop
 	}
 
 	color := "warning"
