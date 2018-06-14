@@ -156,6 +156,10 @@ Currently, supported CI are here:
 - Circle CI
 - Travis CI
 
+### Private Repository Considerations
+GitHub private repositories require the `repo` and `write:discussion` permissions.
+
+
 ## Committers
 
  * Masaki ISHIYAMA ([@b4b4r07](https://github.com/b4b4r07))
