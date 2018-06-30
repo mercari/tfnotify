@@ -27,7 +27,7 @@ dep: devel-deps
 
 .PHONY: reviewdog
 reviewdog: devel-deps
-	reviewdog -ci="circle-ci"
+	reviewdog -reporter="github-pr-check"
 
 .PHONY: coverage
 coverage: devel-deps
