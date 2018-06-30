@@ -34,7 +34,7 @@ coverage: devel-deps
 	goverage -v -covermode=atomic -coverprofile=coverage.txt $(PACKAGES)
 
 .PHONY: release
-release: devel-deps
+release:
 	@./misc/scripts/bump-and-chglog.sh
 	@./misc/scripts/upload-artifacts.sh
 
