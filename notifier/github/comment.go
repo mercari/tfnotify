@@ -73,7 +73,7 @@ func (g *CommentService) DeleteDuplicates(title string) {
 
 func (g *CommentService) getDuplicates(title string) []*github.IssueComment {
 	var dup []*github.IssueComment
-	re := regexp.MustCompile(`(?m)^(\n+)?` + title + `\n+` + g.client.Config.PR.Message + `\n+`)
+	re := regexp.MustCompile(`(?m)^(\n+)?` + title + `( +.*)?\n+` + g.client.Config.PR.Message + `\n+`)
 
 	comments, _ := g.client.Comment.List(g.client.Config.PR.Number)
 	for _, comment := range comments {

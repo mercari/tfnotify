@@ -175,6 +175,10 @@ func TestCommentGetDuplicates(t *testing.T) {
 				ID:   github.Int64(371765744),
 				Body: github.String("## Plan result\nbaz message\n"),
 			},
+			&github.IssueComment{
+				ID:   github.Int64(371765745),
+				Body: github.String("## Plan result <build URL>\nbaz message\n"),
+			},
 		}
 		return comments, nil, nil
 	}
@@ -198,6 +202,20 @@ func TestCommentGetDuplicates(t *testing.T) {
 			title:    "## Plan result",
 			message:  "hoge message",
 			comments: nil,
+		},
+		{
+			title:   "## Plan result",
+			message: "baz message",
+			comments: []*github.IssueComment{
+				&github.IssueComment{
+					ID:   github.Int64(371765744),
+					Body: github.String("## Plan result\nbaz message\n"),
+				},
+				&github.IssueComment{
+					ID:   github.Int64(371765745),
+					Body: github.String("## Plan result <build URL>\nbaz message\n"),
+				},
+			},
 		},
 	}
 
