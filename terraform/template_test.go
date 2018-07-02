@@ -14,14 +14,34 @@ func TestDefaultTemplateExecute(t *testing.T) {
 		{
 			template: DefaultDefaultTemplate,
 			value:    CommonTemplate{},
-			resp:     "\n## Terraform result\n\n\n\n\n\n<details><summary>Details (Click me)</summary>\n<pre><code>\n</code></pre></details>\n",
+			resp: `
+## Terraform result
+
+
+
+
+
+<details><summary>Details (Click me)</summary>
+<pre><code>
+</code></pre></details>
+`,
 		},
 		{
 			template: DefaultDefaultTemplate,
 			value: CommonTemplate{
 				Message: "message",
 			},
-			resp: "\n## Terraform result\n\nmessage\n\n\n\n<details><summary>Details (Click me)</summary>\n<pre><code>\n</code></pre></details>\n",
+			resp: `
+## Terraform result
+
+message
+
+
+
+<details><summary>Details (Click me)</summary>
+<pre><code>
+</code></pre></details>
+`,
 		},
 		{
 			template: DefaultDefaultTemplate,
@@ -31,7 +51,17 @@ func TestDefaultTemplateExecute(t *testing.T) {
 				Result:  "c",
 				Body:    "d",
 			},
-			resp: "\na\n\nb\n\n\n\n<details><summary>Details (Click me)</summary>\n<pre><code>c\n</code></pre></details>\n",
+			resp: `
+a
+
+b
+
+
+
+<details><summary>Details (Click me)</summary>
+<pre><code>c
+</code></pre></details>
+`,
 		},
 
 		{
@@ -42,7 +72,17 @@ func TestDefaultTemplateExecute(t *testing.T) {
 				Result:  "c",
 				Body:    "d",
 			},
-			resp: "\na\n\nb\n\n\n\n<details><summary>Details (Click me)</summary>\n<pre><code>c\n</code></pre></details>\n",
+			resp: `
+a
+
+b
+
+
+
+<details><summary>Details (Click me)</summary>
+<pre><code>c
+</code></pre></details>
+`,
 		},
 		{
 			template: `{{ .Title }}-{{ .Message }}-{{ .Result }}-{{ .Body }}`,
@@ -52,7 +92,7 @@ func TestDefaultTemplateExecute(t *testing.T) {
 				Result:  "should be used as body",
 				Body:    "should be empty",
 			},
-			resp: "a-b--should be used as body",
+			resp: `a-b--should be used as body`,
 		},
 	}
 	for _, testCase := range testCases {
@@ -77,14 +117,30 @@ func TestFmtTemplateExecute(t *testing.T) {
 		{
 			template: DefaultFmtTemplate,
 			value:    CommonTemplate{},
-			resp:     "\n## Fmt result\n\n\n\n\n\n\n",
+			resp: `
+## Fmt result
+
+
+
+
+
+
+`,
 		},
 		{
 			template: DefaultFmtTemplate,
 			value: CommonTemplate{
 				Message: "message",
 			},
-			resp: "\n## Fmt result\n\nmessage\n\n\n\n\n",
+			resp: `
+## Fmt result
+
+message
+
+
+
+
+`,
 		},
 		{
 			template: DefaultFmtTemplate,
@@ -94,7 +150,15 @@ func TestFmtTemplateExecute(t *testing.T) {
 				Result:  "c",
 				Body:    "d",
 			},
-			resp: "\na\n\nb\n\n\n\nc\n",
+			resp: `
+a
+
+b
+
+
+
+c
+`,
 		},
 
 		{
@@ -105,7 +169,15 @@ func TestFmtTemplateExecute(t *testing.T) {
 				Result:  "c",
 				Body:    "d",
 			},
-			resp: "\na\n\nb\n\n\n\nc\n",
+			resp: `
+a
+
+b
+
+
+
+c
+`,
 		},
 		{
 			template: `{{ .Title }}-{{ .Message }}-{{ .Result }}-{{ .Body }}`,
@@ -115,7 +187,7 @@ func TestFmtTemplateExecute(t *testing.T) {
 				Result:  "should be used as body",
 				Body:    "should be empty",
 			},
-			resp: "a-b--should be used as body",
+			resp: `a-b--should be used as body`,
 		},
 	}
 	for _, testCase := range testCases {
@@ -140,7 +212,17 @@ func TestPlanTemplateExecute(t *testing.T) {
 		{
 			template: DefaultPlanTemplate,
 			value:    CommonTemplate{},
-			resp:     "\n## Plan result\n\n\n\n\n\n<details><summary>Details (Click me)</summary>\n<pre><code>\n</code></pre></details>\n",
+			resp: `
+## Plan result
+
+
+
+
+
+<details><summary>Details (Click me)</summary>
+<pre><code>
+</code></pre></details>
+`,
 		},
 		{
 			template: DefaultPlanTemplate,
@@ -150,7 +232,20 @@ func TestPlanTemplateExecute(t *testing.T) {
 				Result:  "result",
 				Body:    "body",
 			},
-			resp: "\ntitle\n\nmessage\n\n\n<pre><code>result\n</code></pre>\n\n\n<details><summary>Details (Click me)</summary>\n<pre><code>body\n</code></pre></details>\n",
+			resp: `
+title
+
+message
+
+
+<pre><code>result
+</code></pre>
+
+
+<details><summary>Details (Click me)</summary>
+<pre><code>body
+</code></pre></details>
+`,
 		},
 		{
 			template: DefaultPlanTemplate,
@@ -160,7 +255,17 @@ func TestPlanTemplateExecute(t *testing.T) {
 				Result:  "",
 				Body:    "body",
 			},
-			resp: "\ntitle\n\nmessage\n\n\n\n<details><summary>Details (Click me)</summary>\n<pre><code>body\n</code></pre></details>\n",
+			resp: `
+title
+
+message
+
+
+
+<details><summary>Details (Click me)</summary>
+<pre><code>body
+</code></pre></details>
+`,
 		},
 		{
 			template: "",
@@ -170,7 +275,17 @@ func TestPlanTemplateExecute(t *testing.T) {
 				Result:  "",
 				Body:    "body",
 			},
-			resp: "\ntitle\n\nmessage\n\n\n\n<details><summary>Details (Click me)</summary>\n<pre><code>body\n</code></pre></details>\n",
+			resp: `
+title
+
+message
+
+
+
+<details><summary>Details (Click me)</summary>
+<pre><code>body
+</code></pre></details>
+`,
 		},
 		{
 			template: `{{ .Title }}-{{ .Message }}-{{ .Result }}-{{ .Body }}`,
@@ -180,7 +295,7 @@ func TestPlanTemplateExecute(t *testing.T) {
 				Result:  "c",
 				Body:    "d",
 			},
-			resp: "a-b-c-d",
+			resp: `a-b-c-d`,
 		},
 	}
 	for _, testCase := range testCases {
@@ -205,7 +320,17 @@ func TestApplyTemplateExecute(t *testing.T) {
 		{
 			template: DefaultApplyTemplate,
 			value:    CommonTemplate{},
-			resp:     "\n## Apply result\n\n\n\n\n\n<details><summary>Details (Click me)</summary>\n<pre><code>\n</code></pre></details>\n",
+			resp: `
+## Apply result
+
+
+
+
+
+<details><summary>Details (Click me)</summary>
+<pre><code>
+</code></pre></details>
+`,
 		},
 		{
 			template: DefaultApplyTemplate,
@@ -215,7 +340,20 @@ func TestApplyTemplateExecute(t *testing.T) {
 				Result:  "result",
 				Body:    "body",
 			},
-			resp: "\ntitle\n\nmessage\n\n\n<pre><code>result\n</code></pre>\n\n\n<details><summary>Details (Click me)</summary>\n<pre><code>body\n</code></pre></details>\n",
+			resp: `
+title
+
+message
+
+
+<pre><code>result
+</code></pre>
+
+
+<details><summary>Details (Click me)</summary>
+<pre><code>body
+</code></pre></details>
+`,
 		},
 		{
 			template: DefaultApplyTemplate,
@@ -225,7 +363,17 @@ func TestApplyTemplateExecute(t *testing.T) {
 				Result:  "",
 				Body:    "body",
 			},
-			resp: "\ntitle\n\nmessage\n\n\n\n<details><summary>Details (Click me)</summary>\n<pre><code>body\n</code></pre></details>\n",
+			resp: `
+title
+
+message
+
+
+
+<details><summary>Details (Click me)</summary>
+<pre><code>body
+</code></pre></details>
+`,
 		},
 		{
 			template: "",
@@ -235,7 +383,17 @@ func TestApplyTemplateExecute(t *testing.T) {
 				Result:  "",
 				Body:    "body",
 			},
-			resp: "\ntitle\n\nmessage\n\n\n\n<details><summary>Details (Click me)</summary>\n<pre><code>body\n</code></pre></details>\n",
+			resp: `
+title
+
+message
+
+
+
+<details><summary>Details (Click me)</summary>
+<pre><code>body
+</code></pre></details>
+`,
 		},
 		{
 			template: `{{ .Title }}-{{ .Message }}-{{ .Result }}-{{ .Body }}`,
@@ -245,7 +403,7 @@ func TestApplyTemplateExecute(t *testing.T) {
 				Result:  "c",
 				Body:    "d",
 			},
-			resp: "a-b-c-d",
+			resp: `a-b-c-d`,
 		},
 	}
 	for _, testCase := range testCases {
