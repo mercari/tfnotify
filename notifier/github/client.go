@@ -13,6 +13,9 @@ import (
 // EnvToken is GitHub API Token
 const EnvToken = "GITHUB_TOKEN"
 
+// EnvBaseURL is GitHub base URL. This can be set to a domain endpoint to use with GitHub Enterprise.
+const EnvBaseURL = "GITHUB_BASE_URL"
+
 // Client is a API client for GitHub
 type Client struct {
 	*github.Client
@@ -32,6 +35,7 @@ type Client struct {
 // Config is a configuration for GitHub client
 type Config struct {
 	Token    string
+	BaseURL  string
 	Owner    string
 	Repo     string
 	PR       PullRequest
@@ -66,6 +70,19 @@ func NewClient(cfg Config) (*Client, error) {
 	)
 	tc := oauth2.NewClient(oauth2.NoContext, ts)
 	client := github.NewClient(tc)
+
+	baseURL := cfg.BaseURL
+	baseURL = strings.TrimPrefix(baseURL, "$")
+	if baseURL == EnvBaseURL {
+		baseURL = os.Getenv(EnvBaseURL)
+	}
+	if baseURL != "" {
+		var err error
+		client, err = github.NewEnterpriseClient(baseURL, baseURL, tc)
+		if err != nil {
+			return &Client{}, errors.New("failed to create a new github api client")
+		}
+	}
 
 	c := &Client{
 		Config: cfg,
