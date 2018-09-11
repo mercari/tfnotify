@@ -26,4 +26,4 @@ git-chglog -o CHANGELOG.md --next-tag "v$next_version"
 git commit -am "Bump version $next_version and update changelog"
 git tag "v$next_version"
 
-git push && git push --tags
+# git push && git push --tags
