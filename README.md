@@ -60,7 +60,7 @@ For `plan` command, you also need to specify `plan` as the argument of tfnotify.
 
 When running tfnotify, you can specify the configuration path via `--config` option (if it's omitted, it defaults to `{.,}tfnotify.y{,a}ml`).
 
-The example settings of GitHub and Slack are as follows. Incidentally, there is no need to replace TOKEN string such as `$GITHUB_TOKEN` with the actual token. Instead, it must be defined as environment variables in CI settings.
+The example settings of GitHub, GitHub Enterprise and Slack are as follows. Incidentally, there is no need to replace TOKEN string such as `$GITHUB_TOKEN` with the actual token. Instead, it must be defined as environment variables in CI settings.
 
 [template](https://golang.org/pkg/text/template/) of Go can be used for `template`. The templates can be used in `tfnotify.yaml` are as follows:
 
@@ -83,6 +83,55 @@ ci: circleci
 notifier:
   github:
     token: $GITHUB_TOKEN
+    repository:
+      owner: "mercari"
+      name: "tfnotify"
+terraform:
+  fmt:
+    template: |
+      {{ .Title }}
+
+      {{ .Message }}
+
+      {{ .Result }}
+
+      {{ .Body }}
+  plan:
+    template: |
+      {{ .Title }} <sup>[CI link]( {{ .Link }} )</sup>
+      {{ .Message }}
+      {{if .Result}}
+      <pre><code> {{ .Result }}
+      </pre></code>
+      {{end}}
+      <details><summary>Details (Click me)</summary>
+      <pre><code> {{ .Body }}
+      </pre></code></details>
+  apply:
+    template: |
+      {{ .Title }}
+      {{ .Message }}
+      {{if .Result}}
+      <pre><code> {{ .Result }}
+      </pre></code>
+      {{end}}
+      <details><summary>Details (Click me)</summary>
+      <pre><code> {{ .Body }}
+      </pre></code></details>
+```
+
+</details>
+
+<details>
+<summary>For GitHub Enterprise</summary>
+
+```yaml
+---
+ci: circleci
+notifier:
+  github:
+    token: $GITHUB_TOKEN
+    base_url: $GITHUB_BASE_URL
     repository:
       owner: "mercari"
       name: "tfnotify"

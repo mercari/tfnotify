@@ -62,9 +62,10 @@ func (t *tfnotify) Run() error {
 	switch selectedNotifier {
 	case "github":
 		client, err := github.NewClient(github.Config{
-			Token: t.config.Notifier.Github.Token,
-			Owner: t.config.Notifier.Github.Repository.Owner,
-			Repo:  t.config.Notifier.Github.Repository.Name,
+			Token:   t.config.Notifier.Github.Token,
+			BaseURL: t.config.Notifier.Github.BaseURL,
+			Owner:   t.config.Notifier.Github.Repository.Owner,
+			Repo:    t.config.Notifier.Github.Repository.Name,
 			PR: github.PullRequest{
 				Revision: ci.PR.Revision,
 				Number:   ci.PR.Number,

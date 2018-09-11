@@ -72,6 +72,89 @@ func TestNewClient(t *testing.T) {
 	}
 }
 
+func TestNewClientWithBaseURL(t *testing.T) {
+	githubBaseURL := os.Getenv(EnvBaseURL)
+	defer func() {
+		os.Setenv(EnvBaseURL, githubBaseURL)
+	}()
+	os.Setenv(EnvBaseURL, "")
+
+	testCases := []struct {
+		config     Config
+		envBaseURL string
+		expect     string
+	}{
+		{
+			// specify directly
+			config: Config{
+				Token:   "abcdefg",
+				BaseURL: "https://git.example.com/api/v3/",
+			},
+			envBaseURL: "",
+			expect:     "https://git.example.com/api/v3/",
+		},
+		{
+			// specify via env but not to be set env (part 1)
+			config: Config{
+				Token:   "abcdefg",
+				BaseURL: "GITHUB_BASE_URL",
+			},
+			envBaseURL: "",
+			expect:     "https://api.github.com/",
+		},
+		{
+			// specify via env (part 1)
+			config: Config{
+				Token:   "abcdefg",
+				BaseURL: "GITHUB_BASE_URL",
+			},
+			envBaseURL: "https://git.example.com/api/v3/",
+			expect:     "https://git.example.com/api/v3/",
+		},
+		{
+			// specify via env but not to be set env (part 2)
+			config: Config{
+				Token:   "abcdefg",
+				BaseURL: "$GITHUB_BASE_URL",
+			},
+			envBaseURL: "",
+			expect:     "https://api.github.com/",
+		},
+		{
+			// specify via env (part 2)
+			config: Config{
+				Token:   "abcdefg",
+				BaseURL: "$GITHUB_BASE_URL",
+			},
+			envBaseURL: "https://git.example.com/api/v3/",
+			expect:     "https://git.example.com/api/v3/",
+		},
+		{
+			// no specification (part 1)
+			config:     Config{Token: "abcdefg"},
+			envBaseURL: "",
+			expect:     "https://api.github.com/",
+		},
+		{
+			// no specification (part 2)
+			config:     Config{Token: "abcdefg"},
+			envBaseURL: "https://git.example.com/api/v3/",
+			expect:     "https://api.github.com/",
+		},
+	}
+	for _, testCase := range testCases {
+		os.Setenv(EnvBaseURL, testCase.envBaseURL)
+		c, err := NewClient(testCase.config)
+		if err != nil {
+			continue
+		}
+		url := c.Client.BaseURL.String()
+		if url != testCase.expect {
+			t.Errorf("got %q but want %q", url, testCase.expect)
+		}
+	}
+}
+
 func TestIsNumber(t *testing.T) {
 	testCases := []struct {
 		pr   PullRequest

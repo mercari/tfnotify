@@ -28,6 +28,7 @@ type Notifier struct {
 // GithubNotifier is a notifier for GitHub
 type GithubNotifier struct {
 	Token      string     `yaml:"token"`
+	BaseURL    string     `yaml:"base_url"`
 	Repository Repository `yaml:"repository"`
 }
 
