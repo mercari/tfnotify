@@ -30,6 +30,7 @@ type Config struct {
 	Token    string
 	Channel  string
 	Botname  string
+	Title    string
 	Message  string
 	CI       string
 	Parser   terraform.Parser
