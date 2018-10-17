@@ -69,6 +69,7 @@ func (t *tfnotify) Run() error {
 			PR: github.PullRequest{
 				Revision: ci.PR.Revision,
 				Number:   ci.PR.Number,
+				Title:    t.context.String("title"),
 				Message:  t.context.String("message"),
 			},
 			CI:       ci.URL,
@@ -84,6 +85,7 @@ func (t *tfnotify) Run() error {
 			Token:    t.config.Notifier.Slack.Token,
 			Channel:  t.config.Notifier.Slack.Channel,
 			Botname:  t.config.Notifier.Slack.Bot,
+			Title:    t.context.String("title"),
 			Message:  t.context.String("message"),
 			CI:       ci.URL,
 			Parser:   t.parser,
@@ -123,6 +125,10 @@ func main() {
 			Action: cmdFmt,
 			Flags: []cli.Flag{
 				cli.StringFlag{
+					Name:  "title, t",
+					Usage: "Specify the title to use for notification",
+				},
+				cli.StringFlag{
 					Name:  "message, m",
 					Usage: "Specify the message to use for notification",
 				},
@@ -134,6 +140,10 @@ func main() {
 			Action: cmdPlan,
 			Flags: []cli.Flag{
 				cli.StringFlag{
+					Name:  "title, t",
+					Usage: "Specify the title to use for notification",
+				},
+				cli.StringFlag{
 					Name:  "message, m",
 					Usage: "Specify the message to use for notification",
 				},
@@ -144,6 +154,10 @@ func main() {
 			Usage:  "Parse stdin as a apply result",
 			Action: cmdApply,
 			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "title, t",
+					Usage: "Specify the title to use for notification",
+				},
 				cli.StringFlag{
 					Name:  "message, m",
 					Usage: "Specify the message to use for notification",
