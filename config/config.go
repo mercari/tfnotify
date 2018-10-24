@@ -93,6 +93,8 @@ func (cfg *Config) Validation() error {
 		// ok pattern
 	case "travis", "travisci", "travis-ci":
 		// ok pattern
+	case "codebuild":
+		// ok pattern
 	default:
 		return fmt.Errorf("%s: not supported yet", cfg.CI)
 	}

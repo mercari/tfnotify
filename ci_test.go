@@ -209,3 +209,101 @@ func TestTravisCI(t *testing.T) {
 		}
 	}
 }
+
+func TestCodeBuild(t *testing.T) {
+	envs := []string{
+		"CODEBUILD_RESOLVED_SOURCE_VERSION",
+		"CODEBUILD_SOURCE_VERSION",
+		"CODEBUILD_AGENT_ENV_CODEBUILD_BUILD_URL",
+	}
+	saveEnvs := make(map[string]string)
+	for _, key := range envs {
+		saveEnvs[key] = os.Getenv(key)
+		os.Unsetenv(key)
+	}
+	defer func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}()
+
+	// https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref.html
+	testCases := []struct {
+		fn func()
+		ci CI
+		ok bool
+	}{
+		{
+			fn: func() {
+				os.Setenv("CODEBUILD_RESOLVED_SOURCE_VERSION", "abcdefg")
+				os.Setenv("CODEBUILD_SOURCE_VERSION", "pr/123")
+				os.Setenv("CODEBUILD_AGENT_ENV_CODEBUILD_BUILD_URL", "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   123,
+				},
+				URL: "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new",
+			},
+			ok: true,
+		},
+		{
+			fn: func() {
+				os.Setenv("CODEBUILD_RESOLVED_SOURCE_VERSION", "abcdefg")
+				os.Setenv("CODEBUILD_SOURCE_VERSION", "pr/1")
+				os.Setenv("CODEBUILD_AGENT_ENV_CODEBUILD_BUILD_URL", "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   1,
+				},
+				URL: "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new",
+			},
+			ok: true,
+		},
+		{
+			fn: func() {
+				os.Setenv("CODEBUILD_RESOLVED_SOURCE_VERSION", "")
+				os.Setenv("CODEBUILD_SOURCE_VERSION", "")
+				os.Setenv("CODEBUILD_AGENT_ENV_CODEBUILD_BUILD_URL", "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "",
+					Number:   0,
+				},
+				URL: "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new",
+			},
+			ok: true,
+		},
+		{
+			fn: func() {
+				os.Setenv("CODEBUILD_RESOLVED_SOURCE_VERSION", "")
+				os.Setenv("CODEBUILD_SOURCE_VERSION", "pr/abc")
+				os.Setenv("CODEBUILD_AGENT_ENV_CODEBUILD_BUILD_URL", "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "",
+					Number:   0,
+				},
+				URL: "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new",
+			},
+			ok: false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase.fn()
+		ci, err := codebuild()
+		if !reflect.DeepEqual(ci, testCase.ci) {
+			t.Errorf("got %q but want %q", ci, testCase.ci)
+		}
+		if (err == nil) != testCase.ok {
+			t.Errorf("got error %q", err)
+		}
+	}
+}
+
