@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 // CI represents a common information obtained from all CI platforms
@@ -44,5 +45,21 @@ func circleci() (ci CI, err error) {
 func travisci() (ci CI, err error) {
 	ci.PR.Revision = os.Getenv("TRAVIS_PULL_REQUEST_SHA")
 	ci.PR.Number, err = strconv.Atoi(os.Getenv("TRAVIS_PULL_REQUEST"))
+	return ci, err
+}
+
+func codebuild() (ci CI, err error) {
+	ci.PR.Number = 0
+	ci.PR.Revision = os.Getenv("CODEBUILD_RESOLVED_SOURCE_VERSION")
+	ci.URL = os.Getenv("CODEBUILD_AGENT_ENV_CODEBUILD_BUILD_URL")
+	sourceVersion := os.Getenv("CODEBUILD_SOURCE_VERSION")
+	if sourceVersion == "" {
+		return ci, nil
+	}
+	pr := strings.Replace(sourceVersion, "pr/", "", 1)
+	if pr == "" {
+		return ci, nil
+	}
+	ci.PR.Number, err = strconv.Atoi(pr)
 	return ci, err
 }

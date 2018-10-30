@@ -204,6 +204,7 @@ Currently, supported CI are here:
 
 - Circle CI
 - Travis CI
+- AWS CodeBuild
 
 ### Private Repository Considerations
 GitHub private repositories require the `repo` and `write:discussion` permissions.
