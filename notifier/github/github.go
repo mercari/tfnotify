@@ -28,7 +28,7 @@ func (g *GitHub) IssuesCreateComment(ctx context.Context, number int, comment *g
 
 // IssuesDeleteComment is a wrapper of https://godoc.org/github.com/google/go-github/github#IssuesService.DeleteComment
 func (g *GitHub) IssuesDeleteComment(ctx context.Context, commentID int64) (*github.Response, error) {
-	return g.Client.Issues.DeleteComment(ctx, g.owner, g.repo, int(commentID))
+	return g.Client.Issues.DeleteComment(ctx, g.owner, g.repo, int64(commentID))
 }
 
 // IssuesListComments is a wrapper of https://godoc.org/github.com/google/go-github/github#IssuesService.ListComments
