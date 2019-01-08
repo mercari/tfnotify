@@ -70,6 +70,18 @@
   version = "v0.0.4"
 
 [[projects]]
+  digest = "1:f2506d323836b8fa307d3cdcadd5475015367b95f465a002a8a0a7d77b505b8b"
+  name = "github.com/nulab/go-typetalk"
+  packages = [
+    "typetalk/internal",
+    "typetalk/shared",
+    "typetalk/v1",
+  ]
+  pruneopts = "NUT"
+  revision = "a2c8b0c4afa7b874f4d911a1e9199999bc15b2f4"
+  version = "v2.1.0"
+
+[[projects]]
   digest = "1:5cf3f025cbee5951a4ee961de067c8a89fc95a5adabead774f82822efabab121"
   name = "github.com/pkg/errors"
   packages = ["."]
@@ -147,6 +159,8 @@
     "github.com/lestrrat-go/slack",
     "github.com/lestrrat-go/slack/objects",
     "github.com/mattn/go-colorable",
+    "github.com/nulab/go-typetalk/typetalk/shared",
+    "github.com/nulab/go-typetalk/typetalk/v1",
     "github.com/urfave/cli",
     "golang.org/x/oauth2",
     "gopkg.in/yaml.v2",

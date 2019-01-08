@@ -37,6 +37,10 @@ func TestLoadFile(t *testing.T) {
 						Channel: "",
 						Bot:     "",
 					},
+					Typetalk: TypetalkNotifier{
+						Token:   "",
+						TopicID: "",
+					},
 				},
 				Terraform: Terraform{
 					Default: Default{
@@ -72,6 +76,10 @@ func TestLoadFile(t *testing.T) {
 						Token:   "",
 						Channel: "",
 						Bot:     "",
+					},
+					Typetalk: TypetalkNotifier{
+						Token:   "",
+						TopicID: "",
 					},
 				},
 				Terraform: Terraform{
@@ -189,6 +197,33 @@ notifier:
 `),
 			expected: "",
 		},
+		{
+			contents: []byte(`
+ci: circleci
+notifier:
+  typetalk:
+`),
+			expected: "notifier is missing",
+		},
+		{
+			contents: []byte(`
+ci: circleci
+notifier:
+  typetalk:
+    token: token
+`),
+			expected: "Typetalk topic id is missing",
+		},
+		{
+			contents: []byte(`
+ci: circleci
+notifier:
+  typetalk:
+    token: token
+    topic_id: 12345
+`),
+			expected: "",
+		},
 	}
 	for _, testCase := range testCases {
 		cfg, err := helperLoadConfig(testCase.contents)
@@ -220,6 +255,10 @@ func TestGetNotifierType(t *testing.T) {
 		{
 			contents: []byte("repository:\n  owner: a\n  name: b\nci: circleci\nnotifier:\n  slack:\n    token: token\n"),
 			expected: "slack",
+		},
+		{
+			contents: []byte("repository:\n  owner: a\n  name: b\nci: circleci\nnotifier:\n  typetalk:\n    token: token\n"),
+			expected: "typetalk",
 		},
 	}
 	for _, testCase := range testCases {

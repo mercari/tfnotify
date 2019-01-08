@@ -21,8 +21,9 @@ type Config struct {
 
 // Notifier is a notification notifier
 type Notifier struct {
-	Github GithubNotifier `yaml:"github"`
-	Slack  SlackNotifier  `yaml:"slack"`
+	Github   GithubNotifier   `yaml:"github"`
+	Slack    SlackNotifier    `yaml:"slack"`
+	Typetalk TypetalkNotifier `yaml:"typetalk"`
 }
 
 // GithubNotifier is a notifier for GitHub
@@ -43,6 +44,12 @@ type SlackNotifier struct {
 	Token   string `yaml:"token"`
 	Channel string `yaml:"channel"`
 	Bot     string `yaml:"bot"`
+}
+
+// TypetalkNotifier is a notifier for Typetalk
+type TypetalkNotifier struct {
+	Token   string `yaml:"token"`
+	TopicID string `yaml:"topic_id"`
 }
 
 // Terraform represents terraform configurations
@@ -111,6 +118,11 @@ func (cfg *Config) Validation() error {
 			return fmt.Errorf("slack channel id is missing")
 		}
 	}
+	if cfg.isDefinedTypetalk() {
+		if cfg.Notifier.Typetalk.TopicID == "" {
+			return fmt.Errorf("Typetalk topic id is missing")
+		}
+	}
 	notifier := cfg.GetNotifierType()
 	if notifier == "" {
 		return fmt.Errorf("notifier is missing")
@@ -128,6 +140,11 @@ func (cfg *Config) isDefinedSlack() bool {
 	return cfg.Notifier.Slack != (SlackNotifier{})
 }
 
+func (cfg *Config) isDefinedTypetalk() bool {
+	// not empty
+	return cfg.Notifier.Typetalk != (TypetalkNotifier{})
+}
+
 // GetNotifierType return notifier type described in Config
 func (cfg *Config) GetNotifierType() string {
 	if cfg.isDefinedGithub() {
@@ -135,6 +152,9 @@ func (cfg *Config) GetNotifierType() string {
 	}
 	if cfg.isDefinedSlack() {
 		return "slack"
+	}
+	if cfg.isDefinedTypetalk() {
+		return "typetalk"
 	}
 	return ""
 }

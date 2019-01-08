@@ -7,3 +7,4 @@ ignore:
   - "main.go"
   - "notifier/github/github.go"
   - "notifier/slack/slack.go"
+  - "notifier/typetalk/typetalk.go"
