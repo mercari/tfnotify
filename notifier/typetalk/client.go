@@ -12,6 +12,9 @@ import (
 // EnvToken is Typetalk API Token
 const EnvToken = "TYPETALK_TOKEN"
 
+// EnvTopicID is Typetalk topic ID
+const EnvTopicID = "TYPETALK_TOPIC_ID"
+
 // Client represents Typetalk API client.
 type Client struct {
 	*typetalk.Client
@@ -38,7 +41,7 @@ type service struct {
 
 // NewClient returns Client initialized with Config
 func NewClient(cfg Config) (*Client, error) {
-	token := cfg.Token
+	token := os.ExpandEnv(cfg.Token)
 	if token == EnvToken {
 		token = os.Getenv(EnvToken)
 	}
@@ -46,13 +49,17 @@ func NewClient(cfg Config) (*Client, error) {
 		return &Client{}, errors.New("Typetalk token is missing")
 	}
 
-	if cfg.TopicID == "" {
+	topicIDString := os.ExpandEnv(cfg.TopicID)
+	if topicIDString == EnvTopicID {
+		topicIDString = os.Getenv(EnvTopicID)
+	}
+	if topicIDString == "" {
 		return &Client{}, errors.New("Typetalk topic ID is missing")
 	}
 
-	topicID, err := strconv.Atoi(cfg.TopicID)
+	topicID, err := strconv.Atoi(topicIDString)
 	if err != nil {
-		return &Client{}, err
+		return &Client{}, errors.New("Typetalk topic ID is not numeric value")
 	}
 
 	client := typetalk.NewClient(nil)
