@@ -88,6 +88,8 @@ notifier:
     repository:
       owner: "mercari"
       name: "tfnotify"
+    filters:
+      parse_exit_code: 1
 terraform:
   fmt:
     template: |
@@ -184,6 +186,8 @@ notifier:
     token: $SLACK_TOKEN
     channel: $SLACK_CHANNEL_ID
     bot: $SLACK_BOT_NAME
+    filters:
+      parse_exit_code: 1
 terraform:
   plan:
     template: |

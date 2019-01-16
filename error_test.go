@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"testing"
+
+	"github.com/mercari/tfnotify/notifier"
 )
 
 func TestHandleError(t *testing.T) {
@@ -32,6 +34,10 @@ func TestHandleError(t *testing.T) {
 		},
 		{
 			err:      nil,
+			exitCode: 0,
+		},
+		{
+			err:      notifier.ErrNop,
 			exitCode: 0,
 		},
 	}

@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/mercari/tfnotify/terraform"
 	"github.com/lestrrat-go/slack/objects"
+	"github.com/mercari/tfnotify/config"
+	"github.com/mercari/tfnotify/terraform"
 )
 
 func TestNotify(t *testing.T) {
@@ -23,6 +24,7 @@ func TestNotify(t *testing.T) {
 				Message:  "",
 				Parser:   terraform.NewPlanParser(),
 				Template: terraform.NewPlanTemplate(terraform.DefaultPlanTemplate),
+				Filters:  nil,
 			},
 			body:     "Plan: 1 to add",
 			exitCode: 0,
@@ -36,10 +38,27 @@ func TestNotify(t *testing.T) {
 				Message:  "",
 				Parser:   terraform.NewPlanParser(),
 				Template: terraform.NewPlanTemplate(terraform.DefaultPlanTemplate),
+				Filters:  nil,
 			},
 			body:     "Plan: 1 to add",
 			exitCode: 1,
 			ok:       false,
+		},
+		{
+			config: Config{
+				Token:    "token",
+				Channel:  "channel",
+				Botname:  "botname",
+				Message:  "",
+				Parser:   terraform.NewPlanParser(),
+				Template: terraform.NewPlanTemplate(terraform.DefaultPlanTemplate),
+				Filters: &config.Filters{
+					ParseExitCode: 1,
+				},
+			},
+			body:     "Plan: 1 to add", // ParseExitCode is 0
+			exitCode: 0,
+			ok:       false, // nop
 		},
 	}
 	fake := fakeAPI{

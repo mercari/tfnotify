@@ -31,6 +31,7 @@ type GithubNotifier struct {
 	Token      string     `yaml:"token"`
 	BaseURL    string     `yaml:"base_url"`
 	Repository Repository `yaml:"repository"`
+	Filters    *Filters   `yaml:"filters"`
 }
 
 // Repository represents a GitHub repository
@@ -41,9 +42,15 @@ type Repository struct {
 
 // SlackNotifier is a notifier for Slack
 type SlackNotifier struct {
-	Token   string `yaml:"token"`
-	Channel string `yaml:"channel"`
-	Bot     string `yaml:"bot"`
+	Token   string   `yaml:"token"`
+	Channel string   `yaml:"channel"`
+	Bot     string   `yaml:"bot"`
+	Filters *Filters `yaml:"filters"`
+}
+
+// Filters is conditions for notification
+type Filters struct {
+	ParseExitCode int `yaml:"parse_exit_code"`
 }
 
 // TypetalkNotifier is a notifier for Typetalk
@@ -179,4 +186,9 @@ func (cfg *Config) Find(file string) (string, error) {
 		}
 	}
 	return "", errors.New("config for tfnotify is not found at all")
+}
+
+// Match returns terraform result matches conditions or not
+func (filters *Filters) Match(exitCode int) bool {
+	return filters == nil || exitCode == filters.ParseExitCode
 }

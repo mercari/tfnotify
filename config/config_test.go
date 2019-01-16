@@ -360,3 +360,37 @@ func TestFind(t *testing.T) {
 		}
 	}
 }
+
+func TestFiltersMatch(t *testing.T) {
+	testCases := []struct {
+		filters  *Filters
+		exitCode int
+		expect   bool
+	}{
+		{
+			nil,
+			1,
+			true,
+		},
+		{
+			&Filters{
+				ParseExitCode: 1,
+			},
+			1,
+			true,
+		},
+		{
+			&Filters{
+				ParseExitCode: 1,
+			},
+			0,
+			false,
+		},
+	}
+	for _, testCase := range testCases {
+		actual := testCase.filters.Match(testCase.exitCode)
+		if actual != testCase.expect {
+			t.Errorf("got %t but want %t", actual, testCase.expect)
+		}
+	}
+}

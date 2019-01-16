@@ -5,8 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mercari/tfnotify/terraform"
 	"github.com/lestrrat-go/slack"
+	"github.com/mercari/tfnotify/config"
+	"github.com/mercari/tfnotify/terraform"
 )
 
 // EnvToken is Slack API Token
@@ -35,6 +36,7 @@ type Config struct {
 	CI       string
 	Parser   terraform.Parser
 	Template terraform.Template
+	Filters  *config.Filters
 }
 
 type service struct {

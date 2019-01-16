@@ -1,6 +1,7 @@
 package github
 
 import (
+	"github.com/mercari/tfnotify/notifier"
 	"github.com/mercari/tfnotify/terraform"
 )
 
@@ -13,6 +14,7 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 	cfg := g.client.Config
 	parser := g.client.Config.Parser
 	template := g.client.Config.Template
+	filters := g.client.Config.Filters
 
 	result := parser.Parse(body)
 	if result.Error != nil {
@@ -20,6 +22,10 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 	}
 	if result.Result == "" {
 		return result.ExitCode, result.Error
+	}
+
+	if !filters.Match(result.ExitCode) {
+		return result.ExitCode, notifier.ErrNop
 	}
 
 	template.SetValue(terraform.CommonTemplate{

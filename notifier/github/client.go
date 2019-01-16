@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/github"
+	"github.com/mercari/tfnotify/config"
 	"github.com/mercari/tfnotify/terraform"
 	"golang.org/x/oauth2"
 )
@@ -42,6 +43,7 @@ type Config struct {
 	CI       string
 	Parser   terraform.Parser
 	Template terraform.Template
+	Filters  *config.Filters
 }
 
 // PullRequest represents GitHub Pull Request metadata

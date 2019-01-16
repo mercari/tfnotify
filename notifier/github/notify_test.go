@@ -3,6 +3,7 @@ package github
 import (
 	"testing"
 
+	"github.com/mercari/tfnotify/config"
 	"github.com/mercari/tfnotify/terraform"
 )
 
@@ -26,6 +27,7 @@ func TestNotifyNotify(t *testing.T) {
 				},
 				Parser:   terraform.NewPlanParser(),
 				Template: terraform.NewPlanTemplate(terraform.DefaultPlanTemplate),
+				Filters:  nil,
 			},
 			body:     "body",
 			ok:       false,
@@ -44,6 +46,7 @@ func TestNotifyNotify(t *testing.T) {
 				},
 				Parser:   terraform.NewPlanParser(),
 				Template: terraform.NewPlanTemplate(terraform.DefaultPlanTemplate),
+				Filters:  nil,
 			},
 			body:     "Plan: 1 to add",
 			ok:       false,
@@ -62,6 +65,7 @@ func TestNotifyNotify(t *testing.T) {
 				},
 				Parser:   terraform.NewPlanParser(),
 				Template: terraform.NewPlanTemplate(terraform.DefaultPlanTemplate),
+				Filters:  nil,
 			},
 			body:     "Error: hoge",
 			ok:       true,
@@ -80,6 +84,7 @@ func TestNotifyNotify(t *testing.T) {
 				},
 				Parser:   terraform.NewPlanParser(),
 				Template: terraform.NewPlanTemplate(terraform.DefaultPlanTemplate),
+				Filters:  nil,
 			},
 			body:     "Plan: 1 to add",
 			ok:       true,
@@ -98,9 +103,31 @@ func TestNotifyNotify(t *testing.T) {
 				},
 				Parser:   terraform.NewPlanParser(),
 				Template: terraform.NewPlanTemplate(terraform.DefaultPlanTemplate),
+				Filters:  nil,
 			},
 			body:     "Plan: 1 to add",
 			ok:       true,
+			exitCode: 0,
+		},
+		{
+			// valid, filter mismatch
+			config: Config{
+				Token: "token",
+				Owner: "owner",
+				Repo:  "repo",
+				PR: PullRequest{
+					Revision: "",
+					Number:   1,
+					Message:  "message",
+				},
+				Parser:   terraform.NewPlanParser(),
+				Template: terraform.NewPlanTemplate(terraform.DefaultPlanTemplate),
+				Filters: &config.Filters{
+					ParseExitCode: 1,
+				},
+			},
+			body:     "Plan: 1 to add", // ParseExitCode is 0
+			ok:       false,            // nop
 			exitCode: 0,
 		},
 		{
@@ -116,6 +143,7 @@ func TestNotifyNotify(t *testing.T) {
 				},
 				Parser:   terraform.NewApplyParser(),
 				Template: terraform.NewApplyTemplate(terraform.DefaultApplyTemplate),
+				Filters:  nil,
 			},
 			body:     "Apply complete!",
 			ok:       true,
