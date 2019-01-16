@@ -23,6 +23,8 @@ You can do this by using this command.
 
 <img src="./misc/images/2.png" width="500">
 
+<img src="./misc/images/3.png" width="600">
+
 ## Installation
 
 Grab the binary from GitHub Releases (Recommended)
@@ -60,7 +62,7 @@ For `plan` command, you also need to specify `plan` as the argument of tfnotify.
 
 When running tfnotify, you can specify the configuration path via `--config` option (if it's omitted, it defaults to `{.,}tfnotify.y{,a}ml`).
 
-The example settings of GitHub, GitHub Enterprise and Slack are as follows. Incidentally, there is no need to replace TOKEN string such as `$GITHUB_TOKEN` with the actual token. Instead, it must be defined as environment variables in CI settings.
+The example settings of GitHub and GitHub Enterprise, Slack, [Typetalk](https://www.typetalk.com/) are as follows. Incidentally, there is no need to replace TOKEN string such as `$GITHUB_TOKEN` with the actual token. Instead, it must be defined as environment variables in CI settings.
 
 [template](https://golang.org/pkg/text/template/) of Go can be used for `template`. The templates can be used in `tfnotify.yaml` are as follows:
 
@@ -182,6 +184,32 @@ notifier:
     token: $SLACK_TOKEN
     channel: $SLACK_CHANNEL_ID
     bot: $SLACK_BOT_NAME
+terraform:
+  plan:
+    template: |
+      {{ .Message }}
+      {{if .Result}}
+      ```
+      {{ .Result }}
+      ```
+      {{end}}
+      ```
+      {{ .Body }}
+      ```
+```
+
+</details>
+
+<details>
+<summary>For Typetalk</summary>
+
+```yaml
+---
+ci: circleci
+notifier:
+  typetalk:
+    token: $TYPETALK_TOKEN
+    topic_id: $TYPETALK_TOPIC_ID
 terraform:
   plan:
     template: |

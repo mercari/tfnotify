@@ -9,6 +9,7 @@ import (
 	"github.com/mercari/tfnotify/notifier"
 	"github.com/mercari/tfnotify/notifier/github"
 	"github.com/mercari/tfnotify/notifier/slack"
+	"github.com/mercari/tfnotify/notifier/typetalk"
 	"github.com/mercari/tfnotify/terraform"
 
 	"github.com/urfave/cli"
@@ -90,6 +91,20 @@ func (t *tfnotify) Run() error {
 			Token:    t.config.Notifier.Slack.Token,
 			Channel:  t.config.Notifier.Slack.Channel,
 			Botname:  t.config.Notifier.Slack.Bot,
+			Title:    t.context.String("title"),
+			Message:  t.context.String("message"),
+			CI:       ci.URL,
+			Parser:   t.parser,
+			Template: t.template,
+		})
+		if err != nil {
+			return err
+		}
+		notifier = client.Notify
+	case "typetalk":
+		client, err := typetalk.NewClient(typetalk.Config{
+			Token:    t.config.Notifier.Typetalk.Token,
+			TopicID:  t.config.Notifier.Typetalk.TopicID,
 			Title:    t.context.String("title"),
 			Message:  t.context.String("message"),
 			CI:       ci.URL,
