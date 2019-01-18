@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mercari/tfnotify/terraform"
 	"github.com/lestrrat-go/slack"
+	"github.com/mercari/tfnotify/terraform"
 )
 
 // EnvToken is Slack API Token
@@ -25,7 +25,7 @@ type Client struct {
 	API API
 }
 
-// Config is a configuration for GitHub client
+// Config is a configuration for Slack client
 type Config struct {
 	Token    string
 	Channel  string
