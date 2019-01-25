@@ -39,7 +39,7 @@ func TestNewClient(t *testing.T) {
 			// specify via env but not to be set env (part 2)
 			config:   Config{Token: "$TYPETALK_TOKEN", TopicID: "12345"},
 			envToken: "",
-			expect:   "typetalk token is missing",
+			expect:   "Typetalk token is missing",
 		},
 		{
 			// specify via env (part 2)
