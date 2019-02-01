@@ -45,6 +45,7 @@ func circleci() (ci CI, err error) {
 func travisci() (ci CI, err error) {
 	ci.PR.Revision = os.Getenv("TRAVIS_PULL_REQUEST_SHA")
 	ci.PR.Number, err = strconv.Atoi(os.Getenv("TRAVIS_PULL_REQUEST"))
+	ci.URL = os.Getenv("TRAVIS_BUILD_WEB_URL")
 	return ci, err
 }
 
