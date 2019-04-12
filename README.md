@@ -234,9 +234,15 @@ Currently, supported CI are here:
 - Travis CI
 - AWS CodeBuild
 
-### Private Repository Considerations
-GitHub private repositories require the `repo` and `write:discussion` permissions.
+If you want to run tfnotify locally and use GitHub as notifier, please set `--pr` flag with `--ci=local` like the following:
 
+```console
+$ terraform plan | ./tfnotify --ci "local" --pr "2" plan
+```
+
+### Private Repository Considerations
+
+GitHub private repositories require the `repo` and `write:discussion` permissions.
 
 ## Committers
 

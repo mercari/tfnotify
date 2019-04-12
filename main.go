@@ -38,6 +38,14 @@ func (t *tfnotify) Run() error {
 	var ci CI
 	var err error
 	switch ciname {
+	case "local":
+		ci = CI{
+			URL: "",
+			PR: PullRequest{
+				Number:   t.context.GlobalInt("pr"),
+				Revision: "",
+			},
+		}
 	case "circleci", "circle-ci":
 		ci, err = circleci()
 		if err != nil {
@@ -134,6 +142,7 @@ func main() {
 	app.Usage = description
 	app.Version = version
 	app.Flags = []cli.Flag{
+		cli.IntFlag{Name: "pr", Usage: "Pull request number. this is useful for running locally. this should be given with --ci=local"},
 		cli.StringFlag{Name: "ci", Usage: "name of CI to run tfnotify"},
 		cli.StringFlag{Name: "config", Usage: "config path"},
 		cli.StringFlag{Name: "notifier", Usage: "notification destination"},

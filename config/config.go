@@ -96,6 +96,8 @@ func (cfg *Config) Validation() error {
 	switch strings.ToLower(cfg.CI) {
 	case "":
 		return errors.New("ci: need to be set")
+	case "local":
+		// ok pattern
 	case "circleci", "circle-ci":
 		// ok pattern
 	case "travis", "travisci", "travis-ci":
