@@ -236,6 +236,7 @@ Currently, supported CI are here:
 - TeamCity
 - Drone
 - Jenkins
+- GitLab CI
 
 ### Private Repository Considerations
 GitHub private repositories require the `repo` and `write:discussion` permissions.

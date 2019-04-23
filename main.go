@@ -68,6 +68,11 @@ func (t *tfnotify) Run() error {
 		if err != nil {
 			return err
 		}
+	case "gitlabci", "gitlab-ci":
+		ci, err = gitlabci()
+		if err != nil {
+			return err
+		}
 	case "":
 		return fmt.Errorf("CI service: required (e.g. circleci)")
 	default:

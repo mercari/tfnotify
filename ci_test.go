@@ -536,3 +536,89 @@ func TestJenkins(t *testing.T) {
 		}
 	}
 }
+
+func TestGitLabCI(t *testing.T) {
+	envs := []string{
+		"CI_COMMIT_SHA",
+		"CI_JOB_URL",
+		"CI_MERGE_REQUEST_IID",
+		"CI_MERGE_REQUEST_REF_PATH",
+	}
+	saveEnvs := make(map[string]string)
+	for _, key := range envs {
+		saveEnvs[key] = os.Getenv(key)
+		os.Unsetenv(key)
+	}
+	defer func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}()
+
+	// https://docs.gitlab.com/ee/ci/variables/README.html
+	testCases := []struct {
+		fn func()
+		ci CI
+		ok bool
+	}{
+		{
+			fn: func() {
+				os.Setenv("CI_COMMIT_SHA", "abcdefg")
+				os.Setenv("CI_JOB_URL", "https://gitlab.com/owner/repo/-/jobs/111111111")
+				os.Setenv("CI_MERGE_REQUEST_IID", "1")
+				os.Setenv("CI_MERGE_REQUEST_REF_PATH", "refs/merge-requests/1/head")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   1,
+				},
+				URL: "https://gitlab.com/owner/repo/-/jobs/111111111",
+			},
+			ok: true,
+		},
+		{
+			fn: func() {
+				os.Setenv("CI_COMMIT_SHA", "hijklmn")
+				os.Setenv("CI_JOB_URL", "https://gitlab.com/owner/repo/-/jobs/222222222")
+				os.Setenv("CI_MERGE_REQUEST_REF_PATH", "refs/merge-requests/123/head")
+				os.Unsetenv("CI_MERGE_REQUEST_IID")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "hijklmn",
+					Number:   123,
+				},
+				URL: "https://gitlab.com/owner/repo/-/jobs/222222222",
+			},
+			ok: true,
+		},
+		{
+			fn: func() {
+				os.Setenv("CI_COMMIT_SHA", "hijklmn")
+				os.Setenv("CI_JOB_URL", "https://gitlab.com/owner/repo/-/jobs/333333333")
+				os.Unsetenv("CI_MERGE_REQUEST_IID")
+				os.Unsetenv("CI_MERGE_REQUEST_REF_PATH")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "hijklmn",
+					Number:   0,
+				},
+				URL: "https://gitlab.com/owner/repo/-/jobs/333333333",
+			},
+			ok: true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase.fn()
+		ci, err := gitlabci()
+		if !reflect.DeepEqual(ci, testCase.ci) {
+			t.Errorf("got %q but want %q", ci, testCase.ci)
+		}
+		if (err == nil) != testCase.ok {
+			t.Errorf("got error %q", err)
+		}
+	}
+}

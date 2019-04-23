@@ -98,6 +98,8 @@ func (cfg *Config) Validation() error {
 		return errors.New("ci: need to be set")
 	case "circleci", "circle-ci":
 		// ok pattern
+	case "gitlabci", "gitlab-ci":
+		// ok pattern
 	case "travis", "travisci", "travis-ci":
 		// ok pattern
 	case "codebuild":
