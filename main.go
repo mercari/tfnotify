@@ -8,6 +8,7 @@ import (
 	"github.com/mercari/tfnotify/config"
 	"github.com/mercari/tfnotify/notifier"
 	"github.com/mercari/tfnotify/notifier/github"
+	"github.com/mercari/tfnotify/notifier/gitlab"
 	"github.com/mercari/tfnotify/notifier/slack"
 	"github.com/mercari/tfnotify/notifier/typetalk"
 	"github.com/mercari/tfnotify/terraform"
@@ -93,6 +94,26 @@ func (t *tfnotify) Run() error {
 			Owner:   t.config.Notifier.Github.Repository.Owner,
 			Repo:    t.config.Notifier.Github.Repository.Name,
 			PR: github.PullRequest{
+				Revision: ci.PR.Revision,
+				Number:   ci.PR.Number,
+				Title:    t.context.String("title"),
+				Message:  t.context.String("message"),
+			},
+			CI:       ci.URL,
+			Parser:   t.parser,
+			Template: t.template,
+		})
+		if err != nil {
+			return err
+		}
+		notifier = client.Notify
+	case "gitlab":
+		client, err := gitlab.NewClient(gitlab.Config{
+			Token:     t.config.Notifier.Gitlab.Token,
+			BaseURL:   t.config.Notifier.Gitlab.BaseURL,
+			NameSpace: t.config.Notifier.Gitlab.Repository.Owner,
+			Project:   t.config.Notifier.Gitlab.Repository.Name,
+			MR: gitlab.MergeRequest{
 				Revision: ci.PR.Revision,
 				Number:   ci.PR.Number,
 				Title:    t.context.String("title"),
