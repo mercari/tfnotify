@@ -106,6 +106,8 @@ func (cfg *Config) Validation() error {
 		// ok pattern
 	case "drone":
 		// ok pattern
+	case "jenkins":
+		// ok pattern
 	default:
 		return fmt.Errorf("%s: not supported yet", cfg.CI)
 	}

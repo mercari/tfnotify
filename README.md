@@ -235,10 +235,16 @@ Currently, supported CI are here:
 - AWS CodeBuild
 - TeamCity
 - Drone
+- Jenkins
 
 ### Private Repository Considerations
 GitHub private repositories require the `repo` and `write:discussion` permissions.
 
+### Jenkins Considerations
+- Plugin
+  - [Git Plugin](https://wiki.jenkins.io/display/JENKINS/Git+Plugin)
+- Environment Variable
+  - `PULL_REQUEST_NUMBER` or `PULL_REQUEST_URL` are required to set by user for Pull Request Usage
 
 ## Committers
 

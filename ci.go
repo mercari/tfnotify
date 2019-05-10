@@ -82,3 +82,22 @@ func drone() (ci CI, err error) {
 	ci.PR.Number, err = strconv.Atoi(pr)
 	return ci, err
 }
+
+func jenkins() (ci CI, err error) {
+	ci.PR.Number = 0
+	ci.PR.Revision = os.Getenv("GIT_COMMIT")
+	ci.URL = os.Getenv("BUILD_URL")
+	pr := os.Getenv("PULL_REQUEST_NUMBER")
+	if pr == "" {
+		pr = os.Getenv("PULL_REQUEST_URL")
+	}
+	if pr == "" {
+		return ci, nil
+	}
+	re := regexp.MustCompile(`[1-9]\d*$`)
+	ci.PR.Number, err = strconv.Atoi(re.FindString(pr))
+	if err != nil {
+		return ci, fmt.Errorf("%v: cannot get env", pr)
+	}
+	return ci, err
+}
