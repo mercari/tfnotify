@@ -52,7 +52,7 @@ func travisci() (ci CI, err error) {
 func codebuild() (ci CI, err error) {
 	ci.PR.Number = 0
 	ci.PR.Revision = os.Getenv("CODEBUILD_RESOLVED_SOURCE_VERSION")
-	ci.URL = os.Getenv("CODEBUILD_AGENT_ENV_CODEBUILD_BUILD_URL")
+	ci.URL = os.Getenv("CODEBUILD_BUILD_URL")
 	sourceVersion := os.Getenv("CODEBUILD_SOURCE_VERSION")
 	if sourceVersion == "" {
 		return ci, nil

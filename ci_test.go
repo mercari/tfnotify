@@ -214,7 +214,7 @@ func TestCodeBuild(t *testing.T) {
 	envs := []string{
 		"CODEBUILD_RESOLVED_SOURCE_VERSION",
 		"CODEBUILD_SOURCE_VERSION",
-		"CODEBUILD_AGENT_ENV_CODEBUILD_BUILD_URL",
+		"CODEBUILD_BUILD_URL",
 	}
 	saveEnvs := make(map[string]string)
 	for _, key := range envs {
@@ -237,7 +237,7 @@ func TestCodeBuild(t *testing.T) {
 			fn: func() {
 				os.Setenv("CODEBUILD_RESOLVED_SOURCE_VERSION", "abcdefg")
 				os.Setenv("CODEBUILD_SOURCE_VERSION", "pr/123")
-				os.Setenv("CODEBUILD_AGENT_ENV_CODEBUILD_BUILD_URL", "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new")
+				os.Setenv("CODEBUILD_BUILD_URL", "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new")
 			},
 			ci: CI{
 				PR: PullRequest{
@@ -252,7 +252,7 @@ func TestCodeBuild(t *testing.T) {
 			fn: func() {
 				os.Setenv("CODEBUILD_RESOLVED_SOURCE_VERSION", "abcdefg")
 				os.Setenv("CODEBUILD_SOURCE_VERSION", "pr/1")
-				os.Setenv("CODEBUILD_AGENT_ENV_CODEBUILD_BUILD_URL", "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new")
+				os.Setenv("CODEBUILD_BUILD_URL", "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new")
 			},
 			ci: CI{
 				PR: PullRequest{
@@ -267,7 +267,7 @@ func TestCodeBuild(t *testing.T) {
 			fn: func() {
 				os.Setenv("CODEBUILD_RESOLVED_SOURCE_VERSION", "")
 				os.Setenv("CODEBUILD_SOURCE_VERSION", "")
-				os.Setenv("CODEBUILD_AGENT_ENV_CODEBUILD_BUILD_URL", "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new")
+				os.Setenv("CODEBUILD_BUILD_URL", "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new")
 			},
 			ci: CI{
 				PR: PullRequest{
@@ -282,7 +282,7 @@ func TestCodeBuild(t *testing.T) {
 			fn: func() {
 				os.Setenv("CODEBUILD_RESOLVED_SOURCE_VERSION", "")
 				os.Setenv("CODEBUILD_SOURCE_VERSION", "pr/abc")
-				os.Setenv("CODEBUILD_AGENT_ENV_CODEBUILD_BUILD_URL", "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new")
+				os.Setenv("CODEBUILD_BUILD_URL", "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new")
 			},
 			ci: CI{
 				PR: PullRequest{
