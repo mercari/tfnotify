@@ -234,6 +234,7 @@ Currently, supported CI are here:
 - Travis CI
 - AWS CodeBuild
 - TeamCity
+- Drone
 
 ### Private Repository Considerations
 GitHub private repositories require the `repo` and `write:discussion` permissions.

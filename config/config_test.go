@@ -144,7 +144,11 @@ func TestValidation(t *testing.T) {
 			expected: "notifier is missing",
 		},
 		{
-			contents: []byte("ci: circleci\nnotifier:\n  github:\n  teamcity:\n"),
+			contents: []byte("ci: drone\n"),
+			expected: "notifier is missing",
+		},
+		{
+			contents: []byte("ci: circleci\nnotifier:\n  github:\n"),
 			expected: "notifier is missing",
 		},
 		{

@@ -370,3 +370,84 @@ func TestCodeBuild(t *testing.T) {
 		}
 	}
 }
+
+func TestDrone(t *testing.T) {
+	envs := []string{
+		"DRONE_COMMIT_SHA",
+		"DRONE_PULL_REQUEST",
+	}
+	saveEnvs := make(map[string]string)
+	for _, key := range envs {
+		saveEnvs[key] = os.Getenv(key)
+		os.Unsetenv(key)
+	}
+	defer func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}()
+
+	// https://docs.drone.io/reference/environ/
+	testCases := []struct {
+		fn func()
+		ci CI
+		ok bool
+	}{
+		{
+			fn: func() {
+				os.Setenv("DRONE_COMMIT_SHA", "abcdefg")
+				os.Setenv("DRONE_PULL_REQUEST", "1")
+				os.Setenv("DRONE_BUILD_LINK", "https://cloud.drone.io/owner/repo/1")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   1,
+				},
+				URL: "https://cloud.drone.io/owner/repo/1",
+			},
+			ok: true,
+		},
+		{
+			fn: func() {
+				os.Setenv("DRONE_COMMIT_SHA", "abcdefg")
+				os.Setenv("DRONE_PULL_REQUEST", "")
+				os.Setenv("DRONE_BUILD_LINK", "https://cloud.drone.io/owner/repo/1")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   0,
+				},
+				URL: "https://cloud.drone.io/owner/repo/1",
+			},
+			ok: true,
+		},
+		{
+			fn: func() {
+				os.Setenv("DRONE_COMMIT_SHA", "abcdefg")
+				os.Setenv("DRONE_PULL_REQUEST", "abc")
+				os.Setenv("DRONE_BUILD_LINK", "https://cloud.drone.io/owner/repo/1")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   0,
+				},
+				URL: "https://cloud.drone.io/owner/repo/1",
+			},
+			ok: false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase.fn()
+		ci, err := drone()
+		if !reflect.DeepEqual(ci, testCase.ci) {
+			t.Errorf("got %q but want %q", ci, testCase.ci)
+		}
+		if (err == nil) != testCase.ok {
+			t.Errorf("got error %q", err)
+		}
+	}
+}

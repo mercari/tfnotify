@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 )
 
 // Config is for tfnotify config structure
@@ -101,6 +103,8 @@ func (cfg *Config) Validation() error {
 	case "codebuild":
 		// ok pattern
 	case "teamcity":
+		// ok pattern
+	case "drone":
 		// ok pattern
 	default:
 		return fmt.Errorf("%s: not supported yet", cfg.CI)
