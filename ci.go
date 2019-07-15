@@ -64,3 +64,15 @@ func codebuild() (ci CI, err error) {
 	ci.PR.Number, err = strconv.Atoi(pr)
 	return ci, err
 }
+
+func drone() (ci CI, err error) {
+	ci.PR.Number = 0
+	ci.PR.Revision = os.Getenv("DRONE_COMMIT_SHA")
+	ci.URL = os.Getenv("DRONE_BUILD_LINK")
+	pr := os.Getenv("DRONE_PULL_REQUEST")
+	if pr == "" {
+		return ci, nil
+	}
+	ci.PR.Number, err = strconv.Atoi(pr)
+	return ci, err
+}
