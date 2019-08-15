@@ -27,6 +27,7 @@ const (
 {{end}}
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>{{ .Body }}
 </code></pre></details>
 `
@@ -54,6 +55,7 @@ const (
 {{end}}
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>{{ .Body }}
 </code></pre></details>
 `
@@ -70,6 +72,7 @@ const (
 {{end}}
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>{{ .Body }}
 </code></pre></details>
 `
