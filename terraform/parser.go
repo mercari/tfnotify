@@ -48,7 +48,7 @@ func NewDefaultParser() *DefaultParser {
 // NewFmtParser is FmtParser initialized with its Regexp
 func NewFmtParser() *FmtParser {
 	return &FmtParser{
-		Fail: regexp.MustCompile(`(?m)^(diff a/)`),
+		Fail: regexp.MustCompile(`(?m)^@@[^@]+@@`),
 	}
 }
 

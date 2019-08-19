@@ -6,7 +6,8 @@ import (
 	"testing"
 )
 
-const fmtSuccessResult = `
+// terraform fmt -diff=true -write=false (version 0.11.x)
+const fmtFailResult0_11 = `
 google_spanner_database.tf
 diff a/google_spanner_database.tf b/google_spanner_database.tf
 --- /tmp/398669432
@@ -26,6 +27,19 @@ diff a/google_spanner_instance.tf b/google_spanner_instance.tf
  #   num_nodes    = 1
  # }
 +
+`
+
+// terraform fmt -diff=true -write=false (version 0.12.x)
+const fmtFailResult0_12 = `
+versions.tf
+--- old/versions.tf
++++ new/versions.tf
+@@ -1,4 +1,4 @@
+ 
+ terraform {
+-  required_version     = ">= 0.12"
++  required_version = ">= 0.12"
+ }
 `
 
 const planSuccessResult = `
@@ -216,7 +230,16 @@ func TestFmtParserParse(t *testing.T) {
 	}{
 		{
 			name: "diff",
-			body: fmtSuccessResult,
+			body: fmtFailResult0_11,
+			result: ParseResult{
+				Result:   "There is diff in your .tf file (need to be formatted)",
+				ExitCode: 1,
+				Error:    nil,
+			},
+		},
+		{
+			name: "diff",
+			body: fmtFailResult0_12,
 			result: ParseResult{
 				Result:   "There is diff in your .tf file (need to be formatted)",
 				ExitCode: 1,
