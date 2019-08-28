@@ -451,3 +451,88 @@ func TestDrone(t *testing.T) {
 		}
 	}
 }
+
+func TestJenkins(t *testing.T) {
+	envs := []string{
+		"GIT_COMMIT",
+		"BUILD_URL",
+		"PULL_REQUEST_NUMBER",
+		"PULL_REQUEST_URL",
+	}
+	saveEnvs := make(map[string]string)
+	for _, key := range envs {
+		saveEnvs[key] = os.Getenv(key)
+		os.Unsetenv(key)
+	}
+	defer func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}()
+
+	// https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
+	testCases := []struct {
+		fn func()
+		ci CI
+		ok bool
+	}{
+		{
+			fn: func() {
+				os.Setenv("GIT_COMMIT", "abcdefg")
+				os.Setenv("PULL_REQUEST_NUMBER", "123")
+				os.Setenv("BUILD_URL", "http://jenkins.example.com/jenkins/job/test-job/1")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   123,
+				},
+				URL: "http://jenkins.example.com/jenkins/job/test-job/1",
+			},
+			ok: true,
+		},
+		{
+			fn: func() {
+				os.Setenv("GIT_COMMIT", "abcdefg")
+				os.Setenv("PULL_REQUEST_NUMBER", "")
+				os.Setenv("PULL_REQUEST_URL", "https://github.com/owner/repo/pull/1111")
+				os.Setenv("BUILD_URL", "http://jenkins.example.com/jenkins/job/test-job/123")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   1111,
+				},
+				URL: "http://jenkins.example.com/jenkins/job/test-job/123",
+			},
+			ok: true,
+		},
+		{
+			fn: func() {
+				os.Setenv("PULL_REQUEST_NUMBER", "")
+				os.Setenv("PULL_REQUEST_URL", "")
+				os.Setenv("GIT_COMMIT", "abcdefg")
+				os.Setenv("BUILD_URL", "http://jenkins.example.com/jenkins/job/test-job/456")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   0,
+				},
+				URL: "http://jenkins.example.com/jenkins/job/test-job/456",
+			},
+			ok: true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase.fn()
+		ci, err := jenkins()
+		if !reflect.DeepEqual(ci, testCase.ci) {
+			t.Errorf("got %q but want %q", ci, testCase.ci)
+		}
+		if (err == nil) != testCase.ok {
+			t.Errorf("got error %q", err)
+		}
+	}
+}
