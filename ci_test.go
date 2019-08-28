@@ -210,6 +210,70 @@ func TestTravisCI(t *testing.T) {
 	}
 }
 
+func TestTeamCityCI(t *testing.T) {
+	envs := []string{
+		"BUILD_VCS_NUMBER",
+		"BUILD_NUMBER",
+	}
+	saveEnvs := make(map[string]string)
+	for _, key := range envs {
+		saveEnvs[key] = os.Getenv(key)
+		os.Unsetenv(key)
+	}
+	defer func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}()
+
+	// https://confluence.jetbrains.com/display/TCD18/Predefined+Build+Parameters
+	testCases := []struct {
+		fn func()
+		ci CI
+		ok bool
+	}{
+		{
+			fn: func() {
+				os.Setenv("BUILD_NUMBER", "123")
+				os.Setenv("BUILD_VCS_NUMBER", "fafef5adb5b9c39244027c8f16f7c3aa7e352b2e")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "fafef5adb5b9c39244027c8f16f7c3aa7e352b2e",
+					Number:   123,
+				},
+				URL: "",
+			},
+			ok: true,
+		},
+		{
+			fn: func() {
+				os.Setenv("BUILD_NUMBER", "abcdefg")
+				os.Setenv("BUILD_VCS_NUMBER", "false")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   0,
+				},
+				URL: "",
+			},
+			ok: false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase.fn()
+		ci, err := travisci()
+		if !reflect.DeepEqual(ci, testCase.ci) {
+			t.Errorf("got %q but want %q", ci, testCase.ci)
+		}
+		if (err == nil) != testCase.ok {
+			t.Errorf("got error %q", err)
+		}
+	}
+}
+
 func TestCodeBuild(t *testing.T) {
 	envs := []string{
 		"CODEBUILD_RESOLVED_SOURCE_VERSION",
@@ -306,4 +370,3 @@ func TestCodeBuild(t *testing.T) {
 		}
 	}
 }
-

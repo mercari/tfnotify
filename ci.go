@@ -64,3 +64,10 @@ func codebuild() (ci CI, err error) {
 	ci.PR.Number, err = strconv.Atoi(pr)
 	return ci, err
 }
+
+func teamcity() (ci CI, err error) {
+	ci.PR.Revision = os.Getenv("BUILD_VCS_NUMBER")
+	ci.PR.Number, err = strconv.Atoi(os.Getenv("BUILD_NUMBER"))
+
+	return ci, err
+}
