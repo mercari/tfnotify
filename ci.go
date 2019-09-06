@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/google/go-github/github"
 	"os"
 	"regexp"
 	"strconv"
@@ -99,5 +100,30 @@ func jenkins() (ci CI, err error) {
 	if err != nil {
 		return ci, fmt.Errorf("%v: cannot get env", pr)
 	}
+	return ci, err
+}
+
+func github() (ci CI, err error) {
+	ci.PR.Number = 0
+	ci.PR.Revision = os.Getenv("GITHUB_SHA")
+	ci.URL = ""
+	
+	# Get info from GitHub API
+	github_repository_split = strings.Split(os.Getenv("GITHUB_REPOSITORY"), "/")
+	github_owner = github_repository_split[0]
+	github_repository_name = github_repository_split[1]
+	
+	github_client := github.NewClient(nil)
+	pr, resp, err := github_client.RepositoryCommit.GetCommitSHA1(context.Background(), github_owner, github_repository_name, "GITHUB_SHA")
+        if err != nil {
+	  return ci, fmt.Errorf("Error when querying GitHub for commit %v", ci.PR.Revision)
+	}
+	if pr == "" {
+		return ci, nil
+	}
+	
+	ci.URL = pr[0]["html_ur"]
+        ci.PR.Number = pr[0]["number"]
+	
 	return ci, err
 }
