@@ -22,12 +22,20 @@ type Config struct {
 // Notifier is a notification notifier
 type Notifier struct {
 	Github   GithubNotifier   `yaml:"github"`
+	Gitlab   GitlabNotifier   `yaml:"gitlab"`
 	Slack    SlackNotifier    `yaml:"slack"`
 	Typetalk TypetalkNotifier `yaml:"typetalk"`
 }
 
 // GithubNotifier is a notifier for GitHub
 type GithubNotifier struct {
+	Token      string     `yaml:"token"`
+	BaseURL    string     `yaml:"base_url"`
+	Repository Repository `yaml:"repository"`
+}
+
+// GitlabNotifier is a notifier for GitLab
+type GitlabNotifier struct {
 	Token      string     `yaml:"token"`
 	BaseURL    string     `yaml:"base_url"`
 	Repository Repository `yaml:"repository"`
@@ -98,6 +106,8 @@ func (cfg *Config) Validation() error {
 		return errors.New("ci: need to be set")
 	case "circleci", "circle-ci":
 		// ok pattern
+	case "gitlabci", "gitlab-ci":
+		// ok pattern
 	case "travis", "travisci", "travis-ci":
 		// ok pattern
 	case "codebuild":
@@ -116,6 +126,14 @@ func (cfg *Config) Validation() error {
 			return fmt.Errorf("repository owner is missing")
 		}
 		if cfg.Notifier.Github.Repository.Name == "" {
+			return fmt.Errorf("repository name is missing")
+		}
+	}
+	if cfg.isDefinedGitlab() {
+		if cfg.Notifier.Gitlab.Repository.Owner == "" {
+			return fmt.Errorf("repository owner is missing")
+		}
+		if cfg.Notifier.Gitlab.Repository.Name == "" {
 			return fmt.Errorf("repository name is missing")
 		}
 	}
@@ -141,6 +159,11 @@ func (cfg *Config) isDefinedGithub() bool {
 	return cfg.Notifier.Github != (GithubNotifier{})
 }
 
+func (cfg *Config) isDefinedGitlab() bool {
+	// not empty
+	return cfg.Notifier.Gitlab != (GitlabNotifier{})
+}
+
 func (cfg *Config) isDefinedSlack() bool {
 	// not empty
 	return cfg.Notifier.Slack != (SlackNotifier{})
@@ -155,6 +178,9 @@ func (cfg *Config) isDefinedTypetalk() bool {
 func (cfg *Config) GetNotifierType() string {
 	if cfg.isDefinedGithub() {
 		return "github"
+	}
+	if cfg.isDefinedGitlab() {
+		return "gitlab"
 	}
 	if cfg.isDefinedSlack() {
 		return "slack"

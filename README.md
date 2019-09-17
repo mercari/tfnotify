@@ -174,6 +174,54 @@ terraform:
 </details>
 
 <details>
+<summary>For GitLab</summary>
+
+```yaml
+---
+ci: gitlabci
+notifier:
+  gitlab:
+    token: $GITLAB_TOKEN
+    base_url: $GITLAB_BASE_URL
+    repository:
+      owner: "mercari"
+      name: "tfnotify"
+terraform:
+  fmt:
+    template: |
+      {{ .Title }}
+
+      {{ .Message }}
+
+      {{ .Result }}
+
+      {{ .Body }}
+  plan:
+    template: |
+      {{ .Title }} <sup>[CI link]( {{ .Link }} )</sup>
+      {{ .Message }}
+      {{if .Result}}
+      <pre><code> {{ .Result }}
+      </pre></code>
+      {{end}}
+      <details><summary>Details (Click me)</summary>
+      <pre><code> {{ .Body }}
+      </pre></code></details>
+  apply:
+    template: |
+      {{ .Title }}
+      {{ .Message }}
+      {{if .Result}}
+      <pre><code> {{ .Result }}
+      </pre></code>
+      {{end}}
+      <details><summary>Details (Click me)</summary>
+      <pre><code> {{ .Body }}
+      </pre></code></details>
+```
+</details>
+
+<details>
 <summary>For Slack</summary>
 
 ```yaml
@@ -236,6 +284,7 @@ Currently, supported CI are here:
 - TeamCity
 - Drone
 - Jenkins
+- GitLab CI
 
 ### Private Repository Considerations
 GitHub private repositories require the `repo` and `write:discussion` permissions.

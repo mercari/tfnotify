@@ -98,6 +98,14 @@
   version = "v1.20.0"
 
 [[projects]]
+  digest = "1:6ef52d124c3caa2082d7d375ba20decd7a7a93942ac150efe69dba8277388577"
+  name = "github.com/xanzy/go-gitlab"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "be70cf752294cc5c6ee89a18d6ba0caca08aa5c7"
+  version = "v0.16.1"
+
+[[projects]]
   branch = "master"
   digest = "1:f8b491a7c25030a895a0e579742d07136e6958e77ef2d46e769db8eec4e58fcd"
   name = "golang.org/x/net"
@@ -162,6 +170,7 @@
     "github.com/nulab/go-typetalk/typetalk/shared",
     "github.com/nulab/go-typetalk/typetalk/v1",
     "github.com/urfave/cli",
+    "github.com/xanzy/go-gitlab",
     "golang.org/x/oauth2",
     "gopkg.in/yaml.v2",
   ]

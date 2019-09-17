@@ -101,3 +101,23 @@ func jenkins() (ci CI, err error) {
 	}
 	return ci, err
 }
+
+func gitlabci() (ci CI, err error) {
+	ci.PR.Number = 0
+	ci.PR.Revision = os.Getenv("CI_COMMIT_SHA")
+	ci.URL = os.Getenv("CI_JOB_URL")
+	pr := os.Getenv("CI_MERGE_REQUEST_IID")
+	if pr == "" {
+		refPath := os.Getenv("CI_MERGE_REQUEST_REF_PATH")
+		rep := regexp.MustCompile(`refs/merge-requests/\d*/head`)
+		if rep.MatchString(refPath) {
+			strLen := strings.Split(refPath, "/")
+			pr = strLen[2]
+		}
+	}
+	if pr == "" {
+		return ci, nil
+	}
+	ci.PR.Number, err = strconv.Atoi(pr)
+	return ci, err
+}

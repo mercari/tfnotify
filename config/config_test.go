@@ -152,6 +152,10 @@ func TestValidation(t *testing.T) {
 			expected: "notifier is missing",
 		},
 		{
+			contents: []byte("ci: gitlabci\n"),
+			expected: "notifier is missing",
+		},
+		{
 			contents: []byte("ci: circleci\nnotifier:\n  github:\n"),
 			expected: "notifier is missing",
 		},
@@ -223,6 +227,47 @@ ci: circleci
 notifier:
   typetalk:
     token: token
+    topic_id: 12345
+`),
+			expected: "",
+		},
+		{
+			contents: []byte(`
+ci: gitlabci
+notifier:
+  gitlab:
+    token: token
+    repository:
+      owner: owner
+`),
+			expected: "repository name is missing",
+		},
+		{
+			contents: []byte(`
+ci: gitlabci
+notifier:
+  slack:
+`),
+			expected: "notifier is missing",
+		},
+		{
+			contents: []byte(`
+ci: gitlabci
+notifier:
+  gitlab:
+    token: token
+    repository:
+      owner: owner
+      name: name
+`),
+			expected: "",
+		},
+		{
+			contents: []byte(`
+ci: gitlabci
+notifier:
+  typetalk:
+    token: token
 `),
 			expected: "Typetalk topic id is missing",
 		},
@@ -271,6 +316,10 @@ func TestGetNotifierType(t *testing.T) {
 		{
 			contents: []byte("repository:\n  owner: a\n  name: b\nci: circleci\nnotifier:\n  typetalk:\n    token: token\n"),
 			expected: "typetalk",
+		},
+		{
+			contents: []byte("repository:\n  owner: a\n  name: b\nci: gitlabci\nnotifier:\n  gitlab:\n    token: token\n"),
+			expected: "gitlab",
 		},
 	}
 	for _, testCase := range testCases {
