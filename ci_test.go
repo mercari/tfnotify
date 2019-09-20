@@ -234,8 +234,8 @@ func TestTeamCityCI(t *testing.T) {
 	}{
 		{
 			fn: func() {
-				os.Setenv("BUILD_NUMBER", "123")
 				os.Setenv("BUILD_VCS_NUMBER", "fafef5adb5b9c39244027c8f16f7c3aa7e352b2e")
+				os.Setenv("BUILD_NUMBER", "123")
 			},
 			ci: CI{
 				PR: PullRequest{
@@ -248,8 +248,8 @@ func TestTeamCityCI(t *testing.T) {
 		},
 		{
 			fn: func() {
-				os.Setenv("BUILD_NUMBER", "abcdefg")
-				os.Setenv("BUILD_VCS_NUMBER", "false")
+				os.Setenv("BUILD_VCS_NUMBER", "abcdefg")
+				os.Setenv("BUILD_NUMBER", "false")
 			},
 			ci: CI{
 				PR: PullRequest{
@@ -264,7 +264,7 @@ func TestTeamCityCI(t *testing.T) {
 
 	for _, testCase := range testCases {
 		testCase.fn()
-		ci, err := travisci()
+		ci, err := teamcity()
 		if !reflect.DeepEqual(ci, testCase.ci) {
 			t.Errorf("got %q but want %q", ci, testCase.ci)
 		}
