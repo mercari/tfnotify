@@ -50,7 +50,7 @@ func TestLoadFile(t *testing.T) {
 						Template: "",
 					},
 					Plan: Plan{
-						Template: "{{ .Title }}\n{{ .Message }}\n{{if .Result}}\n<pre><code> {{ .Result }}\n</pre></code>\n{{end}}\n<details><summary>Details (Click me)</summary>\n<pre><code> {{ .Body }}\n</pre></code></details>\n",
+						Template: "{{ .Title }}\n{{ .Message }}\n{{if .Result}}\n<pre><code>{{ .Result }}\n</pre></code>\n{{end}}\n<details><summary>Details (Click me)</summary>\n\n<pre><code>{{ .Body }}\n</pre></code></details>\n",
 					},
 					Apply: Apply{
 						Template: "",
@@ -90,7 +90,7 @@ func TestLoadFile(t *testing.T) {
 						Template: "",
 					},
 					Plan: Plan{
-						Template: "{{ .Title }}\n{{ .Message }}\n{{if .Result}}\n<pre><code> {{ .Result }}\n</pre></code>\n{{end}}\n<details><summary>Details (Click me)</summary>\n<pre><code> {{ .Body }}\n</pre></code></details>\n",
+						Template: "{{ .Title }}\n{{ .Message }}\n{{if .Result}}\n<pre><code>{{ .Result }}\n</pre></code>\n{{end}}\n<details><summary>Details (Click me)</summary>\n\n<pre><code>{{ .Body }}\n</pre></code></details>\n",
 					},
 					Apply: Apply{
 						Template: "",

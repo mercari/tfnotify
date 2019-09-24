@@ -22,6 +22,7 @@ func TestDefaultTemplateExecute(t *testing.T) {
 
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>
 </code></pre></details>
 `,
@@ -39,6 +40,7 @@ message
 
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>
 </code></pre></details>
 `,
@@ -59,6 +61,7 @@ b
 
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>c
 </code></pre></details>
 `,
@@ -80,6 +83,7 @@ b
 
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>c
 </code></pre></details>
 `,
@@ -220,6 +224,7 @@ func TestPlanTemplateExecute(t *testing.T) {
 
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>
 </code></pre></details>
 `,
@@ -243,6 +248,7 @@ message
 
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>body
 </code></pre></details>
 `,
@@ -263,6 +269,7 @@ message
 
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>body
 </code></pre></details>
 `,
@@ -283,6 +290,7 @@ message
 
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>body
 </code></pre></details>
 `,
@@ -328,6 +336,7 @@ func TestApplyTemplateExecute(t *testing.T) {
 
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>
 </code></pre></details>
 `,
@@ -351,6 +360,7 @@ message
 
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>body
 </code></pre></details>
 `,
@@ -371,6 +381,7 @@ message
 
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>body
 </code></pre></details>
 `,
@@ -391,6 +402,7 @@ message
 
 
 <details><summary>Details (Click me)</summary>
+
 <pre><code>body
 </code></pre></details>
 `,

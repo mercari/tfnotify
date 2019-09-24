@@ -103,22 +103,24 @@ terraform:
       {{ .Title }} <sup>[CI link]( {{ .Link }} )</sup>
       {{ .Message }}
       {{if .Result}}
-      <pre><code> {{ .Result }}
+      <pre><code>{{ .Result }}
       </pre></code>
       {{end}}
       <details><summary>Details (Click me)</summary>
-      <pre><code> {{ .Body }}
+
+      <pre><code>{{ .Body }}
       </pre></code></details>
   apply:
     template: |
       {{ .Title }}
       {{ .Message }}
       {{if .Result}}
-      <pre><code> {{ .Result }}
+      <pre><code>{{ .Result }}
       </pre></code>
       {{end}}
       <details><summary>Details (Click me)</summary>
-      <pre><code> {{ .Body }}
+
+      <pre><code>{{ .Body }}
       </pre></code></details>
 ```
 
@@ -152,22 +154,24 @@ terraform:
       {{ .Title }} <sup>[CI link]( {{ .Link }} )</sup>
       {{ .Message }}
       {{if .Result}}
-      <pre><code> {{ .Result }}
+      <pre><code>{{ .Result }}
       </pre></code>
       {{end}}
       <details><summary>Details (Click me)</summary>
-      <pre><code> {{ .Body }}
+
+      <pre><code>{{ .Body }}
       </pre></code></details>
   apply:
     template: |
       {{ .Title }}
       {{ .Message }}
       {{if .Result}}
-      <pre><code> {{ .Result }}
+      <pre><code>{{ .Result }}
       </pre></code>
       {{end}}
       <details><summary>Details (Click me)</summary>
-      <pre><code> {{ .Body }}
+
+      <pre><code>{{ .Body }}
       </pre></code></details>
 ```
 

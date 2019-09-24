@@ -11,9 +11,10 @@ terraform:
       {{ .Title }}
       {{ .Message }}
       {{if .Result}}
-      <pre><code> {{ .Result }}
+      <pre><code>{{ .Result }}
       </pre></code>
       {{end}}
       <details><summary>Details (Click me)</summary>
-      <pre><code> {{ .Body }}
+
+      <pre><code>{{ .Body }}
       </pre></code></details>
