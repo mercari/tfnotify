@@ -15,6 +15,7 @@ type Parser interface {
 type ParseResult struct {
 	Result     string
 	HasDestroy bool
+	Action     string
 	ExitCode   int
 	Error      error
 }
@@ -32,6 +33,7 @@ type FmtParser struct {
 // PlanParser is a parser for terraform plan
 type PlanParser struct {
 	Pass       *regexp.Regexp
+	Action     *regexp.Regexp
 	Fail       *regexp.Regexp
 	HasDestroy *regexp.Regexp
 }
@@ -57,8 +59,9 @@ func NewFmtParser() *FmtParser {
 // NewPlanParser is PlanParser initialized with its Regexp
 func NewPlanParser() *PlanParser {
 	return &PlanParser{
-		Pass: regexp.MustCompile(`(?m)^(Plan: \d|No changes.)`),
-		Fail: regexp.MustCompile(`(?m)^(Error: )`),
+		Pass:   regexp.MustCompile(`(?m)^(Plan: \d|No changes.)`),
+		Action: regexp.MustCompile(`(?m)^(An execution plan has been generated)`),
+		Fail:   regexp.MustCompile(`(?m)^(Error: )`),
 		// "0 to destroy" should be treated as "no destroy"
 		HasDestroy: regexp.MustCompile(`(?m)([1-9][0-9]* to destroy.)`),
 	}
@@ -107,9 +110,13 @@ func (p *PlanParser) Parse(body string) ParseResult {
 		}
 	}
 	lines := strings.Split(body, "\n")
-	var i int
-	var result, line string
+	var i, actionStartIdx int
+	var result, action, line string
 	for i, line = range lines {
+		if p.Action.MatchString(line) {
+			// action starts with the line: An execution plan...
+			actionStartIdx = i
+		}
 		if p.Pass.MatchString(line) || p.Fail.MatchString(line) {
 			break
 		}
@@ -117,6 +124,10 @@ func (p *PlanParser) Parse(body string) ParseResult {
 	switch {
 	case p.Pass.MatchString(line):
 		result = lines[i]
+		if actionStartIdx != 0 {
+			// action ends with the line above summary
+			action = strings.Join(trimLastNewline(lines[actionStartIdx:i]), "\n")
+		}
 	case p.Fail.MatchString(line):
 		result = strings.Join(trimLastNewline(lines[i:]), "\n")
 	}
@@ -126,6 +137,7 @@ func (p *PlanParser) Parse(body string) ParseResult {
 	return ParseResult{
 		Result:     result,
 		HasDestroy: hasDestroy,
+		Action:     action,
 		ExitCode:   exitCode,
 		Error:      nil,
 	}

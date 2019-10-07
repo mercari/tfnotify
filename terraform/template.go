@@ -104,6 +104,7 @@ type Template interface {
 type CommonTemplate struct {
 	Title        string
 	Message      string
+	Action       string
 	Result       string
 	Body         string
 	Link         string
@@ -261,6 +262,7 @@ func (t *PlanTemplate) Execute() (string, error) {
 		"Title":   t.Title,
 		"Message": t.Message,
 		"Result":  t.Result,
+		"Action":  t.Action,
 		"Body":    t.Body,
 		"Link":    t.Link,
 	}
@@ -279,6 +281,7 @@ func (t *DestroyWarningTemplate) Execute() (string, error) {
 		"Title":   t.Title,
 		"Message": t.Message,
 		"Result":  t.Result,
+		"Action":  t.Action,
 		"Body":    t.Body,
 		"Link":    t.Link,
 	}
