@@ -13,9 +13,10 @@ type Parser interface {
 
 // ParseResult represents the result of parsed terraform execution
 type ParseResult struct {
-	Result   string
-	ExitCode int
-	Error    error
+	Result     string
+	HasDestroy bool
+	ExitCode   int
+	Error      error
 }
 
 // DefaultParser is a parser for terraform commands
@@ -30,8 +31,9 @@ type FmtParser struct {
 
 // PlanParser is a parser for terraform plan
 type PlanParser struct {
-	Pass *regexp.Regexp
-	Fail *regexp.Regexp
+	Pass       *regexp.Regexp
+	Fail       *regexp.Regexp
+	HasDestroy *regexp.Regexp
 }
 
 // ApplyParser is a parser for terraform apply
@@ -57,6 +59,8 @@ func NewPlanParser() *PlanParser {
 	return &PlanParser{
 		Pass: regexp.MustCompile(`(?m)^(Plan: \d|No changes.)`),
 		Fail: regexp.MustCompile(`(?m)^(Error: )`),
+		// "0 to destroy" should be treated as "no destroy"
+		HasDestroy: regexp.MustCompile(`(?m)([1-9][0-9]* to destroy.)$`),
 	}
 }
 
@@ -116,10 +120,14 @@ func (p *PlanParser) Parse(body string) ParseResult {
 	case p.Fail.MatchString(line):
 		result = strings.Join(trimLastNewline(lines[i:]), "\n")
 	}
+
+	hasDestroy := p.HasDestroy.MatchString(line)
+
 	return ParseResult{
-		Result:   result,
-		ExitCode: exitCode,
-		Error:    nil,
+		Result:     result,
+		HasDestroy: hasDestroy,
+		ExitCode:   exitCode,
+		Error:      nil,
 	}
 }
 
