@@ -357,6 +357,21 @@ func TestCodeBuild(t *testing.T) {
 			},
 			ok: false,
 		},
+		{
+			fn: func() {
+				os.Setenv("CODEBUILD_RESOLVED_SOURCE_VERSION", "")
+				os.Setenv("CODEBUILD_SOURCE_VERSION", "f3008ac30d28ac38ae2533c2b153f00041661f22")
+				os.Setenv("CODEBUILD_BUILD_URL", "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "",
+					Number:   0,
+				},
+				URL: "https://ap-northeast-1.console.aws.amazon.com/codebuild/home?region=ap-northeast-1#/builds/test:f2ae4314-c2d6-4db6-83c2-eacbab1517b7/view/new",
+			},
+			ok: true,
+		},
 	}
 
 	for _, testCase := range testCases {

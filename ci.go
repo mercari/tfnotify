@@ -57,6 +57,9 @@ func codebuild() (ci CI, err error) {
 	if sourceVersion == "" {
 		return ci, nil
 	}
+	if !strings.HasPrefix(sourceVersion,"pr/") {
+		return ci, nil
+	}
 	pr := strings.Replace(sourceVersion, "pr/", "", 1)
 	if pr == "" {
 		return ci, nil
