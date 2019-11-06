@@ -23,10 +23,12 @@ const (
 )
 
 type tfnotify struct {
-	config   config.Config
-	context  *cli.Context
-	parser   terraform.Parser
-	template terraform.Template
+	config                 config.Config
+	context                *cli.Context
+	parser                 terraform.Parser
+	template               terraform.Template
+	destroyWarningTemplate terraform.Template
+	warnDestroy            bool
 }
 
 // Run sends the notification with notifier
@@ -94,14 +96,18 @@ func (t *tfnotify) Run() error {
 			Owner:   t.config.Notifier.Github.Repository.Owner,
 			Repo:    t.config.Notifier.Github.Repository.Name,
 			PR: github.PullRequest{
-				Revision: ci.PR.Revision,
-				Number:   ci.PR.Number,
-				Title:    t.context.String("title"),
-				Message:  t.context.String("message"),
+				Revision:              ci.PR.Revision,
+				Number:                ci.PR.Number,
+				Title:                 t.context.String("title"),
+				Message:               t.context.String("message"),
+				DestroyWarningTitle:   t.context.String("destroy-warning-title"),
+				DestroyWarningMessage: t.context.String("destroy-warning-message"),
 			},
-			CI:       ci.URL,
-			Parser:   t.parser,
-			Template: t.template,
+			CI:                     ci.URL,
+			Parser:                 t.parser,
+			Template:               t.template,
+			DestroyWarningTemplate: t.destroyWarningTemplate,
+			WarnDestroy:            t.warnDestroy,
 		})
 		if err != nil {
 			return err
@@ -208,6 +214,14 @@ func main() {
 					Name:  "message, m",
 					Usage: "Specify the message to use for notification",
 				},
+				cli.StringFlag{
+					Name:  "destroy-warning-title",
+					Usage: "Specify the title to use for destroy warning notification",
+				},
+				cli.StringFlag{
+					Name:  "destroy-warning-message",
+					Usage: "Specify the message to use for destroy warning notification",
+				},
 			},
 		},
 		{
@@ -264,11 +278,17 @@ func cmdPlan(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// If when_destroy is not defined in configuration, tfnotify should not notify it
+	warnDestroy := cfg.Terraform.Plan.WhenDestroy.Template != ""
+
 	t := &tfnotify{
-		config:   cfg,
-		context:  ctx,
-		parser:   terraform.NewPlanParser(),
-		template: terraform.NewPlanTemplate(cfg.Terraform.Plan.Template),
+		config:                 cfg,
+		context:                ctx,
+		parser:                 terraform.NewPlanParser(),
+		template:               terraform.NewPlanTemplate(cfg.Terraform.Plan.Template),
+		destroyWarningTemplate: terraform.NewDestroyWarningTemplate(cfg.Terraform.Plan.WhenDestroy.Template),
+		warnDestroy:            warnDestroy,
 	}
 	return t.Run()
 }
