@@ -102,14 +102,22 @@ func TestLoadFile(t *testing.T) {
 		},
 	}
 
-	var cfg Config
 	for _, testCase := range testCases {
+		var cfg Config
+
 		err := cfg.LoadFile(testCase.file)
-		if !reflect.DeepEqual(cfg, testCase.cfg) {
-			t.Errorf("got %#v but want: %#v", cfg, testCase.cfg)
-		}
-		if (err == nil) != testCase.ok {
-			t.Errorf("got error %q", err)
+		if err == nil {
+			if !testCase.ok {
+				t.Error("got no error but want error")
+			} else {
+				if !reflect.DeepEqual(cfg, testCase.cfg) {
+					t.Errorf("got %#v but want: %#v", cfg, testCase.cfg)
+				}
+			}
+		} else {
+			if testCase.ok {
+				t.Errorf("got error %q but want no error", err)
+			}
 		}
 	}
 }
