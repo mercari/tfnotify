@@ -106,7 +106,7 @@ func TestLoadFile(t *testing.T) {
 	for _, testCase := range testCases {
 		err := cfg.LoadFile(testCase.file)
 		if !reflect.DeepEqual(cfg, testCase.cfg) {
-			t.Errorf("got %q but want %q", cfg, testCase.cfg)
+			t.Errorf("got %#v but want: %#v", cfg, testCase.cfg)
 		}
 		if (err == nil) != testCase.ok {
 			t.Errorf("got error %q", err)
