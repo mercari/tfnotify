@@ -50,13 +50,57 @@ func TestLoadFile(t *testing.T) {
 						Template: "",
 					},
 					Plan: Plan{
-						Template: "{{ .Title }}\n{{ .Message }}\n{{if .Result}}\n<pre><code>{{ .Result }}\n</pre></code>\n{{end}}\n<details><summary>Details (Click me)</summary>\n\n<pre><code>{{ .Body }}\n</pre></code></details>\n",
+						Template:    "{{ .Title }}\n{{ .Message }}\n{{if .Result}}\n<pre><code>{{ .Result }}\n</pre></code>\n{{end}}\n<details><summary>Details (Click me)</summary>\n\n<pre><code>{{ .Body }}\n</pre></code></details>\n",
+						WhenDestroy: WhenDestroy{},
 					},
 					Apply: Apply{
 						Template: "",
 					},
 				},
 				path: "../example.tfnotify.yaml",
+			},
+			ok: true,
+		},
+		{
+			file: "../example-with-destroy.tfnotify.yaml",
+			cfg: Config{
+				CI: "circleci",
+				Notifier: Notifier{
+					Github: GithubNotifier{
+						Token: "$GITHUB_TOKEN",
+						Repository: Repository{
+							Owner: "mercari",
+							Name:  "tfnotify",
+						},
+					},
+					Slack: SlackNotifier{
+						Token:   "",
+						Channel: "",
+						Bot:     "",
+					},
+					Typetalk: TypetalkNotifier{
+						Token:   "",
+						TopicID: "",
+					},
+				},
+				Terraform: Terraform{
+					Default: Default{
+						Template: "",
+					},
+					Fmt: Fmt{
+						Template: "",
+					},
+					Plan: Plan{
+						Template: "{{ .Title }}\n{{ .Message }}\n{{if .Result}}\n<pre><code>{{ .Result }}\n</pre></code>\n{{end}}\n<details><summary>Details (Click me)</summary>\n\n<pre><code>{{ .Body }}\n</pre></code></details>\n",
+						WhenDestroy: WhenDestroy{
+							Template: "## :warning: WARNING: Resource Deletion will happen :warning:\n\nThis plan contains **resource deletion**. Please check the plan result very carefully!\n",
+						},
+					},
+					Apply: Apply{
+						Template: "",
+					},
+				},
+				path: "../example-with-destroy.tfnotify.yaml",
 			},
 			ok: true,
 		},
@@ -90,7 +134,8 @@ func TestLoadFile(t *testing.T) {
 						Template: "",
 					},
 					Plan: Plan{
-						Template: "{{ .Title }}\n{{ .Message }}\n{{if .Result}}\n<pre><code>{{ .Result }}\n</pre></code>\n{{end}}\n<details><summary>Details (Click me)</summary>\n\n<pre><code>{{ .Body }}\n</pre></code></details>\n",
+						Template:    "{{ .Title }}\n{{ .Message }}\n{{if .Result}}\n<pre><code>{{ .Result }}\n</pre></code>\n{{end}}\n<details><summary>Details (Click me)</summary>\n\n<pre><code>{{ .Body }}\n</pre></code></details>\n",
+						WhenDestroy: WhenDestroy{},
 					},
 					Apply: Apply{
 						Template: "",
