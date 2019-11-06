@@ -67,6 +67,11 @@ const (
 {{ .Title }}
 
 This plan contains resource delete operation. Please check the plan result very carefully!
+
+{{if .Result}}
+<pre><code>{{ .Result }}
+</code></pre>
+{{end}}
 `
 
 	// DefaultApplyTemplate is a default template for terraform apply

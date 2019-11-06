@@ -332,28 +332,53 @@ func TestDestroyWarningTemplateExecute(t *testing.T) {
 ## WARNING: Resource Deletion will happen
 
 This plan contains resource delete operation. Please check the plan result very carefully!
+
+
 `,
 		},
 		{
 			template: DefaultDestroyWarningTemplate,
 			value: CommonTemplate{
-				Title: "title",
+				Title:  "title",
+				Result: "result",
 			},
 			resp: `
 title
 
 This plan contains resource delete operation. Please check the plan result very carefully!
+
+
+<pre><code>result
+</code></pre>
+
+`,
+		},
+		{
+			template: DefaultDestroyWarningTemplate,
+			value: CommonTemplate{
+				Title:  "title",
+				Result: "",
+			},
+			resp: `
+title
+
+This plan contains resource delete operation. Please check the plan result very carefully!
+
+
 `,
 		},
 		{
 			template: "",
 			value: CommonTemplate{
-				Title: "title",
+				Title:  "title",
+				Result: "",
 			},
 			resp: `
 title
 
 This plan contains resource delete operation. Please check the plan result very carefully!
+
+
 `,
 		},
 		{
