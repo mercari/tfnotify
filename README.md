@@ -74,6 +74,8 @@ Placeholder | Usage
 `{{ .Body }}` | The entire of Terraform execution result
 `{{ .Link }}` | The link of the build page on CI
 
+On GitHub, tfnotify can also put a warning message if the plan result contains resource deletion (optional).
+
 #### Template Examples
 
 <details>
@@ -122,6 +124,33 @@ terraform:
 
       <pre><code>{{ .Body }}
       </pre></code></details>
+```
+
+If you would like to let tfnotify warn the resource deletion, add `when_destroy` configuration as below.
+
+```yaml
+---
+# ...
+terraform:
+  # ...
+  plan:
+    template: |
+      {{ .Title }} <sup>[CI link]( {{ .Link }} )</sup>
+      {{ .Message }}
+      {{if .Result}}
+      <pre><code>{{ .Result }}
+      </pre></code>
+      {{end}}
+      <details><summary>Details (Click me)</summary>
+
+      <pre><code>{{ .Body }}
+      </pre></code></details>
+    when_destroy:
+      template: |
+        ## :warning: WARNING: Resource Deletion will happen :warning:
+
+        This plan contains **resource deletion**. Please check the plan result very carefully!
+  # ...
 ```
 
 </details>
