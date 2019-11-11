@@ -81,12 +81,8 @@ func (g *NotifyService) notifyDestoryWarning(body string, result terraform.Parse
 		return err
 	}
 
-	if err := g.client.Comment.Post(body, PostOptions{
+	return g.client.Comment.Post(body, PostOptions{
 		Number:   cfg.PR.Number,
 		Revision: cfg.PR.Revision,
-	}); err != nil {
-		return err
-	}
-
-	return nil
+	})
 }
