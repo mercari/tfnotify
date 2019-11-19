@@ -552,6 +552,73 @@ func TestJenkins(t *testing.T) {
 	}
 }
 
+func TestJenkinsGitLab(t *testing.T) {
+	envs := []string{
+		"BUILD_URL",
+		"gitlabBefore",
+		"gitlabMergeRequestIid",
+	}
+	saveEnvs := make(map[string]string)
+	for _, key := range envs {
+		saveEnvs[key] = os.Getenv(key)
+		os.Unsetenv(key)
+	}
+	defer func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}()
+
+	// https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
+	testCases := []struct {
+		fn func()
+		ci CI
+		ok bool
+	}{
+		{
+			fn: func() {
+				os.Setenv("gitlabBefore", "abcdefg")
+				os.Setenv("gitlabMergeRequestIid", "123")
+				os.Setenv("BUILD_URL", "http://jenkins.example.com/jenkins/job/test-job/1")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   123,
+				},
+				URL: "http://jenkins.example.com/jenkins/job/test-job/1",
+			},
+			ok: true,
+		},
+		{
+			fn: func() {
+				os.Setenv("gitlabMergeRequestIid", "")
+				os.Setenv("gitlabBefore", "abcdefg")
+				os.Setenv("BUILD_URL", "http://jenkins.example.com/jenkins/job/test-job/456")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   0,
+				},
+				URL: "http://jenkins.example.com/jenkins/job/test-job/456",
+			},
+			ok: true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase.fn()
+		ci, err := jenkins()
+		if !reflect.DeepEqual(ci, testCase.ci) {
+			t.Errorf("got %q but want %q", ci, testCase.ci)
+		}
+		if (err == nil) != testCase.ok {
+			t.Errorf("got error %q", err)
+		}
+	}
+}
+
 func TestGitLabCI(t *testing.T) {
 	envs := []string{
 		"CI_COMMIT_SHA",
