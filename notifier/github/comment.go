@@ -21,10 +21,10 @@ type PostOptions struct {
 // Post posts comment
 func (g *CommentService) Post(body string, opt PostOptions) error {
 	if opt.Number != 0 {
-		_, _, err := g.client.API.IssuesCreateComment(
+		_, _, err := g.client.API.PullRequestsCreateComment(
 			context.Background(),
 			opt.Number,
-			&github.IssueComment{Body: &body},
+			&github.PullRequestComment{Body: &body},
 		)
 		return err
 	}
@@ -39,19 +39,19 @@ func (g *CommentService) Post(body string, opt PostOptions) error {
 	return fmt.Errorf("github.comment.post: Number or Revision is required")
 }
 
-// List lists comments on GitHub issues/pull requests
-func (g *CommentService) List(number int) ([]*github.IssueComment, error) {
-	comments, _, err := g.client.API.IssuesListComments(
+// List lists comments on GitHub pull requests
+func (g *CommentService) List(number int) ([]*github.PullRequestComment, error) {
+	comments, _, err := g.client.API.PullRequestsListComments(
 		context.Background(),
 		number,
-		&github.IssueListCommentsOptions{},
+		&github.PullRequestListCommentsOptions{},
 	)
 	return comments, err
 }
 
-// Delete deletes comment on GitHub issues/pull requests
+// Delete deletes comment on GitHub pull requests
 func (g *CommentService) Delete(id int) error {
-	_, err := g.client.API.IssuesDeleteComment(
+	_, err := g.client.API.PullRequestsDeleteComment(
 		context.Background(),
 		int64(id),
 	)
@@ -71,8 +71,8 @@ func (g *CommentService) DeleteDuplicates(title string) {
 	}
 }
 
-func (g *CommentService) getDuplicates(title string) []*github.IssueComment {
-	var dup []*github.IssueComment
+func (g *CommentService) getDuplicates(title string) []*github.PullRequestComment {
+	var dup []*github.PullRequestComment
 	re := regexp.MustCompile(`(?m)^(\n+)?` + title + `( +.*)?\n+` + g.client.Config.PR.Message + `\n+`)
 
 	comments, _ := g.client.Comment.List(g.client.Config.PR.Number)
