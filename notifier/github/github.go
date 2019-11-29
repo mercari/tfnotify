@@ -8,9 +8,9 @@ import (
 
 // API is GitHub API interface
 type API interface {
+	PullRequestsCreateComment(ctx context.Context, number int, comment *github.PullRequestComment) (*github.PullRequestComment, *github.Response, error)
 	PullRequestsDeleteComment(ctx context.Context, commentID int64) (*github.Response, error)
 	PullRequestsListComments(ctx context.Context, number int, opt *github.PullRequestListCommentsOptions) ([]*github.PullRequestComment, *github.Response, error)
-	PullRequestsCreateComment(ctx context.Context, number int, comment *github.PullRequestComment) (*github.PullRequestComment, *github.Response, error)
 	IssuesDeleteComment(ctx context.Context, commentID int64) (*github.Response, error)
 	IssuesListComments(ctx context.Context, number int, opt *github.IssueListCommentsOptions) ([]*github.IssueComment, *github.Response, error)
 	IssuesCreateComment(ctx context.Context, number int, comment *github.IssueComment) (*github.IssueComment, *github.Response, error)
@@ -24,19 +24,19 @@ type GitHub struct {
 	owner, repo string
 }
 
+// PullRequestsCreateComment is a wrapper of https://godoc.org/github.com/google/go-github/github#PullRequestsService.CreateComment
+func (g *GitHub) PullRequestsCreateComment(ctx context.Context, number int, comment *github.PullRequestComment) (*github.PullRequestComment, *github.Response, error) {
+	return g.Client.PullRequests.CreateComment(ctx, g.owner, g.repo, number, comment)
+}
+
 // PullRequestsDeleteComment is a wrapper of https://godoc.org/github.com/google/go-github/github#PullRequestsService.DeleteComment
 func (g *GitHub) PullRequestsDeleteComment(ctx context.Context, commentID int64) (*github.Response, error) {
-	return g.Client.PullRequests.CreateComment(ctx, g.owner, g.repo, number, comment)
+	return g.Client.PullRequests.DeleteComment(ctx, g.owner, g.repo, int64(commentID))
 }
 
 // PullRequestsListComments is a wrapper of https://godoc.org/github.com/google/go-github/github#PullRequestsService.ListComments
 func (g *GitHub) PullRequestsListComments(ctx context.Context, number int, opt *github.PullRequestListCommentsOptions) ([]*github.PullRequestComment, *github.Response, error) {
 	return g.Client.PullRequests.ListComments(ctx, g.owner, g.repo, number, opt)
-}
-
-// PullRequestsCreateComment is a wrapper of https://godoc.org/github.com/google/go-github/github#PullRequestsService.CreateComment
-func (g *GitHub) PullRequestsCreateComment(ctx context.Context, number int, comment *github.PullRequestComment) (*github.PullRequestComment, *github.Response, error) {
-	return g.Client.PullRequests.CreateComment(ctx, g.owner, g.repo, number, comment)
 }
 
 // IssuesCreateComment is a wrapper of https://godoc.org/github.com/google/go-github/github#IssuesService.CreateComment

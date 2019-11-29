@@ -68,13 +68,13 @@ func TestCommentPost(t *testing.T) {
 }
 
 func TestCommentList(t *testing.T) {
-	comments := []*github.IssueComment{
-		&github.IssueComment{
-			ID:   github.Int64(371748792),
+	comments := []*github.PullRequestComment{
+		&github.PullRequestComment{
+			ID:   github.Int64(471748792),
 			Body: github.String("comment 1"),
 		},
-		&github.IssueComment{
-			ID:   github.Int64(371765743),
+		&github.PullRequestComment{
+			ID:   github.Int64(471765743),
 			Body: github.String("comment 2"),
 		},
 	}
@@ -82,7 +82,7 @@ func TestCommentList(t *testing.T) {
 		config   Config
 		number   int
 		ok       bool
-		comments []*github.IssueComment
+		comments []*github.PullRequestComment
 	}{
 		{
 			config:   newFakeConfig(),
@@ -160,23 +160,23 @@ func TestCommentDelete(t *testing.T) {
 
 func TestCommentGetDuplicates(t *testing.T) {
 	api := newFakeAPI()
-	api.FakeIssuesListComments = func(ctx context.Context, number int, opt *github.IssueListCommentsOptions) ([]*github.IssueComment, *github.Response, error) {
-		var comments []*github.IssueComment
-		comments = []*github.IssueComment{
-			&github.IssueComment{
-				ID:   github.Int64(371748792),
+	api.FakePullRequestsListComments = func(ctx context.Context, number int, opt *github.PullRequestListCommentsOptions) ([]*github.PullRequestComment, *github.Response, error) {
+		var comments []*github.PullRequestComment
+		comments = []*github.PullRequestComment{
+			&github.PullRequestComment{
+				ID:   github.Int64(471748792),
 				Body: github.String("## Plan result\nfoo message\n"),
 			},
-			&github.IssueComment{
-				ID:   github.Int64(371765743),
+			&github.PullRequestComment{
+				ID:   github.Int64(471765743),
 				Body: github.String("## Plan result\nbar message\n"),
 			},
-			&github.IssueComment{
-				ID:   github.Int64(371765744),
+			&github.PullRequestComment{
+				ID:   github.Int64(471765744),
 				Body: github.String("## Plan result\nbaz message\n"),
 			},
-			&github.IssueComment{
-				ID:   github.Int64(371765745),
+			&github.PullRequestComment{
+				ID:   github.Int64(471765745),
 				Body: github.String("## Plan result <build URL>\nbaz message\n"),
 			},
 		}
@@ -186,14 +186,14 @@ func TestCommentGetDuplicates(t *testing.T) {
 	testCases := []struct {
 		title    string
 		message  string
-		comments []*github.IssueComment
+		comments []*github.PullRequestComment
 	}{
 		{
 			title:   "## Plan result",
 			message: "foo message",
-			comments: []*github.IssueComment{
-				&github.IssueComment{
-					ID:   github.Int64(371748792),
+			comments: []*github.PullRequestComment{
+				&github.PullRequestComment{
+					ID:   github.Int64(471748792),
 					Body: github.String("## Plan result\nfoo message\n"),
 				},
 			},
@@ -206,13 +206,13 @@ func TestCommentGetDuplicates(t *testing.T) {
 		{
 			title:   "## Plan result",
 			message: "baz message",
-			comments: []*github.IssueComment{
-				&github.IssueComment{
-					ID:   github.Int64(371765744),
+			comments: []*github.PullRequestComment{
+				&github.PullRequestComment{
+					ID:   github.Int64(471765744),
 					Body: github.String("## Plan result\nbaz message\n"),
 				},
-				&github.IssueComment{
-					ID:   github.Int64(371765745),
+				&github.PullRequestComment{
+					ID:   github.Int64(471765745),
 					Body: github.String("## Plan result <build URL>\nbaz message\n"),
 				},
 			},

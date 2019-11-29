@@ -39,7 +39,7 @@ func (g *fakeAPI) PullRequestsDeleteComment(ctx context.Context, commentID int64
 	return g.FakePullRequestsDeleteComment(ctx, commentID)
 }
 
-func (g *fakeAPI) PullRequestsListComments(ctx context.Context, number int, opt *github.PullRequestListCommentsOptions) ([]*github.PullRequestsComment, *github.Response, error) {
+func (g *fakeAPI) PullRequestsListComments(ctx context.Context, number int, opt *github.PullRequestListCommentsOptions) ([]*github.PullRequestComment, *github.Response, error) {
 	return g.FakePullRequestsListComments(ctx, number, opt)
 }
 
