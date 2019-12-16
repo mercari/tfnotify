@@ -319,6 +319,92 @@ message
 	}
 }
 
+func TestDestroyWarningTemplateExecute(t *testing.T) {
+	testCases := []struct {
+		template string
+		value    CommonTemplate
+		resp     string
+	}{
+		{
+			template: DefaultDestroyWarningTemplate,
+			value:    CommonTemplate{},
+			resp: `
+## WARNING: Resource Deletion will happen
+
+This plan contains resource delete operation. Please check the plan result very carefully!
+
+
+`,
+		},
+		{
+			template: DefaultDestroyWarningTemplate,
+			value: CommonTemplate{
+				Title:  "title",
+				Result: "result",
+			},
+			resp: `
+title
+
+This plan contains resource delete operation. Please check the plan result very carefully!
+
+
+<pre><code>result
+</code></pre>
+
+`,
+		},
+		{
+			template: DefaultDestroyWarningTemplate,
+			value: CommonTemplate{
+				Title:  "title",
+				Result: "",
+			},
+			resp: `
+title
+
+This plan contains resource delete operation. Please check the plan result very carefully!
+
+
+`,
+		},
+		{
+			template: "",
+			value: CommonTemplate{
+				Title:  "title",
+				Result: "",
+			},
+			resp: `
+title
+
+This plan contains resource delete operation. Please check the plan result very carefully!
+
+
+`,
+		},
+		{
+			template: `{{ .Title }}-{{ .Message }}-{{ .Result }}-{{ .Body }}`,
+			value: CommonTemplate{
+				Title:   "a",
+				Message: "b",
+				Result:  "c",
+				Body:    "d",
+			},
+			resp: `a-b-c-d`,
+		},
+	}
+	for _, testCase := range testCases {
+		template := NewDestroyWarningTemplate(testCase.template)
+		template.SetValue(testCase.value)
+		resp, err := template.Execute()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if resp != testCase.resp {
+			t.Errorf("got %q but want %q", resp, testCase.resp)
+		}
+	}
+}
+
 func TestApplyTemplateExecute(t *testing.T) {
 	testCases := []struct {
 		template string

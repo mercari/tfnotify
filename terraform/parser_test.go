@@ -118,6 +118,50 @@ configuration and real physical resources that exist. As a result, no
 actions need to be performed.
 `
 
+const planHasDestroy = `
+google_bigquery_dataset.tfnotify_echo: Refreshing state...
+google_project.team: Refreshing state...
+pagerduty_team.team: Refreshing state...
+data.pagerduty_vendor.datadog: Refreshing state...
+data.pagerduty_user.service_owner[1]: Refreshing state...
+data.pagerduty_user.service_owner[2]: Refreshing state...
+data.pagerduty_user.service_owner[0]: Refreshing state...
+google_project_services.team: Refreshing state...
+google_project_iam_member.team[1]: Refreshing state...
+google_project_iam_member.team[2]: Refreshing state...
+google_project_iam_member.team[0]: Refreshing state...
+google_project_iam_member.team_platform[1]: Refreshing state...
+google_project_iam_member.team_platform[2]: Refreshing state...
+google_project_iam_member.team_platform[0]: Refreshing state...
+pagerduty_team_membership.team[2]: Refreshing state...
+pagerduty_schedule.secondary: Refreshing state...
+pagerduty_schedule.primary: Refreshing state...
+pagerduty_team_membership.team[0]: Refreshing state...
+pagerduty_team_membership.team[1]: Refreshing state...
+pagerduty_escalation_policy.team: Refreshing state...
+pagerduty_service.team: Refreshing state...
+pagerduty_service_integration.datadog: Refreshing state...
+
+------------------------------------------------------------------------
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  - destroy
+
+Terraform will perform the following actions:
+
+  - google_project_iam_member.team_platform[2]
+
+
+Plan: 0 to add, 0 to change, 1 to destroy.
+
+------------------------------------------------------------------------
+
+Note: You didn't specify an "-out" parameter to save this plan, so Terraform
+can't guarantee that exactly these actions will be performed if
+"terraform apply" is subsequently run.
+`
+
 const applySuccessResult = `
 data.terraform_remote_state.teams_platform_development: Refreshing state...
 google_project.my_service: Refreshing state...
@@ -251,18 +295,20 @@ func TestPlanParserParse(t *testing.T) {
 			name: "plan ok pattern",
 			body: planSuccessResult,
 			result: ParseResult{
-				Result:   "Plan: 1 to add, 0 to change, 0 to destroy.",
-				ExitCode: 0,
-				Error:    nil,
+				Result:     "Plan: 1 to add, 0 to change, 0 to destroy.",
+				HasDestroy: false,
+				ExitCode:   0,
+				Error:      nil,
 			},
 		},
 		{
 			name: "no stdin",
 			body: "",
 			result: ParseResult{
-				Result:   "",
-				ExitCode: 1,
-				Error:    errors.New("cannot parse plan result"),
+				Result:     "",
+				HasDestroy: false,
+				ExitCode:   1,
+				Error:      errors.New("cannot parse plan result"),
 			},
 		},
 		{
@@ -283,9 +329,20 @@ func TestPlanParserParse(t *testing.T) {
 			name: "plan no changes",
 			body: planNoChanges,
 			result: ParseResult{
-				Result:   "No changes. Infrastructure is up-to-date.",
-				ExitCode: 0,
-				Error:    nil,
+				Result:     "No changes. Infrastructure is up-to-date.",
+				HasDestroy: false,
+				ExitCode:   0,
+				Error:      nil,
+			},
+		},
+		{
+			name: "plan has destroy",
+			body: planHasDestroy,
+			result: ParseResult{
+				Result:     "Plan: 0 to add, 0 to change, 1 to destroy.",
+				HasDestroy: true,
+				ExitCode:   0,
+				Error:      nil,
 			},
 		},
 	}

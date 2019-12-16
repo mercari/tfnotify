@@ -12,6 +12,8 @@ const (
 	DefaultFmtTitle = "## Fmt result"
 	// DefaultPlanTitle is a default title for terraform plan
 	DefaultPlanTitle = "## Plan result"
+	// DefaultDestroyWarningTitle is a default title of destroy warning
+	DefaultDestroyWarningTitle = "## WARNING: Resource Deletion will happen"
 	// DefaultApplyTitle is a default title for terraform apply
 	DefaultApplyTitle = "## Apply result"
 
@@ -58,6 +60,18 @@ const (
 
 <pre><code>{{ .Body }}
 </code></pre></details>
+`
+
+	// DefaultDestroyWarningTemplate is a default template for terraform plan
+	DefaultDestroyWarningTemplate = `
+{{ .Title }}
+
+This plan contains resource delete operation. Please check the plan result very carefully!
+
+{{if .Result}}
+<pre><code>{{ .Result }}
+</code></pre>
+{{end}}
 `
 
 	// DefaultApplyTemplate is a default template for terraform apply
@@ -115,6 +129,13 @@ type PlanTemplate struct {
 	CommonTemplate
 }
 
+// DestroyWarningTemplate is a default template for warning of destroy operation in plan
+type DestroyWarningTemplate struct {
+	Template string
+
+	CommonTemplate
+}
+
 // ApplyTemplate is a default template for terraform apply
 type ApplyTemplate struct {
 	Template string
@@ -148,6 +169,16 @@ func NewPlanTemplate(template string) *PlanTemplate {
 		template = DefaultPlanTemplate
 	}
 	return &PlanTemplate{
+		Template: template,
+	}
+}
+
+// NewDestroyWarningTemplate is DestroyWarningTemplate initializer
+func NewDestroyWarningTemplate(template string) *DestroyWarningTemplate {
+	if template == "" {
+		template = DefaultDestroyWarningTemplate
+	}
+	return &DestroyWarningTemplate{
 		Template: template,
 	}
 }
@@ -222,6 +253,26 @@ func (t *PlanTemplate) Execute() (resp string, err error) {
 	return resp, err
 }
 
+// Execute binds the execution result of terraform plan into template
+func (t *DestroyWarningTemplate) Execute() (resp string, err error) {
+	tpl, err := template.New("destroy_warning").Parse(t.Template)
+	if err != nil {
+		return resp, err
+	}
+	var b bytes.Buffer
+	if err := tpl.Execute(&b, map[string]interface{}{
+		"Title":   t.Title,
+		"Message": t.Message,
+		"Result":  t.Result,
+		"Body":    t.Body,
+		"Link":    t.Link,
+	}); err != nil {
+		return resp, err
+	}
+	resp = b.String()
+	return resp, err
+}
+
 // Execute binds the execution result of terraform apply into tepmlate
 func (t *ApplyTemplate) Execute() (resp string, err error) {
 	tpl, err := template.New("apply").Parse(t.Template)
@@ -266,6 +317,14 @@ func (t *PlanTemplate) SetValue(ct CommonTemplate) {
 	t.CommonTemplate = ct
 }
 
+// SetValue sets template entities about destroy warning to CommonTemplate
+func (t *DestroyWarningTemplate) SetValue(ct CommonTemplate) {
+	if ct.Title == "" {
+		ct.Title = DefaultDestroyWarningTitle
+	}
+	t.CommonTemplate = ct
+}
+
 // SetValue sets template entities about terraform apply to CommonTemplate
 func (t *ApplyTemplate) SetValue(ct CommonTemplate) {
 	if ct.Title == "" {
@@ -286,6 +345,11 @@ func (t *FmtTemplate) GetValue() CommonTemplate {
 
 // GetValue gets template entities
 func (t *PlanTemplate) GetValue() CommonTemplate {
+	return t.CommonTemplate
+}
+
+// GetValue gets template entities
+func (t *DestroyWarningTemplate) GetValue() CommonTemplate {
 	return t.CommonTemplate
 }
 

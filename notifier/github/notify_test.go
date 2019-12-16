@@ -104,6 +104,47 @@ func TestNotifyNotify(t *testing.T) {
 			exitCode: 0,
 		},
 		{
+			// valid, and contains destroy
+			// TODO(dtan4): check two comments were made actually
+			config: Config{
+				Token: "token",
+				Owner: "owner",
+				Repo:  "repo",
+				PR: PullRequest{
+					Revision: "",
+					Number:   1,
+					Message:  "message",
+				},
+				Parser:                 terraform.NewPlanParser(),
+				Template:               terraform.NewPlanTemplate(terraform.DefaultPlanTemplate),
+				DestroyWarningTemplate: terraform.NewDestroyWarningTemplate(terraform.DefaultDestroyWarningTemplate),
+				WarnDestroy:            true,
+			},
+			body:     "Plan: 1 to add, 1 to destroy",
+			ok:       true,
+			exitCode: 0,
+		},
+		{
+			// valid, contains destroy, but not to notify
+			config: Config{
+				Token: "token",
+				Owner: "owner",
+				Repo:  "repo",
+				PR: PullRequest{
+					Revision: "",
+					Number:   1,
+					Message:  "message",
+				},
+				Parser:                 terraform.NewPlanParser(),
+				Template:               terraform.NewPlanTemplate(terraform.DefaultPlanTemplate),
+				DestroyWarningTemplate: terraform.NewDestroyWarningTemplate(terraform.DefaultDestroyWarningTemplate),
+				WarnDestroy:            false,
+			},
+			body:     "Plan: 1 to add, 1 to destroy",
+			ok:       true,
+			exitCode: 0,
+		},
+		{
 			// apply case
 			config: Config{
 				Token: "token",

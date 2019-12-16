@@ -80,6 +80,12 @@ type Fmt struct {
 
 // Plan is a terraform plan config
 type Plan struct {
+	Template    string      `yaml:"template"`
+	WhenDestroy WhenDestroy `yaml:"when_destroy,omitempty"`
+}
+
+// WhenDestroy is a configuration to notify the plan result contains destroy operation
+type WhenDestroy struct {
 	Template string `yaml:"template"`
 }
 
