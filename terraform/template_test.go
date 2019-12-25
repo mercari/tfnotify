@@ -89,6 +89,27 @@ b
 `,
 		},
 		{
+			template: "",
+			value: CommonTemplate{
+				Title:   "a",
+				Message: "b",
+				Result:  `This is a "result".`,
+				Body:    "d",
+			},
+			resp: `
+a
+
+b
+
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>This is a &#34;result&#34;.
+</code></pre></details>
+`,
+		},
+		{
 			template: `{{ .Title }}-{{ .Message }}-{{ .Result }}-{{ .Body }}`,
 			value: CommonTemplate{
 				Title:   "a",
@@ -184,6 +205,24 @@ c
 `,
 		},
 		{
+			template: "",
+			value: CommonTemplate{
+				Title:   "a",
+				Message: "b",
+				Result:  `This is a "result".`,
+				Body:    "d",
+			},
+			resp: `
+a
+
+b
+
+
+
+This is a &#34;result&#34;.
+`,
+		},
+		{
 			template: `{{ .Title }}-{{ .Message }}-{{ .Result }}-{{ .Body }}`,
 			value: CommonTemplate{
 				Title:   "a",
@@ -271,6 +310,27 @@ message
 <details><summary>Details (Click me)</summary>
 
 <pre><code>body
+</code></pre></details>
+`,
+		},
+		{
+			template: DefaultPlanTemplate,
+			value: CommonTemplate{
+				Title:   "title",
+				Message: "message",
+				Result:  "",
+				Body:    `This is a "body".`,
+			},
+			resp: `
+title
+
+message
+
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>This is a &#34;body&#34;.
 </code></pre></details>
 `,
 		},
@@ -490,6 +550,27 @@ message
 <details><summary>Details (Click me)</summary>
 
 <pre><code>body
+</code></pre></details>
+`,
+		},
+		{
+			template: "",
+			value: CommonTemplate{
+				Title:   "title",
+				Message: "message",
+				Result:  "",
+				Body:    `This is a "body".`,
+			},
+			resp: `
+title
+
+message
+
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>This is a &#34;body&#34;.
 </code></pre></details>
 `,
 		},
