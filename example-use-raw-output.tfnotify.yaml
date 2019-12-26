@@ -1,0 +1,21 @@
+ci: circleci
+notifier:
+  github:
+    token: $GITHUB_TOKEN
+    repository:
+      owner: "mercari"
+      name: "tfnotify"
+terraform:
+  use_raw_output: true
+  plan:
+    template: |
+      {{ .Title }}
+      {{ .Message }}
+      {{if .Result}}
+      <pre><code>{{ .Result }}
+      </pre></code>
+      {{end}}
+      <details><summary>Details (Click me)</summary>
+
+      <pre><code>{{ .Body }}
+      </pre></code></details>

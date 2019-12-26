@@ -62,10 +62,11 @@ type TypetalkNotifier struct {
 
 // Terraform represents terraform configurations
 type Terraform struct {
-	Default Default `yaml:"default"`
-	Fmt     Fmt     `yaml:"fmt"`
-	Plan    Plan    `yaml:"plan"`
-	Apply   Apply   `yaml:"apply"`
+	Default      Default `yaml:"default"`
+	Fmt          Fmt     `yaml:"fmt"`
+	Plan         Plan    `yaml:"plan"`
+	Apply        Apply   `yaml:"apply"`
+	UseRawOutput bool    `yaml:"use_raw_output,omitempty"`
 }
 
 // Default is a default setting for terraform commands
