@@ -3,6 +3,7 @@ package terraform
 import (
 	"bytes"
 	htmltemplate "html/template"
+	texttemplate "text/template"
 )
 
 const (
@@ -207,7 +208,13 @@ func (t *DefaultTemplate) Execute() (resp string, err error) {
 	var b bytes.Buffer
 
 	if t.UseRawOutput {
-		// do nothing
+		tpl, err := texttemplate.New("default").Parse(t.Template)
+		if err != nil {
+			return resp, err
+		}
+		if err := tpl.Execute(&b, data); err != nil {
+			return resp, err
+		}
 	} else {
 		tpl, err := htmltemplate.New("default").Parse(t.Template)
 		if err != nil {
@@ -235,7 +242,14 @@ func (t *FmtTemplate) Execute() (resp string, err error) {
 	var b bytes.Buffer
 
 	if t.UseRawOutput {
-		// do nothing
+		tpl, err := texttemplate.New("fmt").Parse(t.Template)
+		if err != nil {
+			return resp, err
+		}
+
+		if err := tpl.Execute(&b, data); err != nil {
+			return resp, err
+		}
 	} else {
 		tpl, err := htmltemplate.New("fmt").Parse(t.Template)
 		if err != nil {
@@ -264,7 +278,14 @@ func (t *PlanTemplate) Execute() (resp string, err error) {
 	var b bytes.Buffer
 
 	if t.UseRawOutput {
-		// do nothing
+		tpl, err := texttemplate.New("plan").Parse(t.Template)
+		if err != nil {
+			return resp, err
+		}
+
+		if err := tpl.Execute(&b, data); err != nil {
+			return resp, err
+		}
 	} else {
 		tpl, err := htmltemplate.New("plan").Parse(t.Template)
 		if err != nil {
@@ -313,7 +334,14 @@ func (t *ApplyTemplate) Execute() (resp string, err error) {
 	var b bytes.Buffer
 
 	if t.UseRawOutput {
-		// do nothing
+		tpl, err := texttemplate.New("apply").Parse(t.Template)
+		if err != nil {
+			return resp, err
+		}
+
+		if err := tpl.Execute(&b, data); err != nil {
+			return resp, err
+		}
 	} else {
 		tpl, err := htmltemplate.New("apply").Parse(t.Template)
 		if err != nil {
