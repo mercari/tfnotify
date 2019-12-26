@@ -105,6 +105,7 @@ func (t *tfnotify) Run() error {
 			},
 			CI:                     ci.URL,
 			Parser:                 t.parser,
+			UseRawOutput:           t.config.Terraform.UseRawOutput,
 			Template:               t.template,
 			DestroyWarningTemplate: t.destroyWarningTemplate,
 			WarnDestroy:            t.warnDestroy,
