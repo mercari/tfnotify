@@ -101,11 +101,12 @@ type Template interface {
 
 // CommonTemplate represents template entities
 type CommonTemplate struct {
-	Title   string
-	Message string
-	Result  string
-	Body    string
-	Link    string
+	Title        string
+	Message      string
+	Result       string
+	Body         string
+	Link         string
+	UseRawOutput bool
 }
 
 // DefaultTemplate is a default template for terraform commands

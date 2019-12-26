@@ -624,7 +624,7 @@ func TestGetValue(t *testing.T) {
 		template := testCase.template
 		value := template.GetValue()
 		if !reflect.DeepEqual(value, testCase.expected) {
-			t.Errorf("got %q but want %q", value, testCase.expected)
+			t.Errorf("got %#v but want %#v", value, testCase.expected)
 		}
 	}
 }
