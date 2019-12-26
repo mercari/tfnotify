@@ -195,8 +195,32 @@ func NewApplyTemplate(template string) *ApplyTemplate {
 	}
 }
 
+func generateOutput(kind, template string, data map[string]interface{}, useRawOutput bool) (string, error) {
+	var b bytes.Buffer
+
+	if useRawOutput {
+		tpl, err := texttemplate.New(kind).Parse(template)
+		if err != nil {
+			return "", err
+		}
+		if err := tpl.Execute(&b, data); err != nil {
+			return "", err
+		}
+	} else {
+		tpl, err := htmltemplate.New(kind).Parse(template)
+		if err != nil {
+			return "", err
+		}
+		if err := tpl.Execute(&b, data); err != nil {
+			return "", err
+		}
+	}
+
+	return b.String(), nil
+}
+
 // Execute binds the execution result of terraform command into tepmlate
-func (t *DefaultTemplate) Execute() (resp string, err error) {
+func (t *DefaultTemplate) Execute() (string, error) {
 	data := map[string]interface{}{
 		"Title":   t.Title,
 		"Message": t.Message,
@@ -205,32 +229,16 @@ func (t *DefaultTemplate) Execute() (resp string, err error) {
 		"Link":    t.Link,
 	}
 
-	var b bytes.Buffer
-
-	if t.UseRawOutput {
-		tpl, err := texttemplate.New("default").Parse(t.Template)
-		if err != nil {
-			return resp, err
-		}
-		if err := tpl.Execute(&b, data); err != nil {
-			return resp, err
-		}
-	} else {
-		tpl, err := htmltemplate.New("default").Parse(t.Template)
-		if err != nil {
-			return resp, err
-		}
-		if err := tpl.Execute(&b, data); err != nil {
-			return resp, err
-		}
+	resp, err := generateOutput("default", t.Template, data, t.UseRawOutput)
+	if err != nil {
+		return "", err
 	}
 
-	resp = b.String()
-	return resp, err
+	return resp, nil
 }
 
 // Execute binds the execution result of terraform fmt into tepmlate
-func (t *FmtTemplate) Execute() (resp string, err error) {
+func (t *FmtTemplate) Execute() (string, error) {
 	data := map[string]interface{}{
 		"Title":   t.Title,
 		"Message": t.Message,
@@ -239,34 +247,16 @@ func (t *FmtTemplate) Execute() (resp string, err error) {
 		"Link":    t.Link,
 	}
 
-	var b bytes.Buffer
-
-	if t.UseRawOutput {
-		tpl, err := texttemplate.New("fmt").Parse(t.Template)
-		if err != nil {
-			return resp, err
-		}
-
-		if err := tpl.Execute(&b, data); err != nil {
-			return resp, err
-		}
-	} else {
-		tpl, err := htmltemplate.New("fmt").Parse(t.Template)
-		if err != nil {
-			return resp, err
-		}
-
-		if err := tpl.Execute(&b, data); err != nil {
-			return resp, err
-		}
+	resp, err := generateOutput("fmt", t.Template, data, t.UseRawOutput)
+	if err != nil {
+		return "", err
 	}
 
-	resp = b.String()
-	return resp, err
+	return resp, nil
 }
 
 // Execute binds the execution result of terraform plan into tepmlate
-func (t *PlanTemplate) Execute() (resp string, err error) {
+func (t *PlanTemplate) Execute() (string, error) {
 	data := map[string]interface{}{
 		"Title":   t.Title,
 		"Message": t.Message,
@@ -275,30 +265,12 @@ func (t *PlanTemplate) Execute() (resp string, err error) {
 		"Link":    t.Link,
 	}
 
-	var b bytes.Buffer
-
-	if t.UseRawOutput {
-		tpl, err := texttemplate.New("plan").Parse(t.Template)
-		if err != nil {
-			return resp, err
-		}
-
-		if err := tpl.Execute(&b, data); err != nil {
-			return resp, err
-		}
-	} else {
-		tpl, err := htmltemplate.New("plan").Parse(t.Template)
-		if err != nil {
-			return resp, err
-		}
-
-		if err := tpl.Execute(&b, data); err != nil {
-			return resp, err
-		}
+	resp, err := generateOutput("plan", t.Template, data, t.UseRawOutput)
+	if err != nil {
+		return "", err
 	}
 
-	resp = b.String()
-	return resp, err
+	return resp, nil
 }
 
 // Execute binds the execution result of terraform plan into template
@@ -322,7 +294,7 @@ func (t *DestroyWarningTemplate) Execute() (resp string, err error) {
 }
 
 // Execute binds the execution result of terraform apply into tepmlate
-func (t *ApplyTemplate) Execute() (resp string, err error) {
+func (t *ApplyTemplate) Execute() (string, error) {
 	data := map[string]interface{}{
 		"Title":   t.Title,
 		"Message": t.Message,
@@ -331,30 +303,12 @@ func (t *ApplyTemplate) Execute() (resp string, err error) {
 		"Link":    t.Link,
 	}
 
-	var b bytes.Buffer
-
-	if t.UseRawOutput {
-		tpl, err := texttemplate.New("apply").Parse(t.Template)
-		if err != nil {
-			return resp, err
-		}
-
-		if err := tpl.Execute(&b, data); err != nil {
-			return resp, err
-		}
-	} else {
-		tpl, err := htmltemplate.New("apply").Parse(t.Template)
-		if err != nil {
-			return resp, err
-		}
-
-		if err := tpl.Execute(&b, data); err != nil {
-			return resp, err
-		}
+	resp, err := generateOutput("apply", t.Template, data, t.UseRawOutput)
+	if err != nil {
+		return "", err
 	}
 
-	resp = b.String()
-	return resp, err
+	return resp, nil
 }
 
 // SetValue sets template entities to CommonTemplate
