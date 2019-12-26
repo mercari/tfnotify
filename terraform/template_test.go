@@ -485,7 +485,7 @@ This plan contains resource delete operation. Please check the plan result very 
 			template: DefaultDestroyWarningTemplate,
 			value: CommonTemplate{
 				Title:  "title",
-				Result: "result",
+				Result: `This is a "result".`,
 			},
 			resp: `
 title
@@ -493,7 +493,25 @@ title
 This plan contains resource delete operation. Please check the plan result very carefully!
 
 
-<pre><code>result
+<pre><code>This is a &#34;result&#34;.
+</code></pre>
+
+`,
+		},
+		{
+			template: DefaultDestroyWarningTemplate,
+			value: CommonTemplate{
+				Title:        "title",
+				Result:       `This is a "result".`,
+				UseRawOutput: true,
+			},
+			resp: `
+title
+
+This plan contains resource delete operation. Please check the plan result very carefully!
+
+
+<pre><code>This is a "result".
 </code></pre>
 
 `,

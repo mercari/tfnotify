@@ -274,23 +274,21 @@ func (t *PlanTemplate) Execute() (string, error) {
 }
 
 // Execute binds the execution result of terraform plan into template
-func (t *DestroyWarningTemplate) Execute() (resp string, err error) {
-	tpl, err := htmltemplate.New("destroy_warning").Parse(t.Template)
-	if err != nil {
-		return resp, err
-	}
-	var b bytes.Buffer
-	if err := tpl.Execute(&b, map[string]interface{}{
+func (t *DestroyWarningTemplate) Execute() (string, error) {
+	data := map[string]interface{}{
 		"Title":   t.Title,
 		"Message": t.Message,
 		"Result":  t.Result,
 		"Body":    t.Body,
 		"Link":    t.Link,
-	}); err != nil {
-		return resp, err
 	}
-	resp = b.String()
-	return resp, err
+
+	resp, err := generateOutput("destroy_warning", t.Template, data, t.UseRawOutput)
+	if err != nil {
+		return "", err
+	}
+
+	return resp, nil
 }
 
 // Execute binds the execution result of terraform apply into tepmlate
