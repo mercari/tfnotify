@@ -21,6 +21,7 @@ devel-deps:
 	@go get -v -u github.com/haya14busa/goverage
 	@go get -v -u github.com/motemen/gobump/cmd/gobump
 	@curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $(go env GOPATH)/bin
+	@curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | BINDIR=$(go env GOPATH)/bin sh
 
 .PHONY: dep
 dep: devel-deps
