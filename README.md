@@ -153,6 +153,35 @@ terraform:
   # ...
 ```
 
+Sometimes you may want not to HTML-escape Terraform command outputs.
+For example, when you use use code block to print command output, it's better to use raw characters instead of character references (e.g. `-/+` -> `-/&#43;`, `"` -> `&#34;`).
+
+You can disable HTML escape by adding `use_raw_output: true` configuration.
+With this configuration, Terraform doesn't HTML-escape any Terraform output.
+
+~~~yaml
+---
+# ...
+terraform:
+  use_raw_output: true
+  # ...
+  plan:
+    template: |
+      {{ .Title }} <sup>[CI link]( {{ .Link }} )</sup>
+      {{ .Message }}
+      {{if .Result}}
+      ```
+      {{ .Result }}
+      ```
+      {{end}}
+      <details><summary>Details (Click me)</summary>
+
+      ```
+      {{ .Body }}
+      ```
+  # ...
+~~~
+
 </details>
 
 <details>
