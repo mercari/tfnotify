@@ -2,7 +2,8 @@ package terraform
 
 import (
 	"bytes"
-	"html/template"
+	htmltemplate "html/template"
+	texttemplate "text/template"
 )
 
 const (
@@ -101,11 +102,12 @@ type Template interface {
 
 // CommonTemplate represents template entities
 type CommonTemplate struct {
-	Title   string
-	Message string
-	Result  string
-	Body    string
-	Link    string
+	Title        string
+	Message      string
+	Result       string
+	Body         string
+	Link         string
+	UseRawOutput bool
 }
 
 // DefaultTemplate is a default template for terraform commands
@@ -193,104 +195,118 @@ func NewApplyTemplate(template string) *ApplyTemplate {
 	}
 }
 
-// Execute binds the execution result of terraform command into tepmlate
-func (t *DefaultTemplate) Execute() (resp string, err error) {
-	tpl, err := template.New("default").Parse(t.Template)
-	if err != nil {
-		return resp, err
-	}
+func generateOutput(kind, template string, data map[string]interface{}, useRawOutput bool) (string, error) {
 	var b bytes.Buffer
-	if err := tpl.Execute(&b, map[string]interface{}{
+
+	if useRawOutput {
+		tpl, err := texttemplate.New(kind).Parse(template)
+		if err != nil {
+			return "", err
+		}
+		if err := tpl.Execute(&b, data); err != nil {
+			return "", err
+		}
+	} else {
+		tpl, err := htmltemplate.New(kind).Parse(template)
+		if err != nil {
+			return "", err
+		}
+		if err := tpl.Execute(&b, data); err != nil {
+			return "", err
+		}
+	}
+
+	return b.String(), nil
+}
+
+// Execute binds the execution result of terraform command into tepmlate
+func (t *DefaultTemplate) Execute() (string, error) {
+	data := map[string]interface{}{
 		"Title":   t.Title,
 		"Message": t.Message,
 		"Result":  "",
 		"Body":    t.Result,
 		"Link":    t.Link,
-	}); err != nil {
-		return resp, err
 	}
-	resp = b.String()
-	return resp, err
+
+	resp, err := generateOutput("default", t.Template, data, t.UseRawOutput)
+	if err != nil {
+		return "", err
+	}
+
+	return resp, nil
 }
 
 // Execute binds the execution result of terraform fmt into tepmlate
-func (t *FmtTemplate) Execute() (resp string, err error) {
-	tpl, err := template.New("fmt").Parse(t.Template)
-	if err != nil {
-		return resp, err
-	}
-	var b bytes.Buffer
-	if err := tpl.Execute(&b, map[string]interface{}{
+func (t *FmtTemplate) Execute() (string, error) {
+	data := map[string]interface{}{
 		"Title":   t.Title,
 		"Message": t.Message,
 		"Result":  "",
 		"Body":    t.Result,
 		"Link":    t.Link,
-	}); err != nil {
-		return resp, err
 	}
-	resp = b.String()
-	return resp, err
+
+	resp, err := generateOutput("fmt", t.Template, data, t.UseRawOutput)
+	if err != nil {
+		return "", err
+	}
+
+	return resp, nil
 }
 
 // Execute binds the execution result of terraform plan into tepmlate
-func (t *PlanTemplate) Execute() (resp string, err error) {
-	tpl, err := template.New("plan").Parse(t.Template)
-	if err != nil {
-		return resp, err
-	}
-	var b bytes.Buffer
-	if err := tpl.Execute(&b, map[string]interface{}{
+func (t *PlanTemplate) Execute() (string, error) {
+	data := map[string]interface{}{
 		"Title":   t.Title,
 		"Message": t.Message,
 		"Result":  t.Result,
 		"Body":    t.Body,
 		"Link":    t.Link,
-	}); err != nil {
-		return resp, err
 	}
-	resp = b.String()
-	return resp, err
+
+	resp, err := generateOutput("plan", t.Template, data, t.UseRawOutput)
+	if err != nil {
+		return "", err
+	}
+
+	return resp, nil
 }
 
 // Execute binds the execution result of terraform plan into template
-func (t *DestroyWarningTemplate) Execute() (resp string, err error) {
-	tpl, err := template.New("destroy_warning").Parse(t.Template)
-	if err != nil {
-		return resp, err
-	}
-	var b bytes.Buffer
-	if err := tpl.Execute(&b, map[string]interface{}{
+func (t *DestroyWarningTemplate) Execute() (string, error) {
+	data := map[string]interface{}{
 		"Title":   t.Title,
 		"Message": t.Message,
 		"Result":  t.Result,
 		"Body":    t.Body,
 		"Link":    t.Link,
-	}); err != nil {
-		return resp, err
 	}
-	resp = b.String()
-	return resp, err
+
+	resp, err := generateOutput("destroy_warning", t.Template, data, t.UseRawOutput)
+	if err != nil {
+		return "", err
+	}
+
+	return resp, nil
 }
 
 // Execute binds the execution result of terraform apply into tepmlate
-func (t *ApplyTemplate) Execute() (resp string, err error) {
-	tpl, err := template.New("apply").Parse(t.Template)
-	if err != nil {
-		return resp, err
-	}
-	var b bytes.Buffer
-	if err := tpl.Execute(&b, map[string]interface{}{
+func (t *ApplyTemplate) Execute() (string, error) {
+	data := map[string]interface{}{
 		"Title":   t.Title,
 		"Message": t.Message,
 		"Result":  t.Result,
 		"Body":    t.Body,
 		"Link":    t.Link,
-	}); err != nil {
-		return resp, err
 	}
-	resp = b.String()
-	return resp, err
+
+	resp, err := generateOutput("apply", t.Template, data, t.UseRawOutput)
+	if err != nil {
+		return "", err
+	}
+
+	return resp, nil
 }
 
 // SetValue sets template entities to CommonTemplate

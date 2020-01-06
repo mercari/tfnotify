@@ -56,6 +56,7 @@ func TestLoadFile(t *testing.T) {
 					Apply: Apply{
 						Template: "",
 					},
+					UseRawOutput: false,
 				},
 				path: "../example.tfnotify.yaml",
 			},
@@ -99,6 +100,7 @@ func TestLoadFile(t *testing.T) {
 					Apply: Apply{
 						Template: "",
 					},
+					UseRawOutput: false,
 				},
 				path: "../example-with-destroy.tfnotify.yaml",
 			},

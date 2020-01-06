@@ -33,11 +33,12 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 	}
 
 	template.SetValue(terraform.CommonTemplate{
-		Title:   cfg.PR.Title,
-		Message: cfg.PR.Message,
-		Result:  result.Result,
-		Body:    body,
-		Link:    cfg.CI,
+		Title:        cfg.PR.Title,
+		Message:      cfg.PR.Message,
+		Result:       result.Result,
+		Body:         body,
+		Link:         cfg.CI,
+		UseRawOutput: cfg.UseRawOutput,
 	})
 	body, err = template.Execute()
 	if err != nil {
@@ -70,11 +71,12 @@ func (g *NotifyService) notifyDestoryWarning(body string, result terraform.Parse
 	cfg := g.client.Config
 	destroyWarningTemplate := g.client.Config.DestroyWarningTemplate
 	destroyWarningTemplate.SetValue(terraform.CommonTemplate{
-		Title:   cfg.PR.DestroyWarningTitle,
-		Message: cfg.PR.DestroyWarningMessage,
-		Result:  result.Result,
-		Body:    body,
-		Link:    cfg.CI,
+		Title:        cfg.PR.DestroyWarningTitle,
+		Message:      cfg.PR.DestroyWarningMessage,
+		Result:       result.Result,
+		Body:         body,
+		Link:         cfg.CI,
+		UseRawOutput: cfg.UseRawOutput,
 	})
 	body, err := destroyWarningTemplate.Execute()
 	if err != nil {

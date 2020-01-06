@@ -89,6 +89,71 @@ b
 `,
 		},
 		{
+			template: "",
+			value: CommonTemplate{
+				Title:   "a",
+				Message: "b",
+				Result:  `This is a "result".`,
+				Body:    "d",
+			},
+			resp: `
+a
+
+b
+
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>This is a &#34;result&#34;.
+</code></pre></details>
+`,
+		},
+		{
+			template: "",
+			value: CommonTemplate{
+				Title:        "a",
+				Message:      "b",
+				Result:       `This is a "result".`,
+				Body:         "d",
+				UseRawOutput: true,
+			},
+			resp: `
+a
+
+b
+
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>This is a "result".
+</code></pre></details>
+`,
+		},
+		{
+			template: "",
+			value: CommonTemplate{
+				Title:        "a",
+				Message:      "b",
+				Result:       `This is a "result".`,
+				Body:         "d",
+				UseRawOutput: true,
+			},
+			resp: `
+a
+
+b
+
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>This is a "result".
+</code></pre></details>
+`,
+		},
+		{
 			template: `{{ .Title }}-{{ .Message }}-{{ .Result }}-{{ .Body }}`,
 			value: CommonTemplate{
 				Title:   "a",
@@ -184,6 +249,43 @@ c
 `,
 		},
 		{
+			template: "",
+			value: CommonTemplate{
+				Title:   "a",
+				Message: "b",
+				Result:  `This is a "result".`,
+				Body:    "d",
+			},
+			resp: `
+a
+
+b
+
+
+
+This is a &#34;result&#34;.
+`,
+		},
+		{
+			template: "",
+			value: CommonTemplate{
+				Title:        "a",
+				Message:      "b",
+				Result:       `This is a "result".`,
+				Body:         "d",
+				UseRawOutput: true,
+			},
+			resp: `
+a
+
+b
+
+
+
+This is a "result".
+`,
+		},
+		{
 			template: `{{ .Title }}-{{ .Message }}-{{ .Result }}-{{ .Body }}`,
 			value: CommonTemplate{
 				Title:   "a",
@@ -275,6 +377,49 @@ message
 `,
 		},
 		{
+			template: DefaultPlanTemplate,
+			value: CommonTemplate{
+				Title:   "title",
+				Message: "message",
+				Result:  "",
+				Body:    `This is a "body".`,
+			},
+			resp: `
+title
+
+message
+
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>This is a &#34;body&#34;.
+</code></pre></details>
+`,
+		},
+		{
+			template: DefaultPlanTemplate,
+			value: CommonTemplate{
+				Title:        "title",
+				Message:      "message",
+				Result:       "",
+				Body:         `This is a "body".`,
+				UseRawOutput: true,
+			},
+			resp: `
+title
+
+message
+
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>This is a "body".
+</code></pre></details>
+`,
+		},
+		{
 			template: "",
 			value: CommonTemplate{
 				Title:   "title",
@@ -340,7 +485,7 @@ This plan contains resource delete operation. Please check the plan result very 
 			template: DefaultDestroyWarningTemplate,
 			value: CommonTemplate{
 				Title:  "title",
-				Result: "result",
+				Result: `This is a "result".`,
 			},
 			resp: `
 title
@@ -348,7 +493,25 @@ title
 This plan contains resource delete operation. Please check the plan result very carefully!
 
 
-<pre><code>result
+<pre><code>This is a &#34;result&#34;.
+</code></pre>
+
+`,
+		},
+		{
+			template: DefaultDestroyWarningTemplate,
+			value: CommonTemplate{
+				Title:        "title",
+				Result:       `This is a "result".`,
+				UseRawOutput: true,
+			},
+			resp: `
+title
+
+This plan contains resource delete operation. Please check the plan result very carefully!
+
+
+<pre><code>This is a "result".
 </code></pre>
 
 `,
@@ -494,6 +657,49 @@ message
 `,
 		},
 		{
+			template: "",
+			value: CommonTemplate{
+				Title:   "title",
+				Message: "message",
+				Result:  "",
+				Body:    `This is a "body".`,
+			},
+			resp: `
+title
+
+message
+
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>This is a &#34;body&#34;.
+</code></pre></details>
+`,
+		},
+		{
+			template: "",
+			value: CommonTemplate{
+				Title:        "title",
+				Message:      "message",
+				Result:       "",
+				Body:         `This is a "body".`,
+				UseRawOutput: true,
+			},
+			resp: `
+title
+
+message
+
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>This is a "body".
+</code></pre></details>
+`,
+		},
+		{
 			template: `{{ .Title }}-{{ .Message }}-{{ .Result }}-{{ .Body }}`,
 			value: CommonTemplate{
 				Title:   "a",
@@ -543,7 +749,7 @@ func TestGetValue(t *testing.T) {
 		template := testCase.template
 		value := template.GetValue()
 		if !reflect.DeepEqual(value, testCase.expected) {
-			t.Errorf("got %q but want %q", value, testCase.expected)
+			t.Errorf("got %#v but want %#v", value, testCase.expected)
 		}
 	}
 }
