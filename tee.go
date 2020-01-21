@@ -3,10 +3,8 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"fmt"
-	"io"
-
 	"github.com/mattn/go-colorable"
+	"io"
 )
 
 func tee(stdin io.Reader, stdout io.Writer) string {
@@ -15,8 +13,9 @@ func tee(stdin io.Reader, stdout io.Writer) string {
 
 	tee := io.TeeReader(stdin, &b1)
 	s := bufio.NewScanner(tee)
+	s.Split(bufio.ScanBytes)
 	for s.Scan() {
-		fmt.Fprintln(stdout, s.Text())
+		stdout.Write(s.Bytes())
 	}
 
 	uncolorize := colorable.NewNonColorable(&b2)
