@@ -25,7 +25,7 @@ devel-deps:
 
 .PHONY: dep
 dep: devel-deps
-	dep ensure -v
+	go mod download
 
 .PHONY: reviewdog
 reviewdog: devel-deps
