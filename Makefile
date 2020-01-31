@@ -16,16 +16,15 @@ test:
 .PHONY: devel-deps
 devel-deps:
 	@go get -v -u github.com/git-chglog/git-chglog/cmd/git-chglog
-	@go get -v -u github.com/golang/dep/cmd/dep
 	@go get -v -u golang.org/x/lint/golint
 	@go get -v -u github.com/haya14busa/goverage
 	@go get -v -u github.com/motemen/gobump/cmd/gobump
-	@curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s -- -b $$(go env GOPATH)/bin
+	@curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin
 	@curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | BINDIR=$$(go env GOPATH)/bin sh
 
 .PHONY: dep
 dep: devel-deps
-	dep ensure -v
+	go mod download
 
 .PHONY: reviewdog
 reviewdog: devel-deps
