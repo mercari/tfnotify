@@ -193,7 +193,7 @@ ci: circleci
 notifier:
   github:
     token: $GITHUB_TOKEN
-    base_url: $GITHUB_BASE_URL
+    base_url: $GITHUB_BASE_URL # Example: https://github.example.com/api/v3
     repository:
       owner: "mercari"
       name: "tfnotify"
