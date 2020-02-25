@@ -1,10 +1,12 @@
 tfnotify
 ========
 
-[![][circleci-svg]][circleci] [![][codecov-svg]][codecov] [![][goreportcard-svg]][goreportcard]
+[![][release-svg]][release] [![][test-svg]][test] [![][codecov-svg]][codecov] [![][goreportcard-svg]][goreportcard]
 
-[circleci]: https://circleci.com/gh/mercari/tfnotify/tree/master
-[circleci-svg]: https://circleci.com/gh/mercari/tfnotify/tree/master.svg?style=svg
+[release]: https://github.com/mercari/tfnotify/actions?query=workflow%3Arelease
+[release-svg]: https://github.com/mercari/tfnotify/workflows/release/badge.svg
+[test]: https://github.com/mercari/tfnotify/actions?query=workflow%3Atest
+[test-svg]: https://github.com/mercari/tfnotify/workflows/test/badge.svg
 [codecov]: https://codecov.io/gh/mercari/tfnotify
 [codecov-svg]: https://codecov.io/gh/mercari/tfnotify/branch/master/graph/badge.svg
 [goreportcard]: https://goreportcard.com/report/github.com/mercari/tfnotify
