@@ -1,0 +1,19 @@
+name: reviewdog
+
+on:
+  pull_request:
+    paths:
+    - '**.go'
+    - '.github/workflows/reviewdog.yml'
+
+jobs:
+  golangci-lint:
+    name: Run golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Lint
+        uses: reviewdog/action-golangci-lint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
