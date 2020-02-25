@@ -19,7 +19,9 @@ import (
 const (
 	name        = "tfnotify"
 	description = "Notify the execution result of terraform command"
-	version     = "0.5.0"
+
+	version  = "unset"
+	revision = "unset"
 )
 
 type tfnotify struct {
