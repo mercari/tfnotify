@@ -43,9 +43,15 @@ func circleci() (ci CI, err error) {
 }
 
 func travisci() (ci CI, err error) {
-	ci.PR.Revision = os.Getenv("TRAVIS_PULL_REQUEST_SHA")
-	ci.PR.Number, err = strconv.Atoi(os.Getenv("TRAVIS_PULL_REQUEST"))
 	ci.URL = os.Getenv("TRAVIS_BUILD_WEB_URL")
+	prNumber := os.Getenv("TRAVIS_PULL_REQUEST")
+	if prNumber == "false" {
+		ci.PR.Number = 0
+		ci.PR.Revision = os.Getenv("TRAVIS_COMMIT")
+		return ci, nil
+	}
+	ci.PR.Revision = os.Getenv("TRAVIS_PULL_REQUEST_SHA")
+	ci.PR.Number, err = strconv.Atoi(prNumber)
 	return ci, err
 }
 
@@ -57,7 +63,7 @@ func codebuild() (ci CI, err error) {
 	if sourceVersion == "" {
 		return ci, nil
 	}
-	if !strings.HasPrefix(sourceVersion,"pr/") {
+	if !strings.HasPrefix(sourceVersion, "pr/") {
 		return ci, nil
 	}
 	pr := strings.Replace(sourceVersion, "pr/", "", 1)

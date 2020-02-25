@@ -150,6 +150,7 @@ func TestTravisCI(t *testing.T) {
 	envs := []string{
 		"TRAVIS_PULL_REQUEST_SHA",
 		"TRAVIS_PULL_REQUEST",
+		"TRAVIS_COMMIT",
 	}
 	saveEnvs := make(map[string]string)
 	for _, key := range envs {
@@ -172,6 +173,7 @@ func TestTravisCI(t *testing.T) {
 			fn: func() {
 				os.Setenv("TRAVIS_PULL_REQUEST_SHA", "abcdefg")
 				os.Setenv("TRAVIS_PULL_REQUEST", "1")
+				os.Setenv("TRAVIS_COMMIT", "hijklmn")
 			},
 			ci: CI{
 				PR: PullRequest{
@@ -186,15 +188,16 @@ func TestTravisCI(t *testing.T) {
 			fn: func() {
 				os.Setenv("TRAVIS_PULL_REQUEST_SHA", "abcdefg")
 				os.Setenv("TRAVIS_PULL_REQUEST", "false")
+				os.Setenv("TRAVIS_COMMIT", "hijklmn")
 			},
 			ci: CI{
 				PR: PullRequest{
-					Revision: "abcdefg",
+					Revision: "hijklmn",
 					Number:   0,
 				},
 				URL: "",
 			},
-			ok: false,
+			ok: true,
 		},
 	}
 
