@@ -1,0 +1,27 @@
+name: release
+on:
+  push:
+    tags:
+    - "v[0-9]+.[0-9]+.[0-9]+"
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - name: Setup Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v1
+        with:
+          version: latest
+          args: release --rm-dist
+        env:
+          # To upload homebrew formula to other repos,
+          # need to set the dedicated token having enough permissions
+          # https://github.com/goreleaser/goreleaser/issues/982
+          GITHUB_TOKEN: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
