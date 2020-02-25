@@ -10,7 +10,6 @@ builds:
     ldflags: 
       - -s -w
       - -X main.version={{.Version}}
-      - -X main.revision={{.ShortCommit}}
     env:
       - CGO_ENABLED=0
 archives:
