@@ -95,8 +95,14 @@ func drone() (ci CI, err error) {
 func jenkins() (ci CI, err error) {
 	ci.PR.Number = 0
 	ci.PR.Revision = os.Getenv("GIT_COMMIT")
+	if ci.PR.Revision == "" {
+		ci.PR.Revision = os.Getenv("gitlabBefore")
+	}
 	ci.URL = os.Getenv("BUILD_URL")
 	pr := os.Getenv("PULL_REQUEST_NUMBER")
+	if pr == "" {
+		pr = os.Getenv("gitlabMergeRequestIid")
+	}
 	if pr == "" {
 		pr = os.Getenv("PULL_REQUEST_URL")
 	}
@@ -106,7 +112,7 @@ func jenkins() (ci CI, err error) {
 	re := regexp.MustCompile(`[1-9]\d*$`)
 	ci.PR.Number, err = strconv.Atoi(re.FindString(pr))
 	if err != nil {
-		return ci, fmt.Errorf("%v: cannot get env", pr)
+		return ci, fmt.Errorf("%v: Invalid PullRequest number or MergeRequest ID", pr)
 	}
 	return ci, err
 }
