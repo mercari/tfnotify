@@ -3,8 +3,9 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"github.com/mattn/go-colorable"
 	"io"
+
+	"github.com/mattn/go-colorable"
 )
 
 func tee(stdin io.Reader, stdout io.Writer) string {
