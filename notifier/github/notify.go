@@ -52,13 +52,18 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 	}
 
 	_, isApply := parser.(*terraform.ApplyParser)
-	if !cfg.PR.IsNumber() && isApply {
-		commits, err := g.client.Commits.List(cfg.PR.Revision)
-		if err != nil {
-			return result.ExitCode, err
+	if isApply {
+		prNumber, err := g.client.Commits.MergedPRNumber(cfg.PR.Revision)
+		if err == nil {
+			cfg.PR.Number = prNumber
+		} else if !cfg.PR.IsNumber() {
+			commits, err := g.client.Commits.List(cfg.PR.Revision)
+			if err != nil {
+				return result.ExitCode, err
+			}
+			lastRevision, _ := g.client.Commits.lastOne(commits, cfg.PR.Revision)
+			cfg.PR.Revision = lastRevision
 		}
-		lastRevision, _ := g.client.Commits.lastOne(commits, cfg.PR.Revision)
-		cfg.PR.Revision = lastRevision
 	}
 
 	return result.ExitCode, g.client.Comment.Post(body, PostOptions{

@@ -3,6 +3,8 @@ package github
 import (
 	"context"
 	"errors"
+	"strconv"
+	"strings"
 
 	"github.com/google/go-github/github"
 )
@@ -44,4 +46,24 @@ func (g *CommitsService) lastOne(commits []string, revision string) (string, err
 	// 74c4d6e 2018/04/05 20:34:31
 	// 9260c54 2018/04/05 20:16:20
 	return commits[1], nil
+}
+
+func (g *CommitsService) MergedPRNumber(revision string) (int, error) {
+	commit, _, err := g.client.API.RepositoriesGetCommit(context.Background(), revision)
+	if err != nil {
+		return 0, err
+	}
+
+	message := commit.Commit.GetMessage()
+	if !strings.HasPrefix(message, "Merge pull request #") {
+		return 0, errors.New("not a merge commit")
+	}
+
+	message = strings.TrimPrefix(message, "Merge pull request #")
+	i := strings.Index(message, " from")
+	if i >= 0 {
+		return strconv.Atoi(message[0:i])
+	}
+
+	return 0, errors.New("not a merge commit")
 }
