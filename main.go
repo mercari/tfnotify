@@ -77,6 +77,11 @@ func (t *tfnotify) Run() error {
 		if err != nil {
 			return err
 		}
+	case "github-actions":
+		ci, err = githubActions()
+		if err != nil {
+			return err
+		}
 	case "":
 		return fmt.Errorf("CI service: required (e.g. circleci)")
 	default:
