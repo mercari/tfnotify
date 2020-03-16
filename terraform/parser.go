@@ -68,7 +68,7 @@ func NewPlanParser() *PlanParser {
 func NewApplyParser() *ApplyParser {
 	return &ApplyParser{
 		Pass: regexp.MustCompile(`(?m)^(Apply complete!)`),
-		Fail: regexp.MustCompile(`(?m)^(Error: Error applying plan:)`),
+		Fail: regexp.MustCompile(`(?m)^(Error: )`),
 	}
 }
 

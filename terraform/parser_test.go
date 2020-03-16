@@ -223,25 +223,14 @@ aws_iam_user_policy.teams_terraform: Refreshing state...
 aws_iam_role_policy_attachment.datadog_aws_integration: Refreshing state...
 google_dns_managed_zone.tfnotifyapps_com: Refreshing state...
 google_dns_record_set.dev_tfnotifyapps_com: Refreshing state...
-google_compute_global_address.teams_web_tfnotify_in: Creating...
-  address:    "" => "<computed>"
-  ip_version: "" => "IPV4"
-  name:       "" => "web-tfnotify-in"
-  project:    "" => "tfnotify-jp-tfnotify-prod"
-  self_link:  "" => "<computed>"
 
-Error: Error applying plan:
 
-1 error(s) occurred:
+Error: Batch "project/tfnotify-jp-tfnotify-prod/services:batchEnable" for request "Enable Project Services tfnotify-jp-tfnotify-prod: map[logging.googleapis.com:{}]" returned error: failed to send enable services request: googleapi: Error 403: The caller does not have permission, forbidden
 
-* google_compute_global_address.teams_web_tfnotify_in: 1 error(s) occurred:
+  on .terraform/modules/tfnotify-jp-tfnotify-prod/google_project_service.tf line 6, in resource "google_project_service" "gcp_api_service":
+   6: resource "google_project_service" "gcp_api_service" {
 
-* google_compute_global_address.teams_web_tfnotify_in: Error creating address: googleapi: Error 409: The resource 'projects/tfnotify-jp-tfnotify-prod/global/addresses/teams-web-tfnotify-in' already exists, alreadyExists
 
-Terraform does not automatically rollback in the face of errors.
-Instead, your Terraform state file has been partially updated with
-any resources that successfully completed. Please address the error
-above and apply again to incrementally change your infrastructure.
 `
 
 func TestDefaultParserParse(t *testing.T) {
@@ -405,18 +394,12 @@ func TestApplyParserParse(t *testing.T) {
 			name: "apply ng pattern",
 			body: applyFailureResult,
 			result: ParseResult{
-				Result: `Error: Error applying plan:
+				Result: `Error: Batch "project/tfnotify-jp-tfnotify-prod/services:batchEnable" for request "Enable Project Services tfnotify-jp-tfnotify-prod: map[logging.googleapis.com:{}]" returned error: failed to send enable services request: googleapi: Error 403: The caller does not have permission, forbidden
 
-1 error(s) occurred:
+  on .terraform/modules/tfnotify-jp-tfnotify-prod/google_project_service.tf line 6, in resource "google_project_service" "gcp_api_service":
+   6: resource "google_project_service" "gcp_api_service" {
 
-* google_compute_global_address.teams_web_tfnotify_in: 1 error(s) occurred:
-
-* google_compute_global_address.teams_web_tfnotify_in: Error creating address: googleapi: Error 409: The resource 'projects/tfnotify-jp-tfnotify-prod/global/addresses/teams-web-tfnotify-in' already exists, alreadyExists
-
-Terraform does not automatically rollback in the face of errors.
-Instead, your Terraform state file has been partially updated with
-any resources that successfully completed. Please address the error
-above and apply again to incrementally change your infrastructure.`,
+`,
 				ExitCode: 1,
 				Error:    nil,
 			},
