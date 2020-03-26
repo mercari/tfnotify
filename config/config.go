@@ -125,6 +125,8 @@ func (cfg *Config) Validation() error {
 		// ok pattern
 	case "jenkins":
 		// ok pattern
+	case "github-actions":
+		// ok pattern
 	default:
 		return fmt.Errorf("%s: not supported yet", cfg.CI)
 	}

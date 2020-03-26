@@ -707,3 +707,55 @@ func TestGitLabCI(t *testing.T) {
 		}
 	}
 }
+
+func TestGitHubActions(t *testing.T) {
+	envs := []string{
+		"GITHUB_SHA",
+		"GITHUB_REPOSITORY",
+		"GITHUB_RUN_ID",
+	}
+	saveEnvs := make(map[string]string)
+	for _, key := range envs {
+		saveEnvs[key] = os.Getenv(key)
+		os.Unsetenv(key)
+	}
+	defer func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}()
+
+	// https://help.github.com/ja/actions/configuring-and-managing-workflows/using-environment-variables
+	testCases := []struct {
+		fn func()
+		ci CI
+		ok bool
+	}{
+		{
+			fn: func() {
+				os.Setenv("GITHUB_SHA", "abcdefg")
+				os.Setenv("GITHUB_REPOSITORY", "mercari/tfnotify")
+				os.Setenv("GITHUB_RUN_ID", "12345")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number: 0,
+				},
+				URL: "https://github.com/mercari/tfnotify/runs/12345",
+			},
+			ok: true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase.fn()
+		ci, err := githubActions()
+		if !reflect.DeepEqual(ci, testCase.ci) {
+			t.Errorf("got %q but want %q", ci, testCase.ci)
+		}
+		if (err == nil) != testCase.ok {
+			t.Errorf("got error %q", err)
+		}
+	}
+}
