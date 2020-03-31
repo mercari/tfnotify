@@ -740,7 +740,7 @@ func TestGitHubActions(t *testing.T) {
 			ci: CI{
 				PR: PullRequest{
 					Revision: "abcdefg",
-					Number: 0,
+					Number:   0,
 				},
 				URL: "https://github.com/mercari/tfnotify/runs/12345",
 			},
@@ -751,6 +751,58 @@ func TestGitHubActions(t *testing.T) {
 	for _, testCase := range testCases {
 		testCase.fn()
 		ci, err := githubActions()
+		if !reflect.DeepEqual(ci, testCase.ci) {
+			t.Errorf("got %q but want %q", ci, testCase.ci)
+		}
+		if (err == nil) != testCase.ok {
+			t.Errorf("got error %q", err)
+		}
+	}
+}
+
+func TestCloudBuild(t *testing.T) {
+	envs := []string{
+		"BUILD_ID",
+		"REVISION_ID",
+		"_PR_NUMBER",
+	}
+	saveEnvs := make(map[string]string)
+	for _, key := range envs {
+		saveEnvs[key] = os.Getenv(key)
+		os.Unsetenv(key)
+	}
+	defer func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}()
+
+	// https://cloud.google.com/cloud-build/docs/configuring-builds/substitute-variable-values
+	testCases := []struct {
+		fn func()
+		ci CI
+		ok bool
+	}{
+		{
+			fn: func() {
+				os.Setenv("REVISION_ID", "abcdefg")
+				os.Setenv("BUILD_ID", "hijklmn")
+				os.Setenv("_PR_NUMBER", "123")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   123,
+				},
+				URL: "https://console.cloud.google.com/cloud-build/builds/hijklmn",
+			},
+			ok: true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase.fn()
+		ci, err := cloudbuild()
 		if !reflect.DeepEqual(ci, testCase.ci) {
 			t.Errorf("got %q but want %q", ci, testCase.ci)
 		}
