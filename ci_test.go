@@ -798,6 +798,21 @@ func TestCloudBuild(t *testing.T) {
 			},
 			ok: true,
 		},
+		{
+			fn: func() {
+				os.Setenv("REVISION_ID", "abcdefg")
+				os.Setenv("BUILD_ID", "hijklmn")
+				os.Setenv("_PR_NUMBER", "")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   0,
+				},
+				URL: "https://console.cloud.google.com/cloud-build/builds/hijklmn",
+			},
+			ok: true,
+		},
 	}
 
 	for _, testCase := range testCases {

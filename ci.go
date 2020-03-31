@@ -152,7 +152,12 @@ func cloudbuild() (ci CI, err error) {
 		"https://console.cloud.google.com/cloud-build/builds/%s",
 		os.Getenv("BUILD_ID"),
 	)
-	ci.PR.Number, err = strconv.Atoi(os.Getenv("_PR_NUMBER"))
 	ci.PR.Revision = os.Getenv("REVISION_ID")
+	ci.PR.Number = 0
+	pr := os.Getenv("_PR_NUMBER")
+	if pr == "" {
+		return ci, nil
+	}
+	ci.PR.Number, err = strconv.Atoi(pr)
 	return ci, err
 }
