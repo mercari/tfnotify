@@ -350,6 +350,7 @@ Currently, supported CI are here:
 - Jenkins
 - GitLab CI
 - GitHub Actions
+- Cloud Build
 
 ### Private Repository Considerations
 GitHub private repositories require the `repo` and `write:discussion` permissions.
@@ -359,6 +360,19 @@ GitHub private repositories require the `repo` and `write:discussion` permission
   - [Git Plugin](https://wiki.jenkins.io/display/JENKINS/Git+Plugin)
 - Environment Variable
   - `PULL_REQUEST_NUMBER` or `PULL_REQUEST_URL` are required to set by user for Pull Request Usage
+
+### Cloud Build Considerations
+
+- Environment Variable
+  - `BUILD_ID`, `REVISION_ID`, `_PR_NUMBER` of [substitute variable](https://cloud.google.com/cloud-build/docs/configuring-builds/substitute-variable-values) are required to set as env by user
+```
+steps:
+  - name: "hashicorp/terraform"
+    env:
+    - 'BUILD_ID=$BUILD_ID'
+    - '_PR_NUMBER=$_PR_NUMBER'
+    - 'REVISION_ID=$REVISION_ID'
+```
 
 ## Committers
 
