@@ -139,7 +139,7 @@ func gitlabci() (ci CI, err error) {
 
 func githubActions() (ci CI, err error) {
 	ci.URL = fmt.Sprintf(
-		"https://github.com/%s/runs/%s",
+		"https://github.com/%s/actions/runs/%s",
 		os.Getenv("GITHUB_REPOSITORY"),
 		os.Getenv("GITHUB_RUN_ID"),
 	)
