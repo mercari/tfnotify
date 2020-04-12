@@ -740,9 +740,9 @@ func TestGitHubActions(t *testing.T) {
 			ci: CI{
 				PR: PullRequest{
 					Revision: "abcdefg",
-					Number: 0,
+					Number:   0,
 				},
-				URL: "https://github.com/mercari/tfnotify/runs/12345",
+				URL: "https://github.com/mercari/tfnotify/actions/runs/12345",
 			},
 			ok: true,
 		},
