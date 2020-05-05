@@ -63,7 +63,7 @@ func TestLoadFile(t *testing.T) {
 			ok: true,
 		},
 		{
-			file: "../example-with-destroy.tfnotify.yaml",
+			file: "../example-with-destroy-and-no-changes.tfnotify.yaml",
 			cfg: Config{
 				CI: "circleci",
 				Notifier: Notifier{
@@ -96,13 +96,16 @@ func TestLoadFile(t *testing.T) {
 						WhenDestroy: WhenDestroy{
 							Template: "## :warning: WARNING: Resource Deletion will happen :warning:\n\nThis plan contains **resource deletion**. Please check the plan result very carefully!\n",
 						},
+						WhenNoChanges: WhenNoChanges{
+							GithubLabel: "no-changes",
+						},
 					},
 					Apply: Apply{
 						Template: "",
 					},
 					UseRawOutput: false,
 				},
-				path: "../example-with-destroy.tfnotify.yaml",
+				path: "../example-with-destroy-and-no-changes.tfnotify.yaml",
 			},
 			ok: true,
 		},

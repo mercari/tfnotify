@@ -1,6 +1,7 @@
 package github
 
 import (
+	"context"
 	"github.com/mercari/tfnotify/terraform"
 )
 
@@ -27,6 +28,16 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 		if result.HasDestroy && cfg.WarnDestroy {
 			// Notify destroy warning as a new comment before normal plan result
 			if err = g.notifyDestoryWarning(body, result); err != nil {
+				return result.ExitCode, err
+			}
+		}
+		if result.HasNoChanges && cfg.PR.IsNumber() && cfg.NoChangesLabel != "" {
+			_, _, err = g.client.API.IssuesAddLabels(
+				context.Background(),
+				cfg.PR.Number,
+				[]string{cfg.NoChangesLabel},
+			)
+			if err != nil {
 				return result.ExitCode, err
 			}
 		}

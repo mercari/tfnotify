@@ -115,6 +115,7 @@ func (t *tfnotify) Run() error {
 			Template:               t.template,
 			DestroyWarningTemplate: t.destroyWarningTemplate,
 			WarnDestroy:            t.warnDestroy,
+			NoChangesLabel:         t.config.Terraform.Plan.WhenNoChanges.GithubLabel,
 		})
 		if err != nil {
 			return err

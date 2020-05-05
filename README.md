@@ -155,6 +155,30 @@ terraform:
   # ...
 ```
 
+You can also let tfnotify add a label to PRs whose `terraform plan` output result in no change to the current infrastructure.
+
+```yaml
+---
+# ...
+terraform:
+  # ...
+  plan:
+    template: |
+      {{ .Title }} <sup>[CI link]( {{ .Link }} )</sup>
+      {{ .Message }}
+      {{if .Result}}
+      <pre><code>{{ .Result }}
+      </pre></code>
+      {{end}}
+      <details><summary>Details (Click me)</summary>
+
+      <pre><code>{{ .Body }}
+      </pre></code></details>
+    when_no_changes:
+      github_label: "no-changes"
+  # ...
+```
+
 Sometimes you may want not to HTML-escape Terraform command outputs.
 For example, when you use code block to print command output, it's better to use raw characters instead of character references (e.g. `-/+` -> `-/&#43;`, `"` -> `&#34;`).
 
