@@ -175,7 +175,7 @@ terraform:
       <pre><code>{{ .Body }}
       </pre></code></details>
     when_no_changes:
-      github_label: "no-changes"
+      label: "no-changes"
   # ...
 ```
 

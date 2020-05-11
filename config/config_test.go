@@ -97,7 +97,7 @@ func TestLoadFile(t *testing.T) {
 							Template: "## :warning: WARNING: Resource Deletion will happen :warning:\n\nThis plan contains **resource deletion**. Please check the plan result very carefully!\n",
 						},
 						WhenNoChanges: WhenNoChanges{
-							GithubLabel: "no-changes",
+							Label: "no-changes",
 						},
 					},
 					Apply: Apply{

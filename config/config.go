@@ -93,7 +93,7 @@ type WhenDestroy struct {
 
 // WhenNoChange is a configuration to add a label when the plan result contains no change
 type WhenNoChanges struct {
-	GithubLabel string `yaml:"github_label,omitempty"`
+	Label string `yaml:"label,omitempty"`
 }
 
 // Apply is a terraform apply config
