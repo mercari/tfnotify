@@ -155,7 +155,7 @@ terraform:
   # ...
 ```
 
-You can also let tfnotify add a label to PRs whose `terraform plan` output result in no change to the current infrastructure.
+You can also let tfnotify add a label to PRs whose `terraform plan` output result in no change to the current infrastructure. Currently, this feature is for Github labels only.
 
 ```yaml
 ---
