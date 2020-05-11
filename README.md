@@ -72,6 +72,7 @@ Placeholder | Usage
 ---|---
 `{{ .Title }}` | Like `## Plan result`
 `{{ .Message }}` | A string that can be set from CLI with `--message` option
+`{{ .Action }}` | Using in terraform plan, and matched leading message by parsing like `Terraform will perform the following actions:`
 `{{ .Result }}` | Matched result by parsing like `Plan: 1 to add` or `No changes`
 `{{ .Body }}` | The entire of Terraform execution result
 `{{ .Link }}` | The link of the build page on CI

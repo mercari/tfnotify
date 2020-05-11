@@ -450,6 +450,17 @@ message
 			},
 			resp: `a-b-c-d`,
 		},
+		{
+			template: `{{ .Title }}-{{ .Message }}-{{ .Action }}-{{ .Result }}-{{ .Body }}`,
+			value: CommonTemplate{
+				Title:   "a",
+				Message: "b",
+				Action:  "action",
+				Result:  "c",
+				Body:    "d",
+			},
+			resp: `a-b-action-c-d`,
+		},
 	}
 	for _, testCase := range testCases {
 		template := NewPlanTemplate(testCase.template)

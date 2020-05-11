@@ -35,7 +35,7 @@ versions.tf
 --- old/versions.tf
 +++ new/versions.tf
 @@ -1,4 +1,4 @@
- 
+
  terraform {
 -  required_version     = ">= 0.12"
 +  required_version = ">= 0.12"
@@ -309,8 +309,22 @@ func TestPlanParserParse(t *testing.T) {
 			result: ParseResult{
 				Result:     "Plan: 1 to add, 0 to change, 0 to destroy.",
 				HasDestroy: false,
-				ExitCode:   0,
-				Error:      nil,
+				Action: `An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  + google_compute_global_address.my_another_project
+      id:         <computed>
+      address:    <computed>
+      ip_version: "IPV4"
+      name:       "my-another-project"
+      project:    "my-project"
+      self_link:  <computed>
+`,
+				ExitCode: 0,
+				Error:    nil,
 			},
 		},
 		{
@@ -353,15 +367,23 @@ func TestPlanParserParse(t *testing.T) {
 			result: ParseResult{
 				Result:     "Plan: 0 to add, 0 to change, 1 to destroy.",
 				HasDestroy: true,
-				ExitCode:   0,
-				Error:      nil,
+				Action: `An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  - destroy
+
+Terraform will perform the following actions:
+
+  - google_project_iam_member.team_platform[2]
+`,
+				ExitCode: 0,
+				Error:    nil,
 			},
 		},
 	}
 	for _, testCase := range testCases {
 		result := NewPlanParser().Parse(testCase.body)
 		if !reflect.DeepEqual(result, testCase.result) {
-			t.Errorf("got %v but want %v", result, testCase.result)
+			t.Errorf("<%s>: got %v but want %v", testCase.name, result, testCase.result)
 		}
 	}
 }
