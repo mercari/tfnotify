@@ -13,6 +13,7 @@ type fakeAPI struct {
 	FakeIssuesDeleteComment       func(ctx context.Context, commentID int64) (*github.Response, error)
 	FakeIssuesListComments        func(ctx context.Context, number int, opt *github.IssueListCommentsOptions) ([]*github.IssueComment, *github.Response, error)
 	FakeIssuesAddLabels           func(ctx context.Context, number int, labels []string) ([]*github.Label, *github.Response, error)
+	FakeIssuesRemoveLabel         func(ctx context.Context, number int, label string) (*github.Response, error)
 	FakeRepositoriesCreateComment func(ctx context.Context, sha string, comment *github.RepositoryComment) (*github.RepositoryComment, *github.Response, error)
 	FakeRepositoriesListCommits   func(ctx context.Context, opt *github.CommitsListOptions) ([]*github.RepositoryCommit, *github.Response, error)
 	FakeRepositoriesGetCommit     func(ctx context.Context, sha string) (*github.RepositoryCommit, *github.Response, error)
@@ -32,6 +33,10 @@ func (g *fakeAPI) IssuesListComments(ctx context.Context, number int, opt *githu
 
 func (g *fakeAPI) IssuesAddLabels(ctx context.Context, number int, labels []string) ([]*github.Label, *github.Response, error) {
 	return g.FakeIssuesAddLabels(ctx, number, labels)
+}
+
+func (g *fakeAPI) IssuesRemoveLabel(ctx context.Context, number int, label string) (*github.Response, error) {
+	return g.FakeIssuesRemoveLabel(ctx, number, label)
 }
 
 func (g *fakeAPI) RepositoriesCreateComment(ctx context.Context, sha string, comment *github.RepositoryComment) (*github.RepositoryComment, *github.Response, error) {
@@ -73,6 +78,9 @@ func newFakeAPI() fakeAPI {
 		},
 		FakeIssuesAddLabels: func(ctx context.Context, number int, labels []string) ([]*github.Label, *github.Response, error) {
 			return nil, nil, nil
+		},
+		FakeIssuesRemoveLabel: func(ctx context.Context, number int, label string) (*github.Response, error) {
+			return nil, nil
 		},
 		FakeRepositoriesCreateComment: func(ctx context.Context, sha string, comment *github.RepositoryComment) (*github.RepositoryComment, *github.Response, error) {
 			return &github.RepositoryComment{
