@@ -48,6 +48,8 @@ type Config struct {
 	// DestroyWarningTemplate is used only for additional warning
 	// the plan result contains destroy operation
 	DestroyWarningTemplate terraform.Template
+	// NoChangesLabel is a label to add to PRs when terraform output contains no changes
+	NoChangesLabel string
 }
 
 // PullRequest represents GitHub Pull Request metadata

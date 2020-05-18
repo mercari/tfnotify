@@ -11,6 +11,8 @@ type API interface {
 	IssuesCreateComment(ctx context.Context, number int, comment *github.IssueComment) (*github.IssueComment, *github.Response, error)
 	IssuesDeleteComment(ctx context.Context, commentID int64) (*github.Response, error)
 	IssuesListComments(ctx context.Context, number int, opt *github.IssueListCommentsOptions) ([]*github.IssueComment, *github.Response, error)
+	IssuesAddLabels(ctx context.Context, number int, labels []string) ([]*github.Label, *github.Response, error)
+	IssuesRemoveLabel(ctx context.Context, number int, label string) (*github.Response, error)
 	RepositoriesCreateComment(ctx context.Context, sha string, comment *github.RepositoryComment) (*github.RepositoryComment, *github.Response, error)
 	RepositoriesListCommits(ctx context.Context, opt *github.CommitsListOptions) ([]*github.RepositoryCommit, *github.Response, error)
 	RepositoriesGetCommit(ctx context.Context, sha string) (*github.RepositoryCommit, *github.Response, error)
@@ -35,6 +37,16 @@ func (g *GitHub) IssuesDeleteComment(ctx context.Context, commentID int64) (*git
 // IssuesListComments is a wrapper of https://godoc.org/github.com/google/go-github/github#IssuesService.ListComments
 func (g *GitHub) IssuesListComments(ctx context.Context, number int, opt *github.IssueListCommentsOptions) ([]*github.IssueComment, *github.Response, error) {
 	return g.Client.Issues.ListComments(ctx, g.owner, g.repo, number, opt)
+}
+
+// IssuesAddLabels is a wrapper of https://godoc.org/github.com/google/go-github/github#IssuesService.AddLabelsToIssue
+func (g *GitHub) IssuesAddLabels(ctx context.Context, number int, labels []string) ([]*github.Label, *github.Response, error) {
+	return g.Client.Issues.AddLabelsToIssue(ctx, g.owner, g.repo, number, labels)
+}
+
+// IssuesAddLabels is a wrapper of https://godoc.org/github.com/google/go-github/github#IssuesService.RemoveLabelForIssue
+func (g *GitHub) IssuesRemoveLabel(ctx context.Context, number int, label string) (*github.Response, error) {
+	return g.Client.Issues.RemoveLabelForIssue(ctx, g.owner, g.repo, number, label)
 }
 
 // RepositoriesCreateComment is a wrapper of https://godoc.org/github.com/google/go-github/github#RepositoriesService.CreateComment

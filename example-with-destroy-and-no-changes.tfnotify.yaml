@@ -18,6 +18,8 @@ terraform:
 
       <pre><code>{{ .Body }}
       </pre></code></details>
+    when_no_changes:
+      label: "no-changes"
     when_destroy:
       template: |
         ## :warning: WARNING: Resource Deletion will happen :warning:

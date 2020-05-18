@@ -1,7 +1,9 @@
 package github
 
 import (
+	"context"
 	"github.com/mercari/tfnotify/terraform"
+	"net/http"
 )
 
 // NotifyService handles communication with the notification related
@@ -28,6 +30,29 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 			// Notify destroy warning as a new comment before normal plan result
 			if err = g.notifyDestoryWarning(body, result); err != nil {
 				return result.ExitCode, err
+			}
+		}
+		if cfg.PR.IsNumber() && cfg.NoChangesLabel != "" {
+			// Always attempt to remove the label first so that an IssueLabeled event is created
+			resp, err := g.client.API.IssuesRemoveLabel(
+				context.Background(),
+				cfg.PR.Number,
+				cfg.NoChangesLabel,
+			)
+			// Ignore 404 errors, which are from the PR not having the label
+			if err != nil && resp.StatusCode != http.StatusNotFound {
+				return result.ExitCode, err
+			}
+
+			if result.HasNoChanges {
+				_, _, err = g.client.API.IssuesAddLabels(
+					context.Background(),
+					cfg.PR.Number,
+					[]string{cfg.NoChangesLabel},
+				)
+				if err != nil {
+					return result.ExitCode, err
+				}
 			}
 		}
 	}

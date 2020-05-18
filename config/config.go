@@ -81,13 +81,19 @@ type Fmt struct {
 
 // Plan is a terraform plan config
 type Plan struct {
-	Template    string      `yaml:"template"`
-	WhenDestroy WhenDestroy `yaml:"when_destroy,omitempty"`
+	Template      string        `yaml:"template"`
+	WhenDestroy   WhenDestroy   `yaml:"when_destroy,omitempty"`
+	WhenNoChanges WhenNoChanges `yaml:"when_no_changes,omitempty"`
 }
 
 // WhenDestroy is a configuration to notify the plan result contains destroy operation
 type WhenDestroy struct {
 	Template string `yaml:"template"`
+}
+
+// WhenNoChange is a configuration to add a label when the plan result contains no change
+type WhenNoChanges struct {
+	Label string `yaml:"label,omitempty"`
 }
 
 // Apply is a terraform apply config
