@@ -131,24 +131,7 @@ func (r *ResultLabels) HasAnyLabelDefined() bool {
 	return r.ChangesLabel != "" || r.DestroyLabel != "" || r.ErrorLabel != "" || r.NoChangesLabel != ""
 }
 
-// ToStringSlice returns all the defined labels as a string slice
-func (r *ResultLabels) ToStringSlice() []string {
-	var result []string
-	if r.ChangesLabel != "" {
-		result = append(result, r.ChangesLabel)
-	}
-	if r.DestroyLabel != "" {
-		result = append(result, r.DestroyLabel)
-	}
-	if r.ErrorLabel != "" {
-		result = append(result, r.ErrorLabel)
-	}
-	if r.NoChangesLabel != "" {
-		result = append(result, r.NoChangesLabel)
-	}
-	return result
-}
-
+// IsResultLabel returns true if a label matches any of the internal labels
 func (r *ResultLabels) IsResultLabel(label string) bool {
 	switch label {
 	case "":
