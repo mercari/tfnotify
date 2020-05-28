@@ -213,7 +213,7 @@ func TestHasAnyLabelDefined(t *testing.T) {
 			want: false,
 		},
 		{
-			rl: ResultLabels{},
+			rl:   ResultLabels{},
 			want: false,
 		},
 	}
@@ -271,7 +271,7 @@ func TestIsResultLabels(t *testing.T) {
 			want:  false,
 		},
 		{
-			rl: ResultLabels{},
+			rl:    ResultLabels{},
 			label: "",
 			want:  false,
 		},
