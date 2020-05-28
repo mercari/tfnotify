@@ -212,6 +212,10 @@ func TestHasAnyLabelDefined(t *testing.T) {
 			},
 			want: false,
 		},
+		{
+			rl: ResultLabels{},
+			want: false,
+		},
 	}
 	for _, testCase := range testCases {
 		if testCase.rl.HasAnyLabelDefined() != testCase.want {
@@ -263,6 +267,11 @@ func TestIsResultLabels(t *testing.T) {
 				NoChangesLabel:   "no-changes",
 				PlanErrorLabel:   "",
 			},
+			label: "",
+			want:  false,
+		},
+		{
+			rl: ResultLabels{},
 			label: "",
 			want:  false,
 		},
