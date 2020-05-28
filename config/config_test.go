@@ -93,14 +93,14 @@ func TestLoadFile(t *testing.T) {
 					},
 					Plan: Plan{
 						Template: "{{ .Title }}\n{{ .Message }}\n{{if .Result}}\n<pre><code>{{ .Result }}\n</pre></code>\n{{end}}\n<details><summary>Details (Click me)</summary>\n\n<pre><code>{{ .Body }}\n</pre></code></details>\n",
-						WhenChanges: WhenChanges{
-							Label: "changes",
+						WhenAddOrUpdate: WhenAddOrUpdate{
+							Label: "add-or-update",
 						},
 						WhenDestroy: WhenDestroy{
 							Label:    "destroy",
 							Template: "## :warning: WARNING: Resource Deletion will happen :warning:\n\nThis plan contains **resource deletion**. Please check the plan result very carefully!\n",
 						},
-						WhenError: WhenError{
+						WhenPlanError: WhenPlanError{
 							Label: "error",
 						},
 						WhenNoChanges: WhenNoChanges{

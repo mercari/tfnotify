@@ -155,7 +155,7 @@ terraform:
   # ...
 ```
 
-You can also let tfnotify add a label to PRs whose `terraform plan` output result in no change to the current infrastructure. Currently, this feature is for Github labels only.
+You can also let tfnotify add a label to PRs depending on the `terraform plan` output result. Currently, this feature is for Github labels only.
 
 ```yaml
 ---
@@ -174,8 +174,14 @@ terraform:
 
       <pre><code>{{ .Body }}
       </pre></code></details>
+    when_add_or_update:
+      label: "add-or-update"
+    when_destroy:
+      label: "destroy"
     when_no_changes:
       label: "no-changes"
+    when_plan_error:
+      label: "error"
   # ...
 ```
 

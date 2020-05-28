@@ -39,14 +39,14 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 			}
 			var labelToAdd string
 
-			if result.HasChanges {
-				labelToAdd = cfg.ResultLabels.ChangesLabel
+			if result.HasAddOrUpdate {
+				labelToAdd = cfg.ResultLabels.AddOrUpdateLabel
 			} else if result.HasDestroy {
 				labelToAdd = cfg.ResultLabels.DestroyLabel
-			} else if result.HasPlanError {
-				labelToAdd = cfg.ResultLabels.ErrorLabel
 			} else if result.HasNoChanges {
 				labelToAdd = cfg.ResultLabels.NoChangesLabel
+			} else if result.HasPlanError {
+				labelToAdd = cfg.ResultLabels.PlanErrorLabel
 			}
 
 			if labelToAdd != "" {
