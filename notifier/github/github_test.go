@@ -82,8 +82,7 @@ func newFakeAPI() fakeAPI {
 			return comments, nil, nil
 		},
 		FakeIssuesListLabels: func(ctx context.Context, number int, opts *github.ListOptions) ([]*github.Label, *github.Response, error) {
-			var labels []*github.Label
-			labels = []*github.Label{
+			labels := []*github.Label{
 				&github.Label{
 					ID:   github.Int64(371748792),
 					Name: github.String("label 1"),
