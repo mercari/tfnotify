@@ -63,7 +63,7 @@ func TestLoadFile(t *testing.T) {
 			ok: true,
 		},
 		{
-			file: "../example-with-destroy-and-no-changes.tfnotify.yaml",
+			file: "../example-with-destroy-and-result-labels.tfnotify.yaml",
 			cfg: Config{
 				CI: "circleci",
 				Notifier: Notifier{
@@ -93,8 +93,15 @@ func TestLoadFile(t *testing.T) {
 					},
 					Plan: Plan{
 						Template: "{{ .Title }}\n{{ .Message }}\n{{if .Result}}\n<pre><code>{{ .Result }}\n</pre></code>\n{{end}}\n<details><summary>Details (Click me)</summary>\n\n<pre><code>{{ .Body }}\n</pre></code></details>\n",
+						WhenChanges: WhenChanges{
+							Label: "changes",
+						},
 						WhenDestroy: WhenDestroy{
+							Label:    "destroy",
 							Template: "## :warning: WARNING: Resource Deletion will happen :warning:\n\nThis plan contains **resource deletion**. Please check the plan result very carefully!\n",
+						},
+						WhenError: WhenError{
+							Label: "error",
 						},
 						WhenNoChanges: WhenNoChanges{
 							Label: "no-changes",
@@ -105,7 +112,7 @@ func TestLoadFile(t *testing.T) {
 					},
 					UseRawOutput: false,
 				},
-				path: "../example-with-destroy-and-no-changes.tfnotify.yaml",
+				path: "../example-with-destroy-and-result-labels.tfnotify.yaml",
 			},
 			ok: true,
 		},

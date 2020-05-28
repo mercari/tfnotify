@@ -12,6 +12,7 @@ type fakeAPI struct {
 	FakeIssuesCreateComment       func(ctx context.Context, number int, comment *github.IssueComment) (*github.IssueComment, *github.Response, error)
 	FakeIssuesDeleteComment       func(ctx context.Context, commentID int64) (*github.Response, error)
 	FakeIssuesListComments        func(ctx context.Context, number int, opt *github.IssueListCommentsOptions) ([]*github.IssueComment, *github.Response, error)
+	FakeIssuesListLabels          func(ctx context.Context, number int, opts *github.ListOptions) ([]*github.Label, *github.Response, error)
 	FakeIssuesAddLabels           func(ctx context.Context, number int, labels []string) ([]*github.Label, *github.Response, error)
 	FakeIssuesRemoveLabel         func(ctx context.Context, number int, label string) (*github.Response, error)
 	FakeRepositoriesCreateComment func(ctx context.Context, sha string, comment *github.RepositoryComment) (*github.RepositoryComment, *github.Response, error)
@@ -29,6 +30,10 @@ func (g *fakeAPI) IssuesDeleteComment(ctx context.Context, commentID int64) (*gi
 
 func (g *fakeAPI) IssuesListComments(ctx context.Context, number int, opt *github.IssueListCommentsOptions) ([]*github.IssueComment, *github.Response, error) {
 	return g.FakeIssuesListComments(ctx, number, opt)
+}
+
+func (g *fakeAPI) IssuesListLabels(ctx context.Context, number int, opt *github.ListOptions) ([]*github.Label, *github.Response, error) {
+	return g.FakeIssuesListLabels(ctx, number, opt)
 }
 
 func (g *fakeAPI) IssuesAddLabels(ctx context.Context, number int, labels []string) ([]*github.Label, *github.Response, error) {
@@ -75,6 +80,20 @@ func newFakeAPI() fakeAPI {
 				},
 			}
 			return comments, nil, nil
+		},
+		FakeIssuesListLabels: func(ctx context.Context, number int, opts *github.ListOptions) ([]*github.Label, *github.Response, error) {
+			var labels []*github.Label
+			labels = []*github.Label{
+				&github.Label{
+					ID:   github.Int64(371748792),
+					Name: github.String("label 1"),
+				},
+				&github.Label{
+					ID:   github.Int64(371765743),
+					Name: github.String("label 2"),
+				},
+			}
+			return labels, nil, nil
 		},
 		FakeIssuesAddLabels: func(ctx context.Context, number int, labels []string) ([]*github.Label, *github.Response, error) {
 			return nil, nil, nil

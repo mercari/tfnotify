@@ -179,3 +179,97 @@ func TestIsNumber(t *testing.T) {
 		}
 	}
 }
+
+func TestHasAnyLabelDefined(t *testing.T) {
+	testCases := []struct {
+		rl   ResultLabels
+		want bool
+	}{
+		{
+			rl: ResultLabels{
+				ChangesLabel:   "changes",
+				DestroyLabel:   "destroy",
+				ErrorLabel:     "error",
+				NoChangesLabel: "no-changes",
+			},
+			want: true,
+		},
+		{
+			rl: ResultLabels{
+				ChangesLabel:   "changes",
+				DestroyLabel:   "destroy",
+				ErrorLabel:     "error",
+				NoChangesLabel: "",
+			},
+			want: true,
+		},
+		{
+			rl: ResultLabels{
+				ChangesLabel:   "",
+				DestroyLabel:   "",
+				ErrorLabel:     "",
+				NoChangesLabel: "",
+			},
+			want: false,
+		},
+	}
+	for _, testCase := range testCases {
+		if testCase.rl.HasAnyLabelDefined() != testCase.want {
+			t.Errorf("got %v but want %v", testCase.rl.HasAnyLabelDefined(), testCase.want)
+		}
+	}
+}
+
+func TestIsResultLabels(t *testing.T) {
+	testCases := []struct {
+		rl    ResultLabels
+		label string
+		want  bool
+	}{
+		{
+			rl: ResultLabels{
+				ChangesLabel:   "changes",
+				DestroyLabel:   "destroy",
+				ErrorLabel:     "error",
+				NoChangesLabel: "no-changes",
+			},
+			label: "changes",
+			want:  true,
+		},
+		{
+			rl: ResultLabels{
+				ChangesLabel:   "changes",
+				DestroyLabel:   "destroy",
+				ErrorLabel:     "error",
+				NoChangesLabel: "no-changes",
+			},
+			label: "my-label",
+			want:  false,
+		},
+		{
+			rl: ResultLabels{
+				ChangesLabel:   "changes",
+				DestroyLabel:   "destroy",
+				ErrorLabel:     "error",
+				NoChangesLabel: "no-changes",
+			},
+			label: "",
+			want:  false,
+		},
+		{
+			rl: ResultLabels{
+				ChangesLabel:   "",
+				DestroyLabel:   "",
+				ErrorLabel:     "",
+				NoChangesLabel: "no-changes",
+			},
+			label: "",
+			want:  false,
+		},
+	}
+	for _, testCase := range testCases {
+		if testCase.rl.IsResultLabel(testCase.label) != testCase.want {
+			t.Errorf("got %v but want %v", testCase.rl.IsResultLabel(testCase.label), testCase.want)
+		}
+	}
+}

@@ -82,13 +82,26 @@ type Fmt struct {
 // Plan is a terraform plan config
 type Plan struct {
 	Template      string        `yaml:"template"`
+	WhenChanges   WhenChanges   `yaml:"when_changes,omitempty"`
 	WhenDestroy   WhenDestroy   `yaml:"when_destroy,omitempty"`
+	WhenError     WhenError     `yaml:"when_error,omitempty"`
 	WhenNoChanges WhenNoChanges `yaml:"when_no_changes,omitempty"`
+}
+
+// WhenChanges is a configuration to notify the plan result contains new or updated in place resources
+type WhenChanges struct {
+	Label string `yaml:"label,omitempty"`
 }
 
 // WhenDestroy is a configuration to notify the plan result contains destroy operation
 type WhenDestroy struct {
-	Template string `yaml:"template"`
+	Label    string `yaml:"label,omitempty"`
+	Template string `yaml:"template,omitempty"`
+}
+
+// WhenError is a configuration to notify the plan result contains new or updated in place resources
+type WhenError struct {
+	Label string `yaml:"label,omitempty"`
 }
 
 // WhenNoChange is a configuration to add a label when the plan result contains no change

@@ -32,23 +32,28 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 				return result.ExitCode, err
 			}
 		}
-		if cfg.PR.IsNumber() && cfg.NoChangesLabel != "" {
-			// Always attempt to remove the label first so that an IssueLabeled event is created
-			resp, err := g.client.API.IssuesRemoveLabel(
-				context.Background(),
-				cfg.PR.Number,
-				cfg.NoChangesLabel,
-			)
-			// Ignore 404 errors, which are from the PR not having the label
-			if err != nil && resp.StatusCode != http.StatusNotFound {
+		if cfg.PR.IsNumber() && cfg.ResultLabels.HasAnyLabelDefined() {
+			err = g.removeResultLabels()
+			if err != nil {
 				return result.ExitCode, err
 			}
+			var labelToAdd string
 
-			if result.HasNoChanges {
+			if result.HasChanges {
+				labelToAdd = cfg.ResultLabels.ChangesLabel
+			} else if result.HasDestroy {
+				labelToAdd = cfg.ResultLabels.DestroyLabel
+			} else if result.HasPlanError {
+				labelToAdd = cfg.ResultLabels.ErrorLabel
+			} else if result.HasNoChanges {
+				labelToAdd = cfg.ResultLabels.NoChangesLabel
+			}
+
+			if labelToAdd != "" {
 				_, _, err = g.client.API.IssuesAddLabels(
 					context.Background(),
 					cfg.PR.Number,
-					[]string{cfg.NoChangesLabel},
+					[]string{labelToAdd},
 				)
 				if err != nil {
 					return result.ExitCode, err
@@ -117,4 +122,25 @@ func (g *NotifyService) notifyDestoryWarning(body string, result terraform.Parse
 		Number:   cfg.PR.Number,
 		Revision: cfg.PR.Revision,
 	})
+}
+
+func (g *NotifyService) removeResultLabels() error {
+	cfg := g.client.Config
+	labels, _, err := g.client.API.IssuesListLabels(context.Background(), cfg.PR.Number, nil)
+	if err != nil {
+		return err
+	}
+
+	for _, l := range labels {
+		labelText := l.GetName()
+		if cfg.ResultLabels.IsResultLabel(labelText) {
+			resp, err := g.client.API.IssuesRemoveLabel(context.Background(), cfg.PR.Number, labelText)
+			// Ignore 404 errors, which are from the PR not having the label
+			if err != nil && resp.StatusCode != http.StatusNotFound {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

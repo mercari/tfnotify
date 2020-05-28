@@ -176,6 +176,104 @@ can't guarantee that exactly these actions will be performed if
 "terraform apply" is subsequently run.
 `
 
+const planHasAddAndDestroy = `
+Refreshing Terraform state in-memory prior to plan...
+The refreshed state will be used to calculate this plan, but will not be
+persisted to local or remote state storage.
+
+data.terraform_remote_state.teams_platform_development: Refreshing state...
+google_project.my_project: Refreshing state...
+aws_iam_policy.datadog_aws_integration: Refreshing state...
+aws_iam_user.teams_terraform: Refreshing state...
+aws_iam_role.datadog_aws_integration: Refreshing state...
+google_project_services.my_project: Refreshing state...
+google_bigquery_dataset.gateway_access_log: Refreshing state...
+aws_iam_role_policy_attachment.datadog_aws_integration: Refreshing state...
+google_logging_project_sink.gateway_access_log_bigquery_sink: Refreshing state...
+google_project_iam_member.gateway_access_log_bigquery_sink_writer_is_bigquery_data_editor: Refreshing state...
+google_dns_managed_zone.tfnotifyapps_com: Refreshing state...
+google_dns_record_set.dev_tfnotifyapps_com: Refreshing state...
+google_project_iam_member.team_platform[1]: Refreshing state...
+google_project_iam_member.team_platform[2]: Refreshing state...
+google_project_iam_member.team_platform[0]: Refreshing state...
+
+------------------------------------------------------------------------
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
+  - destroy
+
+Terraform will perform the following actions:
+
+  + google_compute_global_address.my_another_project
+      id:         <computed>
+      address:    <computed>
+      ip_version: "IPV4"
+      name:       "my-another-project"
+      project:    "my-project"
+      self_link:  <computed>
+
+  - google_project_iam_member.team_platform[2]
+
+Plan: 1 to add, 0 to change, 1 to destroy.
+
+------------------------------------------------------------------------
+
+Note: You didn't specify an "-out" parameter to save this plan, so Terraform
+can't guarantee that exactly these actions will be performed if
+"terraform apply" is subsequently run.
+`
+
+const planHasAddAndUpdateInPlace = `
+Refreshing Terraform state in-memory prior to plan...
+The refreshed state will be used to calculate this plan, but will not be
+persisted to local or remote state storage.
+
+data.terraform_remote_state.teams_platform_development: Refreshing state...
+google_project.my_project: Refreshing state...
+aws_iam_policy.datadog_aws_integration: Refreshing state...
+aws_iam_user.teams_terraform: Refreshing state...
+aws_iam_role.datadog_aws_integration: Refreshing state...
+google_project_services.my_project: Refreshing state...
+google_bigquery_dataset.gateway_access_log: Refreshing state...
+aws_iam_role_policy_attachment.datadog_aws_integration: Refreshing state...
+google_logging_project_sink.gateway_access_log_bigquery_sink: Refreshing state...
+google_project_iam_member.gateway_access_log_bigquery_sink_writer_is_bigquery_data_editor: Refreshing state...
+google_dns_managed_zone.tfnotifyapps_com: Refreshing state...
+google_dns_record_set.dev_tfnotifyapps_com: Refreshing state...
+google_project_iam_member.team_platform[1]: Refreshing state...
+google_project_iam_member.team_platform[2]: Refreshing state...
+google_project_iam_member.team_platform[0]: Refreshing state...
+
+------------------------------------------------------------------------
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  + google_compute_global_address.my_another_project
+      id:         <computed>
+      address:    <computed>
+      ip_version: "IPV4"
+      name:       "my-another-project"
+      project:    "my-project"
+      self_link:  <computed>
+
+  ~ google_project_iam_member.team_platform[2]
+
+Plan: 1 to add, 1 to change, 0 to destroy.
+
+------------------------------------------------------------------------
+
+Note: You didn't specify an "-out" parameter to save this plan, so Terraform
+can't guarantee that exactly these actions will be performed if
+"terraform apply" is subsequently run.
+`
+
 const applySuccessResult = `
 data.terraform_remote_state.teams_platform_development: Refreshing state...
 google_project.my_service: Refreshing state...
@@ -308,7 +406,9 @@ func TestPlanParserParse(t *testing.T) {
 			body: planSuccessResult,
 			result: ParseResult{
 				Result:       "Plan: 1 to add, 0 to change, 0 to destroy.",
+				HasChanges:   true,
 				HasDestroy:   false,
+				HasPlanError: false,
 				HasNoChanges: false,
 				ExitCode:     0,
 				Error:        nil,
@@ -319,7 +419,9 @@ func TestPlanParserParse(t *testing.T) {
 			body: "",
 			result: ParseResult{
 				Result:       "",
+				HasChanges:   false,
 				HasDestroy:   false,
+				HasPlanError: false,
 				HasNoChanges: false,
 				ExitCode:     1,
 				Error:        errors.New("cannot parse plan result"),
@@ -335,8 +437,12 @@ func TestPlanParserParse(t *testing.T) {
 
 * google_sql_database.main: google_sql_database.main: Error reading SQL Database "main" in instance "main-master-instance": googleapi: Error 409: The instance or operation is not in an appropriate state to handle the request., invalidState
 * google_sql_user.proxyuser_main: 1 error(s) occurred:`,
-				ExitCode: 1,
-				Error:    nil,
+				HasChanges:   false,
+				HasDestroy:   false,
+				HasPlanError: true,
+				HasNoChanges: false,
+				ExitCode:     1,
+				Error:        nil,
 			},
 		},
 		{
@@ -344,7 +450,9 @@ func TestPlanParserParse(t *testing.T) {
 			body: planNoChanges,
 			result: ParseResult{
 				Result:       "No changes. Infrastructure is up-to-date.",
+				HasChanges:   false,
 				HasDestroy:   false,
+				HasPlanError: false,
 				HasNoChanges: true,
 				ExitCode:     0,
 				Error:        nil,
@@ -355,7 +463,35 @@ func TestPlanParserParse(t *testing.T) {
 			body: planHasDestroy,
 			result: ParseResult{
 				Result:       "Plan: 0 to add, 0 to change, 1 to destroy.",
+				HasChanges:   false,
 				HasDestroy:   true,
+				HasPlanError: false,
+				HasNoChanges: false,
+				ExitCode:     0,
+				Error:        nil,
+			},
+		},
+		{
+			name: "plan has add and destroy",
+			body: planHasAddAndDestroy,
+			result: ParseResult{
+				Result:       "Plan: 1 to add, 0 to change, 1 to destroy.",
+				HasChanges:   false,
+				HasDestroy:   true,
+				HasPlanError: false,
+				HasNoChanges: false,
+				ExitCode:     0,
+				Error:        nil,
+			},
+		},
+		{
+			name: "plan has add and update in place",
+			body: planHasAddAndUpdateInPlace,
+			result: ParseResult{
+				Result:       "Plan: 1 to add, 1 to change, 0 to destroy.",
+				HasChanges:   true,
+				HasDestroy:   false,
+				HasPlanError: false,
 				HasNoChanges: false,
 				ExitCode:     0,
 				Error:        nil,

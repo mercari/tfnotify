@@ -48,8 +48,8 @@ type Config struct {
 	// DestroyWarningTemplate is used only for additional warning
 	// the plan result contains destroy operation
 	DestroyWarningTemplate terraform.Template
-	// NoChangesLabel is a label to add to PRs when terraform output contains no changes
-	NoChangesLabel string
+	// ResultLabels is a set of labels to apply depending on the plan result
+	ResultLabels ResultLabels
 }
 
 // PullRequest represents GitHub Pull Request metadata
@@ -116,4 +116,46 @@ func NewClient(cfg Config) (*Client, error) {
 // IsNumber returns true if PullRequest is Pull Request build
 func (pr *PullRequest) IsNumber() bool {
 	return pr.Number != 0
+}
+
+// ResultLabels represents the labels to add to the PR depending on the plan result
+type ResultLabels struct {
+	ChangesLabel   string
+	DestroyLabel   string
+	ErrorLabel     string
+	NoChangesLabel string
+}
+
+// HasAnyLabelDefined returns true if any of the internal labels are set
+func (r *ResultLabels) HasAnyLabelDefined() bool {
+	return r.ChangesLabel != "" || r.DestroyLabel != "" || r.ErrorLabel != "" || r.NoChangesLabel != ""
+}
+
+// ToStringSlice returns all the defined labels as a string slice
+func (r *ResultLabels) ToStringSlice() []string {
+	var result []string
+	if r.ChangesLabel != "" {
+		result = append(result, r.ChangesLabel)
+	}
+	if r.DestroyLabel != "" {
+		result = append(result, r.DestroyLabel)
+	}
+	if r.ErrorLabel != "" {
+		result = append(result, r.ErrorLabel)
+	}
+	if r.NoChangesLabel != "" {
+		result = append(result, r.NoChangesLabel)
+	}
+	return result
+}
+
+func (r *ResultLabels) IsResultLabel(label string) bool {
+	switch label {
+	case "":
+		return false
+	case r.ChangesLabel, r.DestroyLabel, r.ErrorLabel, r.NoChangesLabel:
+		return true
+	default:
+		return false
+	}
 }

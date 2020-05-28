@@ -10,6 +10,7 @@ import (
 type API interface {
 	IssuesCreateComment(ctx context.Context, number int, comment *github.IssueComment) (*github.IssueComment, *github.Response, error)
 	IssuesDeleteComment(ctx context.Context, commentID int64) (*github.Response, error)
+	IssuesListLabels(ctx context.Context, number int, opt *github.ListOptions) ([]*github.Label, *github.Response, error)
 	IssuesListComments(ctx context.Context, number int, opt *github.IssueListCommentsOptions) ([]*github.IssueComment, *github.Response, error)
 	IssuesAddLabels(ctx context.Context, number int, labels []string) ([]*github.Label, *github.Response, error)
 	IssuesRemoveLabel(ctx context.Context, number int, label string) (*github.Response, error)
@@ -44,7 +45,12 @@ func (g *GitHub) IssuesAddLabels(ctx context.Context, number int, labels []strin
 	return g.Client.Issues.AddLabelsToIssue(ctx, g.owner, g.repo, number, labels)
 }
 
-// IssuesAddLabels is a wrapper of https://godoc.org/github.com/google/go-github/github#IssuesService.RemoveLabelForIssue
+// IssuesListLabels is a wrapper of https://godoc.org/github.com/google/go-github/github#IssuesService.ListLabelsByIssue
+func (g *GitHub) IssuesListLabels(ctx context.Context, number int, opt *github.ListOptions) ([]*github.Label, *github.Response, error) {
+	return g.Client.Issues.ListLabelsByIssue(ctx, g.owner, g.repo, number, opt)
+}
+
+// IssuesRemoveLabel is a wrapper of https://godoc.org/github.com/google/go-github/github#IssuesService.RemoveLabelForIssue
 func (g *GitHub) IssuesRemoveLabel(ctx context.Context, number int, label string) (*github.Response, error) {
 	return g.Client.Issues.RemoveLabelForIssue(ctx, g.owner, g.repo, number, label)
 }

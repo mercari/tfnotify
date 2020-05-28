@@ -14,7 +14,9 @@ type Parser interface {
 // ParseResult represents the result of parsed terraform execution
 type ParseResult struct {
 	Result       string
+	HasChanges   bool
 	HasDestroy   bool
+	HasPlanError bool
 	HasNoChanges bool
 	ExitCode     int
 	Error        error
@@ -117,19 +119,24 @@ func (p *PlanParser) Parse(body string) ParseResult {
 			break
 		}
 	}
+	var hasPlanError bool
 	switch {
 	case p.Pass.MatchString(line):
 		result = lines[i]
 	case p.Fail.MatchString(line):
+		hasPlanError = true
 		result = strings.Join(trimLastNewline(lines[i:]), "\n")
 	}
 
 	hasDestroy := p.HasDestroy.MatchString(line)
 	hasNoChanges := p.HasNoChanges.MatchString(line)
+	hasChanges := !hasNoChanges && !hasDestroy && !hasPlanError
 
 	return ParseResult{
 		Result:       result,
+		HasChanges:   hasChanges,
 		HasDestroy:   hasDestroy,
+		HasPlanError: hasPlanError,
 		HasNoChanges: hasNoChanges,
 		ExitCode:     exitCode,
 		Error:        nil,
