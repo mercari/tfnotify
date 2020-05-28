@@ -39,7 +39,7 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 			}
 			var labelToAdd string
 
-			if result.HasAddOrUpdate {
+			if result.HasAddOrUpdateOnly {
 				labelToAdd = cfg.ResultLabels.AddOrUpdateLabel
 			} else if result.HasDestroy {
 				labelToAdd = cfg.ResultLabels.DestroyLabel

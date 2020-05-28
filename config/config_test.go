@@ -93,7 +93,7 @@ func TestLoadFile(t *testing.T) {
 					},
 					Plan: Plan{
 						Template: "{{ .Title }}\n{{ .Message }}\n{{if .Result}}\n<pre><code>{{ .Result }}\n</pre></code>\n{{end}}\n<details><summary>Details (Click me)</summary>\n\n<pre><code>{{ .Body }}\n</pre></code></details>\n",
-						WhenAddOrUpdate: WhenAddOrUpdate{
+						WhenAddOrUpdateOnly: WhenAddOrUpdateOnly{
 							Label: "add-or-update",
 						},
 						WhenDestroy: WhenDestroy{

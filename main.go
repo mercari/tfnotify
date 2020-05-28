@@ -116,7 +116,7 @@ func (t *tfnotify) Run() error {
 			DestroyWarningTemplate: t.destroyWarningTemplate,
 			WarnDestroy:            t.warnDestroy,
 			ResultLabels: github.ResultLabels{
-				AddOrUpdateLabel: t.config.Terraform.Plan.WhenAddOrUpdate.Label,
+				AddOrUpdateLabel: t.config.Terraform.Plan.WhenAddOrUpdateOnly.Label,
 				DestroyLabel:     t.config.Terraform.Plan.WhenDestroy.Label,
 				NoChangesLabel:   t.config.Terraform.Plan.WhenNoChanges.Label,
 				PlanErrorLabel:   t.config.Terraform.Plan.WhenPlanError.Label,

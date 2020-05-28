@@ -174,7 +174,7 @@ terraform:
 
       <pre><code>{{ .Body }}
       </pre></code></details>
-    when_add_or_update:
+    when_add_or_update_only:
       label: "add-or-update"
     when_destroy:
       label: "destroy"
