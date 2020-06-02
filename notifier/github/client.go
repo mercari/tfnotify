@@ -48,8 +48,8 @@ type Config struct {
 	// DestroyWarningTemplate is used only for additional warning
 	// the plan result contains destroy operation
 	DestroyWarningTemplate terraform.Template
-	// NoChangesLabel is a label to add to PRs when terraform output contains no changes
-	NoChangesLabel string
+	// ResultLabels is a set of labels to apply depending on the plan result
+	ResultLabels ResultLabels
 }
 
 // PullRequest represents GitHub Pull Request metadata
@@ -116,4 +116,29 @@ func NewClient(cfg Config) (*Client, error) {
 // IsNumber returns true if PullRequest is Pull Request build
 func (pr *PullRequest) IsNumber() bool {
 	return pr.Number != 0
+}
+
+// ResultLabels represents the labels to add to the PR depending on the plan result
+type ResultLabels struct {
+	AddOrUpdateLabel string
+	DestroyLabel     string
+	NoChangesLabel   string
+	PlanErrorLabel   string
+}
+
+// HasAnyLabelDefined returns true if any of the internal labels are set
+func (r *ResultLabels) HasAnyLabelDefined() bool {
+	return r.AddOrUpdateLabel != "" || r.DestroyLabel != "" || r.NoChangesLabel != "" || r.PlanErrorLabel != ""
+}
+
+// IsResultLabel returns true if a label matches any of the internal labels
+func (r *ResultLabels) IsResultLabel(label string) bool {
+	switch label {
+	case "":
+		return false
+	case r.AddOrUpdateLabel, r.DestroyLabel, r.NoChangesLabel, r.PlanErrorLabel:
+		return true
+	default:
+		return false
+	}
 }

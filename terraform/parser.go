@@ -13,11 +13,13 @@ type Parser interface {
 
 // ParseResult represents the result of parsed terraform execution
 type ParseResult struct {
-	Result       string
-	HasDestroy   bool
-	HasNoChanges bool
-	ExitCode     int
-	Error        error
+	Result             string
+	HasAddOrUpdateOnly bool
+	HasDestroy         bool
+	HasNoChanges       bool
+	HasPlanError       bool
+	ExitCode           int
+	Error              error
 }
 
 // DefaultParser is a parser for terraform commands
@@ -117,22 +119,27 @@ func (p *PlanParser) Parse(body string) ParseResult {
 			break
 		}
 	}
+	var hasPlanError bool
 	switch {
 	case p.Pass.MatchString(line):
 		result = lines[i]
 	case p.Fail.MatchString(line):
+		hasPlanError = true
 		result = strings.Join(trimLastNewline(lines[i:]), "\n")
 	}
 
 	hasDestroy := p.HasDestroy.MatchString(line)
 	hasNoChanges := p.HasNoChanges.MatchString(line)
+	HasAddOrUpdateOnly := !hasNoChanges && !hasDestroy && !hasPlanError
 
 	return ParseResult{
-		Result:       result,
-		HasDestroy:   hasDestroy,
-		HasNoChanges: hasNoChanges,
-		ExitCode:     exitCode,
-		Error:        nil,
+		Result:             result,
+		HasAddOrUpdateOnly: HasAddOrUpdateOnly,
+		HasDestroy:         hasDestroy,
+		HasNoChanges:       hasNoChanges,
+		HasPlanError:       hasPlanError,
+		ExitCode:           exitCode,
+		Error:              nil,
 	}
 }
 

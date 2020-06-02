@@ -115,7 +115,12 @@ func (t *tfnotify) Run() error {
 			Template:               t.template,
 			DestroyWarningTemplate: t.destroyWarningTemplate,
 			WarnDestroy:            t.warnDestroy,
-			NoChangesLabel:         t.config.Terraform.Plan.WhenNoChanges.Label,
+			ResultLabels: github.ResultLabels{
+				AddOrUpdateLabel: t.config.Terraform.Plan.WhenAddOrUpdateOnly.Label,
+				DestroyLabel:     t.config.Terraform.Plan.WhenDestroy.Label,
+				NoChangesLabel:   t.config.Terraform.Plan.WhenNoChanges.Label,
+				PlanErrorLabel:   t.config.Terraform.Plan.WhenPlanError.Label,
+			},
 		})
 		if err != nil {
 			return err

@@ -179,3 +179,106 @@ func TestIsNumber(t *testing.T) {
 		}
 	}
 }
+
+func TestHasAnyLabelDefined(t *testing.T) {
+	testCases := []struct {
+		rl   ResultLabels
+		want bool
+	}{
+		{
+			rl: ResultLabels{
+				AddOrUpdateLabel: "add-or-update",
+				DestroyLabel:     "destroy",
+				NoChangesLabel:   "no-changes",
+				PlanErrorLabel:   "error",
+			},
+			want: true,
+		},
+		{
+			rl: ResultLabels{
+				AddOrUpdateLabel: "add-or-update",
+				DestroyLabel:     "destroy",
+				NoChangesLabel:   "",
+				PlanErrorLabel:   "error",
+			},
+			want: true,
+		},
+		{
+			rl: ResultLabels{
+				AddOrUpdateLabel: "",
+				DestroyLabel:     "",
+				NoChangesLabel:   "",
+				PlanErrorLabel:   "",
+			},
+			want: false,
+		},
+		{
+			rl:   ResultLabels{},
+			want: false,
+		},
+	}
+	for _, testCase := range testCases {
+		if testCase.rl.HasAnyLabelDefined() != testCase.want {
+			t.Errorf("got %v but want %v", testCase.rl.HasAnyLabelDefined(), testCase.want)
+		}
+	}
+}
+
+func TestIsResultLabels(t *testing.T) {
+	testCases := []struct {
+		rl    ResultLabels
+		label string
+		want  bool
+	}{
+		{
+			rl: ResultLabels{
+				AddOrUpdateLabel: "add-or-update",
+				DestroyLabel:     "destroy",
+				NoChangesLabel:   "no-changes",
+				PlanErrorLabel:   "error",
+			},
+			label: "add-or-update",
+			want:  true,
+		},
+		{
+			rl: ResultLabels{
+				AddOrUpdateLabel: "add-or-update",
+				DestroyLabel:     "destroy",
+				NoChangesLabel:   "no-changes",
+				PlanErrorLabel:   "error",
+			},
+			label: "my-label",
+			want:  false,
+		},
+		{
+			rl: ResultLabels{
+				AddOrUpdateLabel: "add-or-update",
+				DestroyLabel:     "destroy",
+				NoChangesLabel:   "no-changes",
+				PlanErrorLabel:   "error",
+			},
+			label: "",
+			want:  false,
+		},
+		{
+			rl: ResultLabels{
+				AddOrUpdateLabel: "",
+				DestroyLabel:     "",
+				NoChangesLabel:   "no-changes",
+				PlanErrorLabel:   "",
+			},
+			label: "",
+			want:  false,
+		},
+		{
+			rl:    ResultLabels{},
+			label: "",
+			want:  false,
+		},
+	}
+	for _, testCase := range testCases {
+		if testCase.rl.IsResultLabel(testCase.label) != testCase.want {
+			t.Errorf("got %v but want %v", testCase.rl.IsResultLabel(testCase.label), testCase.want)
+		}
+	}
+}
