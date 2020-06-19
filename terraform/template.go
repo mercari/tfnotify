@@ -219,7 +219,7 @@ func generateOutput(kind, template string, data map[string]interface{}, useRawOu
 	return b.String(), nil
 }
 
-// Execute binds the execution result of terraform command into tepmlate
+// Execute binds the execution result of terraform command into template
 func (t *DefaultTemplate) Execute() (string, error) {
 	data := map[string]interface{}{
 		"Title":   t.Title,
@@ -237,7 +237,7 @@ func (t *DefaultTemplate) Execute() (string, error) {
 	return resp, nil
 }
 
-// Execute binds the execution result of terraform fmt into tepmlate
+// Execute binds the execution result of terraform fmt into template
 func (t *FmtTemplate) Execute() (string, error) {
 	data := map[string]interface{}{
 		"Title":   t.Title,
@@ -255,7 +255,7 @@ func (t *FmtTemplate) Execute() (string, error) {
 	return resp, nil
 }
 
-// Execute binds the execution result of terraform plan into tepmlate
+// Execute binds the execution result of terraform plan into template
 func (t *PlanTemplate) Execute() (string, error) {
 	data := map[string]interface{}{
 		"Title":   t.Title,
@@ -291,7 +291,7 @@ func (t *DestroyWarningTemplate) Execute() (string, error) {
 	return resp, nil
 }
 
-// Execute binds the execution result of terraform apply into tepmlate
+// Execute binds the execution result of terraform apply into template
 func (t *ApplyTemplate) Execute() (string, error) {
 	data := map[string]interface{}{
 		"Title":   t.Title,
