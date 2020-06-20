@@ -44,7 +44,7 @@ $ go get -u github.com/mercari/tfnotify
 2. Bind parsed results to Go templates
 3. Notify it to any platform (e.g. GitHub) as you like
 
-Detailed specifications such as templates and notification destinations can be customized from the configration files (described later).
+Detailed specifications such as templates and notification destinations can be customized from the configuration files (described later).
 
 ## Usage
 
