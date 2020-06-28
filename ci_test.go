@@ -746,6 +746,22 @@ func TestGitHubActions(t *testing.T) {
 			},
 			ok: true,
 		},
+		{
+			fn: func() {
+				os.Setenv("GITHUB_SHA", "abcdefg")
+				os.Setenv("GITHUB_REPOSITORY", "mercari/tfnotify")
+				os.Setenv("GITHUB_RUN_ID", "12345")
+				os.Setenv("GITHUB_REF", "refs/pull/123/merge")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   123,
+				},
+				URL: "https://github.com/mercari/tfnotify/actions/runs/12345",
+			},
+			ok: true,
+		},
 	}
 
 	for _, testCase := range testCases {
