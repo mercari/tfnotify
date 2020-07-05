@@ -713,6 +713,7 @@ func TestGitHubActions(t *testing.T) {
 		"GITHUB_SHA",
 		"GITHUB_REPOSITORY",
 		"GITHUB_RUN_ID",
+		"GITHUB_REF",
 	}
 	saveEnvs := make(map[string]string)
 	for _, key := range envs {
