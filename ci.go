@@ -146,3 +146,19 @@ func githubActions() (ci CI, err error) {
 	ci.PR.Revision = os.Getenv("GITHUB_SHA")
 	return ci, err
 }
+
+func cloudbuild() (ci CI, err error) {
+	ci.PR.Number = 0
+	ci.PR.Revision = os.Getenv("COMMIT_SHA")
+	ci.URL = fmt.Sprintf(
+		"https://console.cloud.google.com/cloud-build/builds/%s?project=%s",
+		os.Getenv("BUILD_ID"),
+		os.Getenv("PROJECT_ID"),
+	)
+	pr := os.Getenv("_PR_NUMBER")
+	if pr == "" {
+		return ci, nil
+	}
+	ci.PR.Number, err = strconv.Atoi(pr)
+	return ci, err
+}
