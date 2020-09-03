@@ -4,6 +4,8 @@ import (
 	"bytes"
 	htmltemplate "html/template"
 	texttemplate "text/template"
+
+	"github.com/Masterminds/sprig"
 )
 
 const (
@@ -199,7 +201,7 @@ func generateOutput(kind, template string, data map[string]interface{}, useRawOu
 	var b bytes.Buffer
 
 	if useRawOutput {
-		tpl, err := texttemplate.New(kind).Parse(template)
+		tpl, err := texttemplate.New(kind).Funcs(sprig.TxtFuncMap()).Parse(template)
 		if err != nil {
 			return "", err
 		}
