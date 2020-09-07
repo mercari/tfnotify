@@ -209,7 +209,7 @@ func generateOutput(kind, template string, data map[string]interface{}, useRawOu
 			return "", err
 		}
 	} else {
-		tpl, err := htmltemplate.New(kind).Parse(template)
+		tpl, err := htmltemplate.New(kind).Funcs(sprig.HtmlFuncMap()).Parse(template)
 		if err != nil {
 			return "", err
 		}
