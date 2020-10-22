@@ -70,6 +70,15 @@ func TestCommitsLastOne(t *testing.T) {
 			lastRev:  "",
 			ok:       false,
 		},
+		{
+			// one commit
+			commits: []string{
+				"04e0917e448b662c2b16330fad50e97af16ff27a",
+			},
+			revision: "04e0917e448b662c2b16330fad50e97af16ff27a",
+			lastRev:  "",
+			ok:       false,
+		},
 	}
 
 	for _, testCase := range testCases {
