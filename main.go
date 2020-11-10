@@ -19,7 +19,9 @@ import (
 const (
 	name        = "tfnotify"
 	description = "Notify the execution result of terraform command"
+)
 
+var (
 	version = "unset"
 )
 
