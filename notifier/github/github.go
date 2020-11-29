@@ -14,6 +14,7 @@ type API interface {
 	IssuesListComments(ctx context.Context, number int, opt *github.IssueListCommentsOptions) ([]*github.IssueComment, *github.Response, error)
 	IssuesAddLabels(ctx context.Context, number int, labels []string) ([]*github.Label, *github.Response, error)
 	IssuesRemoveLabel(ctx context.Context, number int, label string) (*github.Response, error)
+	IssuesUpdateLabel(ctx context.Context, label, color string) (*github.Label, *github.Response, error)
 	RepositoriesCreateComment(ctx context.Context, sha string, comment *github.RepositoryComment) (*github.RepositoryComment, *github.Response, error)
 	RepositoriesListCommits(ctx context.Context, opt *github.CommitsListOptions) ([]*github.RepositoryCommit, *github.Response, error)
 	RepositoriesGetCommit(ctx context.Context, sha string) (*github.RepositoryCommit, *github.Response, error)
@@ -53,6 +54,13 @@ func (g *GitHub) IssuesListLabels(ctx context.Context, number int, opt *github.L
 // IssuesRemoveLabel is a wrapper of https://godoc.org/github.com/google/go-github/github#IssuesService.RemoveLabelForIssue
 func (g *GitHub) IssuesRemoveLabel(ctx context.Context, number int, label string) (*github.Response, error) {
 	return g.Client.Issues.RemoveLabelForIssue(ctx, g.owner, g.repo, number, label)
+}
+
+// IssuesUpdateLabel is a wrapper of https://pkg.go.dev/github.com/google/go-github/github#IssuesService.EditLabel
+func (g *GitHub) IssuesUpdateLabel(ctx context.Context, label, color string) (*github.Label, *github.Response, error) {
+	return g.Client.Issues.EditLabel(ctx, g.owner, g.repo, label, &github.Label{
+		Color: &color,
+	})
 }
 
 // RepositoriesCreateComment is a wrapper of https://godoc.org/github.com/google/go-github/github#RepositoriesService.CreateComment

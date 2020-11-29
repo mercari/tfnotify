@@ -91,22 +91,26 @@ type Plan struct {
 // WhenAddOrUpdateOnly is a configuration to notify the plan result contains new or updated in place resources
 type WhenAddOrUpdateOnly struct {
 	Label string `yaml:"label,omitempty"`
+	Color string `yaml:"color,omitempty"`
 }
 
 // WhenDestroy is a configuration to notify the plan result contains destroy operation
 type WhenDestroy struct {
 	Label    string `yaml:"label,omitempty"`
 	Template string `yaml:"template,omitempty"`
+	Color    string `yaml:"color,omitempty"`
 }
 
 // WhenNoChange is a configuration to add a label when the plan result contains no change
 type WhenNoChanges struct {
 	Label string `yaml:"label,omitempty"`
+	Color string `yaml:"color,omitempty"`
 }
 
 // WhenPlanError is a configuration to notify the plan result returns an error
 type WhenPlanError struct {
 	Label string `yaml:"label,omitempty"`
+	Color string `yaml:"color,omitempty"`
 }
 
 // Apply is a terraform apply config

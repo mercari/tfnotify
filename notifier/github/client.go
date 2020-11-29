@@ -120,10 +120,14 @@ func (pr *PullRequest) IsNumber() bool {
 
 // ResultLabels represents the labels to add to the PR depending on the plan result
 type ResultLabels struct {
-	AddOrUpdateLabel string
-	DestroyLabel     string
-	NoChangesLabel   string
-	PlanErrorLabel   string
+	AddOrUpdateLabel      string
+	DestroyLabel          string
+	NoChangesLabel        string
+	PlanErrorLabel        string
+	AddOrUpdateLabelColor string
+	DestroyLabelColor     string
+	NoChangesLabelColor   string
+	PlanErrorLabelColor   string
 }
 
 // HasAnyLabelDefined returns true if any of the internal labels are set
