@@ -48,11 +48,11 @@ func newFakeAPI() fakeAPI {
 		FakeListMergeRequestNotes: func(mergeRequest int, opt *gitlab.ListMergeRequestNotesOptions, options ...gitlab.OptionFunc) ([]*gitlab.Note, *gitlab.Response, error) {
 			var comments []*gitlab.Note
 			comments = []*gitlab.Note{
-				&gitlab.Note{
+				{
 					ID:   371748792,
 					Body: "comment 1",
 				},
-				&gitlab.Note{
+				{
 					ID:   371765743,
 					Body: "comment 2",
 				},
@@ -67,13 +67,13 @@ func newFakeAPI() fakeAPI {
 		FakeListCommits: func(opt *gitlab.ListCommitsOptions, options ...gitlab.OptionFunc) ([]*gitlab.Commit, *gitlab.Response, error) {
 			var commits []*gitlab.Commit
 			commits = []*gitlab.Commit{
-				&gitlab.Commit{
+				{
 					ID: "04e0917e448b662c2b16330fad50e97af16ff27a",
 				},
-				&gitlab.Commit{
+				{
 					ID: "04e0917e448b662c2b16330fad50e97af16ff27b",
 				},
-				&gitlab.Commit{
+				{
 					ID: "04e0917e448b662c2b16330fad50e97af16ff27c",
 				},
 			}

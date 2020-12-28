@@ -70,11 +70,11 @@ func newFakeAPI() fakeAPI {
 		FakeIssuesListComments: func(ctx context.Context, number int, opt *github.IssueListCommentsOptions) ([]*github.IssueComment, *github.Response, error) {
 			var comments []*github.IssueComment
 			comments = []*github.IssueComment{
-				&github.IssueComment{
+				{
 					ID:   github.Int64(371748792),
 					Body: github.String("comment 1"),
 				},
-				&github.IssueComment{
+				{
 					ID:   github.Int64(371765743),
 					Body: github.String("comment 2"),
 				},
@@ -83,11 +83,11 @@ func newFakeAPI() fakeAPI {
 		},
 		FakeIssuesListLabels: func(ctx context.Context, number int, opts *github.ListOptions) ([]*github.Label, *github.Response, error) {
 			labels := []*github.Label{
-				&github.Label{
+				{
 					ID:   github.Int64(371748792),
 					Name: github.String("label 1"),
 				},
-				&github.Label{
+				{
 					ID:   github.Int64(371765743),
 					Name: github.String("label 2"),
 				},
@@ -110,13 +110,13 @@ func newFakeAPI() fakeAPI {
 		FakeRepositoriesListCommits: func(ctx context.Context, opt *github.CommitsListOptions) ([]*github.RepositoryCommit, *github.Response, error) {
 			var commits []*github.RepositoryCommit
 			commits = []*github.RepositoryCommit{
-				&github.RepositoryCommit{
+				{
 					SHA: github.String("04e0917e448b662c2b16330fad50e97af16ff27a"),
 				},
-				&github.RepositoryCommit{
+				{
 					SHA: github.String("04e0917e448b662c2b16330fad50e97af16ff27b"),
 				},
-				&github.RepositoryCommit{
+				{
 					SHA: github.String("04e0917e448b662c2b16330fad50e97af16ff27c"),
 				},
 			}

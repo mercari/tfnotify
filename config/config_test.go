@@ -427,7 +427,7 @@ func createDummy(file string) {
 	if _, err := os.Stat(file); err == nil {
 		return
 	}
-	f, err := os.OpenFile(file, os.O_RDONLY|os.O_CREATE, 0666)
+	f, err := os.OpenFile(file, os.O_RDONLY|os.O_CREATE, 0o666)
 	if err != nil {
 		panic(err)
 	}

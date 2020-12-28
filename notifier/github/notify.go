@@ -2,8 +2,9 @@ package github
 
 import (
 	"context"
-	"github.com/mercari/tfnotify/terraform"
 	"net/http"
+
+	"github.com/mercari/tfnotify/terraform"
 )
 
 // NotifyService handles communication with the notification related

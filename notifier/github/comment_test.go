@@ -69,11 +69,11 @@ func TestCommentPost(t *testing.T) {
 
 func TestCommentList(t *testing.T) {
 	comments := []*github.IssueComment{
-		&github.IssueComment{
+		{
 			ID:   github.Int64(371748792),
 			Body: github.String("comment 1"),
 		},
-		&github.IssueComment{
+		{
 			ID:   github.Int64(371765743),
 			Body: github.String("comment 2"),
 		},
@@ -163,19 +163,19 @@ func TestCommentGetDuplicates(t *testing.T) {
 	api.FakeIssuesListComments = func(ctx context.Context, number int, opt *github.IssueListCommentsOptions) ([]*github.IssueComment, *github.Response, error) {
 		var comments []*github.IssueComment
 		comments = []*github.IssueComment{
-			&github.IssueComment{
+			{
 				ID:   github.Int64(371748792),
 				Body: github.String("## Plan result\nfoo message\n"),
 			},
-			&github.IssueComment{
+			{
 				ID:   github.Int64(371765743),
 				Body: github.String("## Plan result\nbar message\n"),
 			},
-			&github.IssueComment{
+			{
 				ID:   github.Int64(371765744),
 				Body: github.String("## Plan result\nbaz message\n"),
 			},
-			&github.IssueComment{
+			{
 				ID:   github.Int64(371765745),
 				Body: github.String("## Plan result <build URL>\nbaz message\n"),
 			},
@@ -192,7 +192,7 @@ func TestCommentGetDuplicates(t *testing.T) {
 			title:   "## Plan result",
 			message: "foo message",
 			comments: []*github.IssueComment{
-				&github.IssueComment{
+				{
 					ID:   github.Int64(371748792),
 					Body: github.String("## Plan result\nfoo message\n"),
 				},
@@ -207,11 +207,11 @@ func TestCommentGetDuplicates(t *testing.T) {
 			title:   "## Plan result",
 			message: "baz message",
 			comments: []*github.IssueComment{
-				&github.IssueComment{
+				{
 					ID:   github.Int64(371765744),
 					Body: github.String("## Plan result\nbaz message\n"),
 				},
-				&github.IssueComment{
+				{
 					ID:   github.Int64(371765745),
 					Body: github.String("## Plan result <build URL>\nbaz message\n"),
 				},

@@ -68,11 +68,11 @@ func TestCommentPost(t *testing.T) {
 
 func TestCommentList(t *testing.T) {
 	comments := []*gitlab.Note{
-		&gitlab.Note{
+		{
 			ID:   371748792,
 			Body: "comment 1",
 		},
-		&gitlab.Note{
+		{
 			ID:   371765743,
 			Body: "comment 2",
 		},
