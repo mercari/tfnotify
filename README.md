@@ -17,7 +17,7 @@ tfnotify parses Terraform commands' execution result and applies it to an arbitr
 ## Motivation
 
 There are commands such as `plan` and `apply` on Terraform command, but many developers think they would like to check if the execution of those commands succeeded.
-Terraform commands are often executed via CI like Circle CI, but in that case you need to go to the CI page to check it.
+Terraform commands are often executed via CI like CircleCI, but in that case you need to go to the CI page to check it.
 This is very troublesome. It is very efficient if you can check it with GitHub comments or Slack etc.
 You can do this by using this command.
 
@@ -372,7 +372,7 @@ terraform:
 
 Currently, supported CI are here:
 
-- Circle CI
+- CircleCI
 - Travis CI
 - AWS CodeBuild
 - TeamCity
