@@ -54,7 +54,7 @@ func TestNotify(t *testing.T) {
 			t.Fatal(err)
 		}
 		client.API = &fake
-		exitCode, err := client.Notify.Notify(testCase.body)
+		exitCode, err := client.Notify.Notify(context.Background(), testCase.body)
 		if (err == nil) != testCase.ok {
 			t.Errorf("got error %q", err)
 		}

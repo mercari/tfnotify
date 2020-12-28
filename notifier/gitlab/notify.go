@@ -1,6 +1,8 @@
 package gitlab
 
 import (
+	"context"
+
 	"github.com/mercari/tfnotify/terraform"
 )
 
@@ -9,7 +11,7 @@ import (
 type NotifyService service
 
 // Notify posts comment optimized for notifications
-func (g *NotifyService) Notify(body string) (exit int, err error) {
+func (g *NotifyService) Notify(ctx context.Context, body string) (exit int, err error) {
 	cfg := g.client.Config
 	parser := g.client.Config.Parser
 	template := g.client.Config.Template

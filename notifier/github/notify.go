@@ -2,8 +2,9 @@ package github
 
 import (
 	"context"
-	"github.com/mercari/tfnotify/terraform"
 	"net/http"
+
+	"github.com/mercari/tfnotify/terraform"
 )
 
 // NotifyService handles communication with the notification related
@@ -11,7 +12,7 @@ import (
 type NotifyService service
 
 // Notify posts comment optimized for notifications
-func (g *NotifyService) Notify(body string) (exit int, err error) {
+func (g *NotifyService) Notify(ctx context.Context, body string) (exit int, err error) {
 	cfg := g.client.Config
 	parser := g.client.Config.Parser
 	template := g.client.Config.Template
@@ -28,7 +29,7 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 	if isPlan {
 		if result.HasDestroy && cfg.WarnDestroy {
 			// Notify destroy warning as a new comment before normal plan result
-			if err = g.notifyDestoryWarning(body, result); err != nil {
+			if err = g.notifyDestoryWarning(ctx, body, result); err != nil {
 				return result.ExitCode, err
 			}
 		}
@@ -78,7 +79,7 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 	value := template.GetValue()
 
 	if cfg.PR.IsNumber() {
-		g.client.Comment.DeleteDuplicates(value.Title)
+		g.client.Comment.DeleteDuplicates(ctx, value.Title)
 	}
 
 	_, isApply := parser.(*terraform.ApplyParser)
@@ -96,13 +97,13 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 		}
 	}
 
-	return result.ExitCode, g.client.Comment.Post(body, PostOptions{
+	return result.ExitCode, g.client.Comment.Post(ctx, body, PostOptions{
 		Number:   cfg.PR.Number,
 		Revision: cfg.PR.Revision,
 	})
 }
 
-func (g *NotifyService) notifyDestoryWarning(body string, result terraform.ParseResult) error {
+func (g *NotifyService) notifyDestoryWarning(ctx context.Context, body string, result terraform.ParseResult) error {
 	cfg := g.client.Config
 	destroyWarningTemplate := g.client.Config.DestroyWarningTemplate
 	destroyWarningTemplate.SetValue(terraform.CommonTemplate{
@@ -118,7 +119,7 @@ func (g *NotifyService) notifyDestoryWarning(body string, result terraform.Parse
 		return err
 	}
 
-	return g.client.Comment.Post(body, PostOptions{
+	return g.client.Comment.Post(ctx, body, PostOptions{
 		Number:   cfg.PR.Number,
 		Revision: cfg.PR.Revision,
 	})

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -33,7 +34,7 @@ type tfnotify struct {
 }
 
 // Run sends the notification with notifier
-func (t *tfnotify) Run() error {
+func (t *tfnotify) Run(ctx context.Context) error {
 	ciname := t.config.CI
 	if t.context.GlobalString("ci") != "" {
 		ciname = t.context.GlobalString("ci")
@@ -190,7 +191,7 @@ func (t *tfnotify) Run() error {
 		return fmt.Errorf("no notifier specified at all")
 	}
 
-	return NewExitError(notifier.Notify(tee(os.Stdin, os.Stdout)))
+	return NewExitError(notifier.Notify(ctx, tee(os.Stdin, os.Stdout)))
 }
 
 func main() {
@@ -288,7 +289,7 @@ func cmdFmt(ctx *cli.Context) error {
 		parser:   terraform.NewFmtParser(),
 		template: terraform.NewFmtTemplate(cfg.Terraform.Fmt.Template),
 	}
-	return t.Run()
+	return t.Run(context.Background())
 }
 
 func cmdPlan(ctx *cli.Context) error {
@@ -308,7 +309,7 @@ func cmdPlan(ctx *cli.Context) error {
 		destroyWarningTemplate: terraform.NewDestroyWarningTemplate(cfg.Terraform.Plan.WhenDestroy.Template),
 		warnDestroy:            warnDestroy,
 	}
-	return t.Run()
+	return t.Run(context.Background())
 }
 
 func cmdApply(ctx *cli.Context) error {
@@ -322,5 +323,5 @@ func cmdApply(ctx *cli.Context) error {
 		parser:   terraform.NewApplyParser(),
 		template: terraform.NewApplyTemplate(cfg.Terraform.Apply.Template),
 	}
-	return t.Run()
+	return t.Run(context.Background())
 }

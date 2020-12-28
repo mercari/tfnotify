@@ -19,10 +19,10 @@ type PostOptions struct {
 }
 
 // Post posts comment
-func (g *CommentService) Post(body string, opt PostOptions) error {
+func (g *CommentService) Post(ctx context.Context, body string, opt PostOptions) error {
 	if opt.Number != 0 {
 		_, _, err := g.client.API.IssuesCreateComment(
-			context.Background(),
+			ctx,
 			opt.Number,
 			&github.IssueComment{Body: &body},
 		)
@@ -30,7 +30,7 @@ func (g *CommentService) Post(body string, opt PostOptions) error {
 	}
 	if opt.Revision != "" {
 		_, _, err := g.client.API.RepositoriesCreateComment(
-			context.Background(),
+			ctx,
 			opt.Revision,
 			&github.RepositoryComment{Body: &body},
 		)
@@ -40,9 +40,9 @@ func (g *CommentService) Post(body string, opt PostOptions) error {
 }
 
 // List lists comments on GitHub issues/pull requests
-func (g *CommentService) List(number int) ([]*github.IssueComment, error) {
+func (g *CommentService) List(ctx context.Context, number int) ([]*github.IssueComment, error) {
 	comments, _, err := g.client.API.IssuesListComments(
-		context.Background(),
+		ctx,
 		number,
 		&github.IssueListCommentsOptions{},
 	)
@@ -50,32 +50,32 @@ func (g *CommentService) List(number int) ([]*github.IssueComment, error) {
 }
 
 // Delete deletes comment on GitHub issues/pull requests
-func (g *CommentService) Delete(id int) error {
+func (g *CommentService) Delete(ctx context.Context, id int) error {
 	_, err := g.client.API.IssuesDeleteComment(
-		context.Background(),
+		ctx,
 		int64(id),
 	)
 	return err
 }
 
 // DeleteDuplicates deletes duplicate comments containing arbitrary character strings
-func (g *CommentService) DeleteDuplicates(title string) {
+func (g *CommentService) DeleteDuplicates(ctx context.Context, title string) {
 	var ids []int64
-	comments := g.getDuplicates(title)
+	comments := g.getDuplicates(ctx, title)
 	for _, comment := range comments {
 		ids = append(ids, *comment.ID)
 	}
 	for _, id := range ids {
 		// don't handle error
-		g.client.Comment.Delete(int(id))
+		g.client.Comment.Delete(ctx, int(id))
 	}
 }
 
-func (g *CommentService) getDuplicates(title string) []*github.IssueComment {
+func (g *CommentService) getDuplicates(ctx context.Context, title string) []*github.IssueComment {
 	var dup []*github.IssueComment
 	re := regexp.MustCompile(`(?m)^(\n+)?` + title + `( +.*)?\n+` + g.client.Config.PR.Message + `\n+`)
 
-	comments, _ := g.client.Comment.List(g.client.Config.PR.Number)
+	comments, _ := g.client.Comment.List(ctx, g.client.Config.PR.Number)
 	for _, comment := range comments {
 		if re.MatchString(*comment.Body) {
 			dup = append(dup, comment)

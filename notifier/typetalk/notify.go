@@ -11,7 +11,7 @@ import (
 type NotifyService service
 
 // Notify posts message to Typetalk.
-func (s *NotifyService) Notify(body string) (exit int, err error) {
+func (s *NotifyService) Notify(ctx context.Context, body string) (exit int, err error) {
 	cfg := s.client.Config
 	parser := s.client.Config.Parser
 	template := s.client.Config.Template
@@ -39,6 +39,6 @@ func (s *NotifyService) Notify(body string) (exit int, err error) {
 		return result.ExitCode, err
 	}
 
-	_, _, err = s.client.API.ChatPostMessage(context.Background(), text)
+	_, _, err = s.client.API.ChatPostMessage(ctx, text)
 	return result.ExitCode, err
 }

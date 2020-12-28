@@ -1,6 +1,7 @@
 package github
 
 import (
+	"context"
 	"testing"
 
 	"github.com/mercari/tfnotify/terraform"
@@ -215,7 +216,7 @@ func TestNotifyNotify(t *testing.T) {
 		}
 		api := newFakeAPI()
 		client.API = &api
-		exitCode, err := client.Notify.Notify(testCase.body)
+		exitCode, err := client.Notify.Notify(context.Background(), testCase.body)
 		if (err == nil) != testCase.ok {
 			t.Errorf("got error %q", err)
 		}

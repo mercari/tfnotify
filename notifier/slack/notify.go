@@ -13,7 +13,7 @@ import (
 type NotifyService service
 
 // Notify posts comment optimized for notifications
-func (s *NotifyService) Notify(body string) (exit int, err error) {
+func (s *NotifyService) Notify(ctx context.Context, body string) (exit int, err error) {
 	cfg := s.client.Config
 	parser := s.client.Config.Parser
 	template := s.client.Config.Template
@@ -60,6 +60,6 @@ func (s *NotifyService) Notify(body string) (exit int, err error) {
 
 	attachments.Append(attachment)
 	// _, err = s.client.Chat().PostMessage(cfg.Channel).Username(cfg.Botname).SetAttachments(attachments).Do(cfg.Context)
-	_, err = s.client.API.ChatPostMessage(context.Background(), attachments)
+	_, err = s.client.API.ChatPostMessage(ctx, attachments)
 	return result.ExitCode, err
 }

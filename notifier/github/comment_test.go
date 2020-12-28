@@ -60,7 +60,7 @@ func TestCommentPost(t *testing.T) {
 		}
 		api := newFakeAPI()
 		client.API = &api
-		err = client.Comment.Post(testCase.body, testCase.opt)
+		err = client.Comment.Post(context.Background(), testCase.body, testCase.opt)
 		if (err == nil) != testCase.ok {
 			t.Errorf("got error %q", err)
 		}
@@ -111,7 +111,7 @@ func TestCommentList(t *testing.T) {
 		}
 		api := newFakeAPI()
 		client.API = &api
-		comments, err := client.Comment.List(testCase.number)
+		comments, err := client.Comment.List(context.Background(), testCase.number)
 		if (err == nil) != testCase.ok {
 			t.Errorf("got error %q", err)
 		}
@@ -151,7 +151,7 @@ func TestCommentDelete(t *testing.T) {
 		}
 		api := newFakeAPI()
 		client.API = &api
-		err = client.Comment.Delete(testCase.id)
+		err = client.Comment.Delete(context.Background(), testCase.id)
 		if (err == nil) != testCase.ok {
 			t.Errorf("got error %q", err)
 		}
@@ -227,7 +227,7 @@ func TestCommentGetDuplicates(t *testing.T) {
 			t.Fatal(err)
 		}
 		client.API = &api
-		comments := client.Comment.getDuplicates(testCase.title)
+		comments := client.Comment.getDuplicates(context.Background(), testCase.title)
 		if !reflect.DeepEqual(comments, testCase.comments) {
 			t.Errorf("got %q but want %q", comments, testCase.comments)
 		}

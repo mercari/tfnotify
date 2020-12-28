@@ -1,6 +1,8 @@
 package notifier
 
+import "context"
+
 // Notifier is a notification interface
 type Notifier interface {
-	Notify(body string) (exit int, err error)
+	Notify(ctx context.Context, body string) (exit int, err error)
 }
