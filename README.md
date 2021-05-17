@@ -1,14 +1,12 @@
 tfnotify
 ========
 
-[![][release-svg]][release] [![][test-svg]][test] [![][codecov-svg]][codecov] [![][goreportcard-svg]][goreportcard]
+[![][release-svg]][release] [![][test-svg]][test] [![][goreportcard-svg]][goreportcard]
 
 [release]: https://github.com/mercari/tfnotify/actions?query=workflow%3Arelease
 [release-svg]: https://github.com/mercari/tfnotify/workflows/release/badge.svg
 [test]: https://github.com/mercari/tfnotify/actions?query=workflow%3Atest
 [test-svg]: https://github.com/mercari/tfnotify/workflows/test/badge.svg
-[codecov]: https://codecov.io/gh/mercari/tfnotify
-[codecov-svg]: https://codecov.io/gh/mercari/tfnotify/branch/master/graph/badge.svg
 [goreportcard]: https://goreportcard.com/report/github.com/mercari/tfnotify
 [goreportcard-svg]: https://goreportcard.com/badge/github.com/mercari/tfnotify
 
