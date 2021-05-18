@@ -469,12 +469,6 @@ func TestFind(t *testing.T) {
 			ok:     true,
 		},
 		{
-			// invalid config
-			file:   "codecov.yml",
-			expect: "",
-			ok:     false,
-		},
-		{
 			// in case of no args passed
 			file:   "",
 			expect: "tfnotify.yaml",
