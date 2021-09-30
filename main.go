@@ -153,14 +153,15 @@ func (t *tfnotify) Run() error {
 		notifier = client.Notify
 	case "slack":
 		client, err := slack.NewClient(slack.Config{
-			Token:    t.config.Notifier.Slack.Token,
-			Channel:  t.config.Notifier.Slack.Channel,
-			Botname:  t.config.Notifier.Slack.Bot,
-			Title:    t.context.String("title"),
-			Message:  t.context.String("message"),
-			CI:       ci.URL,
-			Parser:   t.parser,
-			Template: t.template,
+			Token:        t.config.Notifier.Slack.Token,
+			Channel:      t.config.Notifier.Slack.Channel,
+			Botname:      t.config.Notifier.Slack.Bot,
+			Title:        t.context.String("title"),
+			Message:      t.context.String("message"),
+			CI:           ci.URL,
+			Parser:       t.parser,
+			UseRawOutput: t.config.Terraform.UseRawOutput,
+			Template:     t.template,
 		})
 		if err != nil {
 			return err
