@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+const (
+	defaultCloudBuildRegion = "global"
+)
+
 // CI represents a common information obtained from all CI platforms
 type CI struct {
 	PR  PullRequest
@@ -153,7 +157,7 @@ func cloudbuild() (ci CI, err error) {
 
 	region := os.Getenv("REGION")
 	if region == "" {
-		region = "global"
+		region = defaultCloudBuildRegion
 	}
 
 	ci.URL = fmt.Sprintf(
