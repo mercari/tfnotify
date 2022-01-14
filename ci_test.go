@@ -766,6 +766,7 @@ func TestCloudBuild(t *testing.T) {
 		"BUILD_ID",
 		"PROJECT_ID",
 		"_PR_NUMBER",
+		"REGION",
 	}
 	saveEnvs := make(map[string]string)
 	for _, key := range envs {
@@ -790,13 +791,14 @@ func TestCloudBuild(t *testing.T) {
 				os.Setenv("BUILD_ID", "build-id")
 				os.Setenv("PROJECT_ID", "gcp-project-id")
 				os.Setenv("_PR_NUMBER", "123")
+				os.Setenv("REGION", "asia-northeast1")
 			},
 			ci: CI{
 				PR: PullRequest{
 					Revision: "abcdefg",
 					Number:   123,
 				},
-				URL: "https://console.cloud.google.com/cloud-build/builds/build-id?project=gcp-project-id",
+				URL: "https://console.cloud.google.com/cloud-build/builds;region=asia-northeast1/build-id?project=gcp-project-id",
 			},
 			ok: true,
 		},
@@ -806,13 +808,14 @@ func TestCloudBuild(t *testing.T) {
 				os.Setenv("BUILD_ID", "build-id")
 				os.Setenv("PROJECT_ID", "gcp-project-id")
 				os.Setenv("_PR_NUMBER", "")
+				os.Setenv("REGION", "")
 			},
 			ci: CI{
 				PR: PullRequest{
 					Revision: "",
 					Number:   0,
 				},
-				URL: "https://console.cloud.google.com/cloud-build/builds/build-id?project=gcp-project-id",
+				URL: "https://console.cloud.google.com/cloud-build/builds;region=global/build-id?project=gcp-project-id",
 			},
 			ok: true,
 		},
@@ -828,7 +831,7 @@ func TestCloudBuild(t *testing.T) {
 					Revision: "",
 					Number:   0,
 				},
-				URL: "https://console.cloud.google.com/cloud-build/builds/build-id?project=gcp-project-id",
+				URL: "https://console.cloud.google.com/cloud-build/builds;region=global/build-id?project=gcp-project-id",
 			},
 			ok: false,
 		},

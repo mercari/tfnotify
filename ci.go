@@ -150,8 +150,15 @@ func githubActions() (ci CI, err error) {
 func cloudbuild() (ci CI, err error) {
 	ci.PR.Number = 0
 	ci.PR.Revision = os.Getenv("COMMIT_SHA")
+
+	region := os.Getenv("REGION")
+	if region == "" {
+		region = "global"
+	}
+
 	ci.URL = fmt.Sprintf(
-		"https://console.cloud.google.com/cloud-build/builds/%s?project=%s",
+		"https://console.cloud.google.com/cloud-build/builds;region=%s/%s?project=%s",
+		region,
 		os.Getenv("BUILD_ID"),
 		os.Getenv("PROJECT_ID"),
 	)
