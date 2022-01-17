@@ -791,7 +791,7 @@ func TestCloudBuild(t *testing.T) {
 				os.Setenv("BUILD_ID", "build-id")
 				os.Setenv("PROJECT_ID", "gcp-project-id")
 				os.Setenv("_PR_NUMBER", "123")
-				os.Setenv("REGION", "asia-northeast1")
+				os.Setenv("_REGION", "asia-northeast1")
 			},
 			ci: CI{
 				PR: PullRequest{
@@ -808,7 +808,7 @@ func TestCloudBuild(t *testing.T) {
 				os.Setenv("BUILD_ID", "build-id")
 				os.Setenv("PROJECT_ID", "gcp-project-id")
 				os.Setenv("_PR_NUMBER", "")
-				os.Setenv("REGION", "")
+				os.Setenv("_REGION", "")
 			},
 			ci: CI{
 				PR: PullRequest{

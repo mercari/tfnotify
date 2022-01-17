@@ -155,7 +155,7 @@ func cloudbuild() (ci CI, err error) {
 	ci.PR.Number = 0
 	ci.PR.Revision = os.Getenv("COMMIT_SHA")
 
-	region := os.Getenv("REGION")
+	region := os.Getenv("_REGION")
 	if region == "" {
 		region = defaultCloudBuildRegion
 	}
