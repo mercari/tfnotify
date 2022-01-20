@@ -472,7 +472,7 @@ func TestPlanParserParse(t *testing.T) {
 			},
 		},
 		{
-			name: "plan ng pattern",
+			name: "plan ng pattern 0.12",
 			body: planFailureResult0_12,
 			result: ParseResult{
 				Result: `Error: Error refreshing state: 4 error(s) occurred:
@@ -490,7 +490,7 @@ func TestPlanParserParse(t *testing.T) {
 			},
 		},
 		{
-			name: "plan ng pattern",
+			name: "plan ng pattern 0.15",
 			body: planFailureResult0_15,
 			result: ParseResult{
 				Result: `| Error: Error refreshing state: 4 error(s) occurred:
@@ -593,7 +593,7 @@ func TestApplyParserParse(t *testing.T) {
 			},
 		},
 		{
-			name: "apply ng pattern",
+			name: "apply ng pattern 0.12",
 			body: applyFailureResult0_12,
 			result: ParseResult{
 				Result: `Error: Batch "project/tfnotify-jp-tfnotify-prod/services:batchEnable" for request "Enable Project Services tfnotify-jp-tfnotify-prod: map[logging.googleapis.com:{}]" returned error: failed to send enable services request: googleapi: Error 403: The caller does not have permission, forbidden
@@ -607,7 +607,7 @@ func TestApplyParserParse(t *testing.T) {
 			},
 		},
 		{
-			name: "apply ng pattern",
+			name: "apply ng pattern 0.15",
 			body: applyFailureResult0_15,
 			result: ParseResult{
 				Result: `| Error: Batch "project/tfnotify-jp-tfnotify-prod/services:batchEnable" for request "Enable Project Services tfnotify-jp-tfnotify-prod: map[logging.googleapis.com:{}]" returned error: failed to send enable services request: googleapi: Error 403: The caller does not have permission, forbidden
