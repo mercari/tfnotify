@@ -368,7 +368,7 @@ google_dns_record_set.dev_tfnotifyapps_com: Refreshing state...
 
 
 | Error: Batch "project/tfnotify-jp-tfnotify-prod/services:batchEnable" for request "Enable Project Services tfnotify-jp-tfnotify-prod: map[logging.googleapis.com:{}]" returned error: failed to send enable services request: googleapi: Error 403: The caller does not have permission, forbidden
-| 
+|
 |   on .terraform/modules/tfnotify-jp-tfnotify-prod/google_project_service.tf line 6, in resource "google_project_service" "gcp_api_service":
 |    6: resource "google_project_service" "gcp_api_service" {
 |
@@ -612,10 +612,10 @@ func TestApplyParserParse(t *testing.T) {
 			result: ParseResult{
 				Result: `| Error: Batch "project/tfnotify-jp-tfnotify-prod/services:batchEnable" for request "Enable Project Services tfnotify-jp-tfnotify-prod: map[logging.googleapis.com:{}]" returned error: failed to send enable services request: googleapi: Error 403: The caller does not have permission, forbidden
 |
-| on .terraform/modules/tfnotify-jp-tfnotify-prod/google_project_service.tf line 6, in resource "google_project_service" "gcp_api_service":
-|  6: resource "google_project_service" "gcp_api_service" {
+|   on .terraform/modules/tfnotify-jp-tfnotify-prod/google_project_service.tf line 6, in resource "google_project_service" "gcp_api_service":
+|    6: resource "google_project_service" "gcp_api_service" {
 |
-`,
+|`,
 				ExitCode: 1,
 				Error:    nil,
 			},
