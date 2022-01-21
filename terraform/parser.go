@@ -62,7 +62,7 @@ func NewFmtParser() *FmtParser {
 func NewPlanParser() *PlanParser {
 	return &PlanParser{
 		Pass: regexp.MustCompile(`(?m)^(Plan: \d|No changes.)`),
-		Fail: regexp.MustCompile(`(?m)^(\|\s{1})?(Error: )`),
+		Fail: regexp.MustCompile(`(?m)^(│\s{1})?(Error: )`),
 		// "0 to destroy" should be treated as "no destroy"
 		HasDestroy:   regexp.MustCompile(`(?m)([1-9][0-9]* to destroy.)`),
 		HasNoChanges: regexp.MustCompile(`(?m)^(No changes. Infrastructure is up-to-date.)`),
@@ -73,7 +73,7 @@ func NewPlanParser() *PlanParser {
 func NewApplyParser() *ApplyParser {
 	return &ApplyParser{
 		Pass: regexp.MustCompile(`(?m)^(Apply complete!)`),
-		Fail: regexp.MustCompile(`(?m)^(\|\s{1})?(Error: )`),
+		Fail: regexp.MustCompile(`(?m)^(│\s{1})?(Error: )`),
 	}
 }
 
