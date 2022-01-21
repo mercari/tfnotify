@@ -104,12 +104,14 @@ xxxxxxxxx
 xxxxxxxxx
 xxxxxxxxx
 
-| Error: Error refreshing state: 4 error(s) occurred:
-| 
-| * google_sql_database.main: 1 error(s) occurred:
-| 
-| * google_sql_database.main: google_sql_database.main: Error reading SQL Database "main" in instance "main-master-instance": googleapi: Error 409: The instance or operation is not in an appropriate state to handle the request., invalidState
-| * google_sql_user.proxyuser_main: 1 error(s) occurred:
+╷
+│ Error: Error refreshing state: 4 error(s) occurred:
+│
+│ * google_sql_database.main: 1 error(s) occurred:
+│ 
+│ * google_sql_database.main: google_sql_database.main: Error reading SQL Database "main" in instance "main-master-instance": googleapi: Error 409: The instance or operation is not in an appropriate state to handle the request., invalidState
+│ * google_sql_user.proxyuser_main: 1 error(s) occurred:
+╵
 `
 
 const planNoChanges = `
@@ -366,13 +368,12 @@ aws_iam_role_policy_attachment.datadog_aws_integration: Refreshing state...
 google_dns_managed_zone.tfnotifyapps_com: Refreshing state...
 google_dns_record_set.dev_tfnotifyapps_com: Refreshing state...
 
-
-| Error: Batch "project/tfnotify-jp-tfnotify-prod/services:batchEnable" for request "Enable Project Services tfnotify-jp-tfnotify-prod: map[logging.googleapis.com:{}]" returned error: failed to send enable services request: googleapi: Error 403: The caller does not have permission, forbidden
-|
-|   on .terraform/modules/tfnotify-jp-tfnotify-prod/google_project_service.tf line 6, in resource "google_project_service" "gcp_api_service":
-|    6: resource "google_project_service" "gcp_api_service" {
-|
-|
+╷
+│ Error: Batch "project/tfnotify-jp-tfnotify-prod/services:batchEnable" for request "Enable Project Services tfnotify-jp-tfnotify-prod: map[logging.googleapis.com:{}]" returned error: failed to send enable services request: googleapi: Error 403: The caller does not have permission, forbidden
+│
+│   on .terraform/modules/tfnotify-jp-tfnotify-prod/google_project_service.tf line 6, in resource "google_project_service" "gcp_api_service":
+│    6: resource "google_project_service" "gcp_api_service" {
+╵
 `
 
 func TestDefaultParserParse(t *testing.T) {
@@ -493,12 +494,13 @@ func TestPlanParserParse(t *testing.T) {
 			name: "plan ng pattern 0.15",
 			body: planFailureResult0_15,
 			result: ParseResult{
-				Result: `| Error: Error refreshing state: 4 error(s) occurred:
-| 
-| * google_sql_database.main: 1 error(s) occurred:
-| 
-| * google_sql_database.main: google_sql_database.main: Error reading SQL Database "main" in instance "main-master-instance": googleapi: Error 409: The instance or operation is not in an appropriate state to handle the request., invalidState
-| * google_sql_user.proxyuser_main: 1 error(s) occurred:`,
+				Result: `│ Error: Error refreshing state: 4 error(s) occurred:
+│
+│ * google_sql_database.main: 1 error(s) occurred:
+│ 
+│ * google_sql_database.main: google_sql_database.main: Error reading SQL Database "main" in instance "main-master-instance": googleapi: Error 409: The instance or operation is not in an appropriate state to handle the request., invalidState
+│ * google_sql_user.proxyuser_main: 1 error(s) occurred:
+╵`,
 				HasAddOrUpdateOnly: false,
 				HasDestroy:         false,
 				HasNoChanges:       false,
@@ -610,12 +612,11 @@ func TestApplyParserParse(t *testing.T) {
 			name: "apply ng pattern 0.15",
 			body: applyFailureResult0_15,
 			result: ParseResult{
-				Result: `| Error: Batch "project/tfnotify-jp-tfnotify-prod/services:batchEnable" for request "Enable Project Services tfnotify-jp-tfnotify-prod: map[logging.googleapis.com:{}]" returned error: failed to send enable services request: googleapi: Error 403: The caller does not have permission, forbidden
-|
-|   on .terraform/modules/tfnotify-jp-tfnotify-prod/google_project_service.tf line 6, in resource "google_project_service" "gcp_api_service":
-|    6: resource "google_project_service" "gcp_api_service" {
-|
-|`,
+				Result: `│ Error: Batch "project/tfnotify-jp-tfnotify-prod/services:batchEnable" for request "Enable Project Services tfnotify-jp-tfnotify-prod: map[logging.googleapis.com:{}]" returned error: failed to send enable services request: googleapi: Error 403: The caller does not have permission, forbidden
+│
+│   on .terraform/modules/tfnotify-jp-tfnotify-prod/google_project_service.tf line 6, in resource "google_project_service" "gcp_api_service":
+│    6: resource "google_project_service" "gcp_api_service" {
+╵`,
 				ExitCode: 1,
 				Error:    nil,
 			},
