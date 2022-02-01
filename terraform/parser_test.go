@@ -86,7 +86,7 @@ can't guarantee that exactly these actions will be performed if
 "terraform apply" is subsequently run.
 `
 
-const planOutputChangesOnlySuccessResult0_12 = `
+const planOnlyOutputChangesSuccessResult0_12 = `
 Refreshing Terraform state in-memory prior to plan...
 The refreshed state will be used to calculate this plan, but will not be
 persisted to local or remote state storage.
@@ -124,7 +124,7 @@ can't guarantee that exactly these actions will be performed if
 "terraform apply" is subsequently run.
 `
 
-const planOutputChangesOnlySuccessResult0_15 = `
+const planOnlyOutputChangesSuccessResult0_15 = `
 Refreshing Terraform state in-memory prior to plan...
 The refreshed state will be used to calculate this plan, but will not be
 persisted to local or remote state storage.
@@ -535,7 +535,7 @@ func TestPlanParserParse(t *testing.T) {
 		},
 		{
 			name: "plan output changes only pattern 0.12",
-			body: planOutputChangesOnlySuccessResult0_12,
+			body: planOnlyOutputChangesSuccessResult0_12,
 			result: ParseResult{
 				Result:             "Plan: 0 to add, 0 to change, 0 to destroy.",
 				HasAddOrUpdateOnly: true,
@@ -548,7 +548,7 @@ func TestPlanParserParse(t *testing.T) {
 		},
 		{
 			name: "plan output changes only pattern 0.15",
-			body: planOutputChangesOnlySuccessResult0_15,
+			body: planOnlyOutputChangesSuccessResult0_15,
 			result: ParseResult{
 				Result:             "Changes to Outputs:",
 				HasAddOrUpdateOnly: true,
