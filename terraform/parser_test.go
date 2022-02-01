@@ -86,6 +86,80 @@ can't guarantee that exactly these actions will be performed if
 "terraform apply" is subsequently run.
 `
 
+const planOutputChangesOnlySuccessResult0_12 = `
+Refreshing Terraform state in-memory prior to plan...
+The refreshed state will be used to calculate this plan, but will not be
+persisted to local or remote state storage.
+
+data.terraform_remote_state.teams_platform_development: Refreshing state...
+google_project.my_project: Refreshing state...
+aws_iam_policy.datadog_aws_integration: Refreshing state...
+aws_iam_user.teams_terraform: Refreshing state...
+aws_iam_role.datadog_aws_integration: Refreshing state...
+google_project_services.my_project: Refreshing state...
+google_bigquery_dataset.gateway_access_log: Refreshing state...
+aws_iam_role_policy_attachment.datadog_aws_integration: Refreshing state...
+google_logging_project_sink.gateway_access_log_bigquery_sink: Refreshing state...
+google_project_iam_member.gateway_access_log_bigquery_sink_writer_is_bigquery_data_editor: Refreshing state...
+google_dns_managed_zone.tfnotifyapps_com: Refreshing state...
+google_dns_record_set.dev_tfnotifyapps_com: Refreshing state...
+
+------------------------------------------------------------------------
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+Plan: 0 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + aws_instance_name = "my-instance"
+
+------------------------------------------------------------------------
+
+Note: You didn't specify an "-out" parameter to save this plan, so Terraform
+can't guarantee that exactly these actions will be performed if
+"terraform apply" is subsequently run.
+`
+
+const planOutputChangesOnlySuccessResult0_15 = `
+Refreshing Terraform state in-memory prior to plan...
+The refreshed state will be used to calculate this plan, but will not be
+persisted to local or remote state storage.
+
+data.terraform_remote_state.teams_platform_development: Refreshing state...
+google_project.my_project: Refreshing state...
+aws_iam_policy.datadog_aws_integration: Refreshing state...
+aws_iam_user.teams_terraform: Refreshing state...
+aws_iam_role.datadog_aws_integration: Refreshing state...
+google_project_services.my_project: Refreshing state...
+google_bigquery_dataset.gateway_access_log: Refreshing state...
+aws_iam_role_policy_attachment.datadog_aws_integration: Refreshing state...
+google_logging_project_sink.gateway_access_log_bigquery_sink: Refreshing state...
+google_project_iam_member.gateway_access_log_bigquery_sink_writer_is_bigquery_data_editor: Refreshing state...
+google_dns_managed_zone.tfnotifyapps_com: Refreshing state...
+google_dns_record_set.dev_tfnotifyapps_com: Refreshing state...
+
+------------------------------------------------------------------------
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+Changes to Outputs:
+  + aws_instance_name = "my-instance"
+
+------------------------------------------------------------------------
+
+Note: You didn't specify an "-out" parameter to save this plan, so Terraform
+can't guarantee that exactly these actions will be performed if
+"terraform apply" is subsequently run.
+`
+
 const planFailureResult0_12 = `
 xxxxxxxxx
 xxxxxxxxx
@@ -451,6 +525,32 @@ func TestPlanParserParse(t *testing.T) {
 			body: planSuccessResult,
 			result: ParseResult{
 				Result:             "Plan: 1 to add, 0 to change, 0 to destroy.",
+				HasAddOrUpdateOnly: true,
+				HasDestroy:         false,
+				HasNoChanges:       false,
+				HasPlanError:       false,
+				ExitCode:           0,
+				Error:              nil,
+			},
+		},
+		{
+			name: "plan output changes only pattern 0.12",
+			body: planOutputChangesOnlySuccessResult0_12,
+			result: ParseResult{
+				Result:             "Plan: 0 to add, 0 to change, 0 to destroy.",
+				HasAddOrUpdateOnly: true,
+				HasDestroy:         false,
+				HasNoChanges:       false,
+				HasPlanError:       false,
+				ExitCode:           0,
+				Error:              nil,
+			},
+		},
+		{
+			name: "plan output changes only pattern 0.15",
+			body: planOutputChangesOnlySuccessResult0_15,
+			result: ParseResult{
+				Result:             "Changes to Outputs:",
 				HasAddOrUpdateOnly: true,
 				HasDestroy:         false,
 				HasNoChanges:       false,

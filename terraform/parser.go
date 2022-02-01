@@ -61,7 +61,7 @@ func NewFmtParser() *FmtParser {
 // NewPlanParser is PlanParser initialized with its Regexp
 func NewPlanParser() *PlanParser {
 	return &PlanParser{
-		Pass: regexp.MustCompile(`(?m)^(Plan: \d|No changes.)`),
+		Pass: regexp.MustCompile(`(?m)^((Plan: \d|No changes.)|(Changes to Outputs:))`),
 		Fail: regexp.MustCompile(`(?m)^(│\s{1})?(Error: )`),
 		// "0 to destroy" should be treated as "no destroy"
 		HasDestroy:   regexp.MustCompile(`(?m)([1-9][0-9]* to destroy.)`),
