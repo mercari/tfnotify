@@ -69,10 +69,11 @@ type service struct {
 // NewClient returns Client initialized with Config
 func NewClient(cfg Config) (*Client, error) {
 	token := cfg.Token
-	token = strings.TrimPrefix(token, "$")
-	if token == EnvToken {
-		token = os.Getenv(EnvToken)
+
+	if strings.HasPrefix(token, "$") {
+		token = os.Getenv(strings.TrimPrefix(token, "$"))
 	}
+
 	if token == "" {
 		return &Client{}, errors.New("github token is missing")
 	}

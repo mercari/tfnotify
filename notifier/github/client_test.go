@@ -2,6 +2,7 @@ package github
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -42,8 +43,20 @@ func TestNewClient(t *testing.T) {
 			expect:   "github token is missing",
 		},
 		{
+			// specify via env but not to be set env (part 3)
+			config:   Config{Token: "$TFNOTIFY_GITHUB_TOKEN"},
+			envToken: "",
+			expect:   "github token is missing",
+		},
+		{
 			// specify via env (part 2)
 			config:   Config{Token: "$GITHUB_TOKEN"},
+			envToken: "abcdefg",
+			expect:   "",
+		},
+		{
+			// specify via env (part 3)
+			config:   Config{Token: "$TFNOTIFY_GITHUB_TOKEN"},
 			envToken: "abcdefg",
 			expect:   "",
 		},
@@ -61,7 +74,13 @@ func TestNewClient(t *testing.T) {
 		},
 	}
 	for _, testCase := range testCases {
-		os.Setenv(EnvToken, testCase.envToken)
+		if strings.HasPrefix(testCase.config.Token, "$") {
+			key := strings.TrimPrefix(testCase.config.Token, "$")
+			os.Setenv(key, testCase.envToken)
+		} else {
+			os.Setenv(EnvToken, testCase.envToken)
+		}
+
 		_, err := NewClient(testCase.config)
 		if err == nil {
 			continue
