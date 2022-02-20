@@ -10,9 +10,6 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// EnvToken is GitHub API Token
-const EnvToken = "GITHUB_TOKEN"
-
 // EnvBaseURL is GitHub base URL. This can be set to a domain endpoint to use with GitHub Enterprise.
 const EnvBaseURL = "GITHUB_BASE_URL"
 

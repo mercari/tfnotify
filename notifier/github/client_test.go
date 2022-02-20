@@ -7,12 +7,6 @@ import (
 )
 
 func TestNewClient(t *testing.T) {
-	githubToken := os.Getenv(EnvToken)
-	defer func() {
-		os.Setenv(EnvToken, githubToken)
-	}()
-	os.Setenv(EnvToken, "")
-
 	testCases := []struct {
 		config   Config
 		envToken string
@@ -77,8 +71,6 @@ func TestNewClient(t *testing.T) {
 		if strings.HasPrefix(testCase.config.Token, "$") {
 			key := strings.TrimPrefix(testCase.config.Token, "$")
 			os.Setenv(key, testCase.envToken)
-		} else {
-			os.Setenv(EnvToken, testCase.envToken)
 		}
 
 		_, err := NewClient(testCase.config)
