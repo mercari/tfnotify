@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
@@ -708,11 +709,32 @@ func TestGitLabCI(t *testing.T) {
 	}
 }
 
+func createTempfile(content string) (*os.File, error) {
+	tempfile, err := ioutil.TempFile("", "")
+	if err != nil {
+		return tempfile, err
+	}
+
+	_, err = tempfile.Write([]byte(content))
+	if err != nil {
+		return tempfile, err
+	}
+
+	err = tempfile.Close()
+	if err != nil {
+		return tempfile, err
+	}
+
+	return tempfile, nil
+}
+
 func TestGitHubActions(t *testing.T) {
+
 	envs := []string{
 		"GITHUB_SHA",
 		"GITHUB_REPOSITORY",
 		"GITHUB_RUN_ID",
+		"GITHUB_EVENT_PATH",
 	}
 	saveEnvs := make(map[string]string)
 	for _, key := range envs {
@@ -727,15 +749,18 @@ func TestGitHubActions(t *testing.T) {
 
 	// https://help.github.com/ja/actions/configuring-and-managing-workflows/using-environment-variables
 	testCases := []struct {
-		fn func()
+		fn func() func()
 		ci CI
 		ok bool
 	}{
 		{
-			fn: func() {
+			fn: func() func() {
 				os.Setenv("GITHUB_SHA", "abcdefg")
 				os.Setenv("GITHUB_REPOSITORY", "mercari/tfnotify")
 				os.Setenv("GITHUB_RUN_ID", "12345")
+				os.Setenv("GITHUB_EVENT_PATH", "")
+
+				return func() {}
 			},
 			ci: CI{
 				PR: PullRequest{
@@ -746,10 +771,115 @@ func TestGitHubActions(t *testing.T) {
 			},
 			ok: true,
 		},
+		{
+			fn: func() func() {
+				os.Setenv("GITHUB_SHA", "abcdefg")
+				os.Setenv("GITHUB_REPOSITORY", "mercari/tfnotify")
+				os.Setenv("GITHUB_RUN_ID", "12345")
+
+				tempfile, _ := createTempfile("{}")
+				os.Setenv("GITHUB_EVENT_PATH", tempfile.Name())
+
+				return func() {
+					os.Remove(tempfile.Name())
+				}
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   0,
+				},
+				URL: "https://github.com/mercari/tfnotify/actions/runs/12345",
+			},
+			ok: true,
+		},
+		{
+			fn: func() func() {
+				os.Setenv("GITHUB_SHA", "abcdefg")
+				os.Setenv("GITHUB_REPOSITORY", "mercari/tfnotify")
+				os.Setenv("GITHUB_RUN_ID", "12345")
+
+				tempfile, _ := createTempfile(`
+					{
+						"issue": {
+							"number": 123
+						}
+					}
+				`)
+				os.Setenv("GITHUB_EVENT_PATH", tempfile.Name())
+
+				return func() {
+					os.Remove(tempfile.Name())
+				}
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   123,
+				},
+				URL: "https://github.com/mercari/tfnotify/actions/runs/12345",
+			},
+			ok: true,
+		},
+		{
+			fn: func() func() {
+				os.Setenv("GITHUB_SHA", "abcdefg")
+				os.Setenv("GITHUB_REPOSITORY", "mercari/tfnotify")
+				os.Setenv("GITHUB_RUN_ID", "12345")
+
+				tempfile, _ := createTempfile(`
+					{
+						"pull_request": {
+							"number": 234
+						}
+					}
+				`)
+				os.Setenv("GITHUB_EVENT_PATH", tempfile.Name())
+
+				return func() {
+					os.Remove(tempfile.Name())
+				}
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   234,
+				},
+				URL: "https://github.com/mercari/tfnotify/actions/runs/12345",
+			},
+			ok: true,
+		},
+		{
+			fn: func() func() {
+				os.Setenv("GITHUB_SHA", "abcdefg")
+				os.Setenv("GITHUB_REPOSITORY", "mercari/tfnotify")
+				os.Setenv("GITHUB_RUN_ID", "12345")
+
+				tempfile, _ := createTempfile(`
+					{
+						"number": 345
+					}
+				`)
+				os.Setenv("GITHUB_EVENT_PATH", tempfile.Name())
+
+				return func() {
+					os.Remove(tempfile.Name())
+				}
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   345,
+				},
+				URL: "https://github.com/mercari/tfnotify/actions/runs/12345",
+			},
+			ok: true,
+		},
 	}
 
 	for _, testCase := range testCases {
-		testCase.fn()
+		teardown := testCase.fn()
+		defer teardown()
 		ci, err := githubActions()
 		if !reflect.DeepEqual(ci, testCase.ci) {
 			t.Errorf("got %q but want %q", ci, testCase.ci)

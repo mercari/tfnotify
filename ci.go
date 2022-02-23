@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"strconv"
@@ -22,6 +24,20 @@ type CI struct {
 type PullRequest struct {
 	Revision string
 	Number   int
+}
+
+type gitHubActionsEventIssue struct {
+	Number int `json:"number"`
+}
+
+type gitHubActionsEventPullRequest struct {
+	Number int `json:"number"`
+}
+
+type gitHubActionsEventPayload struct {
+	Issue       *gitHubActionsEventIssue       `json:"issue"`
+	PullRequest *gitHubActionsEventPullRequest `json:"pull_request"`
+	Number      int                            `json:"number"`
 }
 
 func circleci() (ci CI, err error) {
@@ -148,6 +164,30 @@ func githubActions() (ci CI, err error) {
 		os.Getenv("GITHUB_RUN_ID"),
 	)
 	ci.PR.Revision = os.Getenv("GITHUB_SHA")
+
+	// Extract the pull request number from the event payload that triggered the current workflow.
+	// See: https://docs.github.com/en/actions/reference/events-that-trigger-workflows
+	ci.PR.Number = 0
+	eventPath := os.Getenv("GITHUB_EVENT_PATH")
+	if eventPath != "" {
+		bytes, err := ioutil.ReadFile(eventPath)
+		if err != nil {
+			return ci, err
+		}
+
+		eventPayload := gitHubActionsEventPayload{}
+		if err := json.Unmarshal(bytes, &eventPayload); err != nil {
+			return ci, err
+		}
+
+		if eventPayload.Issue != nil {
+			ci.PR.Number = eventPayload.Issue.Number
+		} else if eventPayload.PullRequest != nil {
+			ci.PR.Number = eventPayload.PullRequest.Number
+		} else {
+			ci.PR.Number = eventPayload.Number
+		}
+	}
 	return ci, err
 }
 
