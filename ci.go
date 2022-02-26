@@ -148,6 +148,24 @@ func githubActions() (ci CI, err error) {
 		os.Getenv("GITHUB_RUN_ID"),
 	)
 	ci.PR.Revision = os.Getenv("GITHUB_SHA")
+	pr := ""
+	if prNumber, ok := os.LookupEnv("PR_NUMBER"); !ok && prNumber != "" {
+		pr = prNumber
+	} else {
+		ref := os.Getenv("GITHUB_REF")
+
+		if ref != "" {
+			prRegex := regexp.MustCompile(`refs/pull/\d*/merge`)
+			if prRegex.MatchString(ref) {
+				strLen := strings.Split(ref, "/")
+				pr = strLen[2]
+			}
+		}
+	}
+	if pr == "" {
+		return ci, nil
+	}
+	ci.PR.Number, err = strconv.Atoi(pr)
 	return ci, err
 }
 
