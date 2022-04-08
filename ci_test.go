@@ -776,3 +776,92 @@ func TestGitHubActions(t *testing.T) {
 		}
 	}
 }
+
+func TestCloudBuild(t *testing.T) {
+	envs := []string{
+		"COMMIT_SHA",
+		"BUILD_ID",
+		"PROJECT_ID",
+		"_PR_NUMBER",
+		"REGION",
+	}
+	saveEnvs := make(map[string]string)
+	for _, key := range envs {
+		saveEnvs[key] = os.Getenv(key)
+		os.Unsetenv(key)
+	}
+	defer func() {
+		for key, value := range saveEnvs {
+			os.Setenv(key, value)
+		}
+	}()
+
+	// https://cloud.google.com/cloud-build/docs/configuring-builds/substitute-variable-values
+	testCases := []struct {
+		fn func()
+		ci CI
+		ok bool
+	}{
+		{
+			fn: func() {
+				os.Setenv("COMMIT_SHA", "abcdefg")
+				os.Setenv("BUILD_ID", "build-id")
+				os.Setenv("PROJECT_ID", "gcp-project-id")
+				os.Setenv("_PR_NUMBER", "123")
+				os.Setenv("_REGION", "asia-northeast1")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   123,
+				},
+				URL: "https://console.cloud.google.com/cloud-build/builds;region=asia-northeast1/build-id?project=gcp-project-id",
+			},
+			ok: true,
+		},
+		{
+			fn: func() {
+				os.Setenv("COMMIT_SHA", "")
+				os.Setenv("BUILD_ID", "build-id")
+				os.Setenv("PROJECT_ID", "gcp-project-id")
+				os.Setenv("_PR_NUMBER", "")
+				os.Setenv("_REGION", "")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "",
+					Number:   0,
+				},
+				URL: "https://console.cloud.google.com/cloud-build/builds;region=global/build-id?project=gcp-project-id",
+			},
+			ok: true,
+		},
+		{
+			fn: func() {
+				os.Setenv("COMMIT_SHA", "")
+				os.Setenv("BUILD_ID", "build-id")
+				os.Setenv("PROJECT_ID", "gcp-project-id")
+				os.Setenv("_PR_NUMBER", "abc")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "",
+					Number:   0,
+				},
+				URL: "https://console.cloud.google.com/cloud-build/builds;region=global/build-id?project=gcp-project-id",
+			},
+			ok: false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase.fn()
+		ci, err := cloudbuild()
+		if !reflect.DeepEqual(ci, testCase.ci) {
+			t.Errorf("got %q but want %q", ci, testCase.ci)
+		}
+		if (err == nil) != testCase.ok {
+			t.Errorf("got error %q", err)
+		}
+	}
+}

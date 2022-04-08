@@ -221,6 +221,14 @@ func TestValidation(t *testing.T) {
 			expected: "notifier is missing",
 		},
 		{
+			contents: []byte("ci: cloudbuild\n"),
+			expected: "notifier is missing",
+		},
+		{
+			contents: []byte("ci: cloud-build\n"),
+			expected: "notifier is missing",
+		},
+		{
 			contents: []byte("ci: circleci\nnotifier:\n  github:\n"),
 			expected: "notifier is missing",
 		},
@@ -459,12 +467,6 @@ func TestFind(t *testing.T) {
 			file:   "tfnotify.yml",
 			expect: "tfnotify.yml",
 			ok:     true,
-		},
-		{
-			// invalid config
-			file:   "codecov.yml",
-			expect: "",
-			ok:     false,
 		},
 		{
 			// in case of no args passed

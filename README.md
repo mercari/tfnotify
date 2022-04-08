@@ -1,14 +1,12 @@
 tfnotify
 ========
 
-[![][release-svg]][release] [![][test-svg]][test] [![][codecov-svg]][codecov] [![][goreportcard-svg]][goreportcard]
+[![][release-svg]][release] [![][test-svg]][test] [![][goreportcard-svg]][goreportcard]
 
 [release]: https://github.com/mercari/tfnotify/actions?query=workflow%3Arelease
 [release-svg]: https://github.com/mercari/tfnotify/workflows/release/badge.svg
 [test]: https://github.com/mercari/tfnotify/actions?query=workflow%3Atest
 [test-svg]: https://github.com/mercari/tfnotify/workflows/test/badge.svg
-[codecov]: https://codecov.io/gh/mercari/tfnotify
-[codecov-svg]: https://codecov.io/gh/mercari/tfnotify/branch/master/graph/badge.svg
 [goreportcard]: https://goreportcard.com/report/github.com/mercari/tfnotify
 [goreportcard-svg]: https://goreportcard.com/badge/github.com/mercari/tfnotify
 
@@ -44,7 +42,7 @@ $ go get -u github.com/mercari/tfnotify
 2. Bind parsed results to Go templates
 3. Notify it to any platform (e.g. GitHub) as you like
 
-Detailed specifications such as templates and notification destinations can be customized from the configration files (described later).
+Detailed specifications such as templates and notification destinations can be customized from the configuration files (described later).
 
 ## Usage
 
@@ -380,6 +378,7 @@ Currently, supported CI are here:
 - Jenkins
 - GitLab CI
 - GitHub Actions
+- Google Cloud Build
 
 ### Private Repository Considerations
 GitHub private repositories require the `repo` and `write:discussion` permissions.
@@ -389,6 +388,18 @@ GitHub private repositories require the `repo` and `write:discussion` permission
   - [Git Plugin](https://wiki.jenkins.io/display/JENKINS/Git+Plugin)
 - Environment Variable
   - `PULL_REQUEST_NUMBER` or `PULL_REQUEST_URL` are required to set by user for Pull Request Usage
+
+### Google Cloud Build Considerations
+
+- These environment variables are needed to be set using [substitutions](https://cloud.google.com/cloud-build/docs/configuring-builds/substitute-variable-values)
+  - `COMMIT_SHA`
+  - `BUILD_ID`
+  - `PROJECT_ID`
+  - `_PR_NUMBER`
+  - `_REGION`
+- Recommended trigger events
+  - `terraform plan`: Pull request
+  - `terraform apply`: Push to branch
 
 ## Committers
 
