@@ -8,9 +8,11 @@ import (
 	"strings"
 )
 
-var (
+const (
 	defaultCloudBuildRegion = "global"
+)
 
+var (
 	// https://help.github.com/en/actions/reference/events-that-trigger-workflows#pull-request-event-pull_request
 	githubActionsPRRefRegexp = regexp.MustCompile(`refs/pull/\d+/merge`)
 )
