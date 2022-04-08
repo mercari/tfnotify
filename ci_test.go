@@ -713,6 +713,7 @@ func TestGitHubActions(t *testing.T) {
 		"GITHUB_SHA",
 		"GITHUB_REPOSITORY",
 		"GITHUB_RUN_ID",
+		"GITHUB_REF",
 	}
 	saveEnvs := make(map[string]string)
 	for _, key := range envs {
@@ -741,6 +742,22 @@ func TestGitHubActions(t *testing.T) {
 				PR: PullRequest{
 					Revision: "abcdefg",
 					Number:   0,
+				},
+				URL: "https://github.com/mercari/tfnotify/actions/runs/12345",
+			},
+			ok: true,
+		},
+		{
+			fn: func() {
+				os.Setenv("GITHUB_SHA", "abcdefg")
+				os.Setenv("GITHUB_REPOSITORY", "mercari/tfnotify")
+				os.Setenv("GITHUB_RUN_ID", "12345")
+				os.Setenv("GITHUB_REF", "refs/pull/123/merge")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   123,
 				},
 				URL: "https://github.com/mercari/tfnotify/actions/runs/12345",
 			},

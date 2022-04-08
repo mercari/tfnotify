@@ -12,6 +12,11 @@ const (
 	defaultCloudBuildRegion = "global"
 )
 
+var (
+	// https://help.github.com/en/actions/reference/events-that-trigger-workflows#pull-request-event-pull_request
+	githubActionsPRRefRegexp = regexp.MustCompile(`refs/pull/\d+/merge`)
+)
+
 // CI represents a common information obtained from all CI platforms
 type CI struct {
 	PR  PullRequest
@@ -148,6 +153,18 @@ func githubActions() (ci CI, err error) {
 		os.Getenv("GITHUB_RUN_ID"),
 	)
 	ci.PR.Revision = os.Getenv("GITHUB_SHA")
+	ci.PR.Number = 0
+
+	if githubActionsPRRefRegexp.MatchString(os.Getenv("GITHUB_REF")) {
+		s := strings.Split(os.Getenv("GITHUB_REF"), "/")[2]
+		pr, err := strconv.Atoi(s)
+		if err != nil {
+			return ci, err
+		}
+
+		ci.PR.Number = pr
+	}
+
 	return ci, err
 }
 
