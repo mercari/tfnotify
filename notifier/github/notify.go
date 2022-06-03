@@ -28,7 +28,7 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 	if isPlan {
 		if result.HasDestroy && cfg.WarnDestroy {
 			// Notify destroy warning as a new comment before normal plan result
-			if err = g.notifyDestoryWarning(body, result); err != nil {
+			if err = g.notifyDestroyWarning(body, result); err != nil {
 				return result.ExitCode, err
 			}
 		}
@@ -102,7 +102,7 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 	})
 }
 
-func (g *NotifyService) notifyDestoryWarning(body string, result terraform.ParseResult) error {
+func (g *NotifyService) notifyDestroyWarning(body string, result terraform.ParseResult) error {
 	cfg := g.client.Config
 	destroyWarningTemplate := g.client.Config.DestroyWarningTemplate
 	destroyWarningTemplate.SetValue(terraform.CommonTemplate{
