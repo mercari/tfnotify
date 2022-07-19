@@ -2,8 +2,10 @@ package github
 
 import (
 	"context"
-	"github.com/mercari/tfnotify/terraform"
 	"net/http"
+	"unicode/utf8"
+
+	"github.com/mercari/tfnotify/terraform"
 )
 
 // NotifyService handles communication with the notification related
@@ -70,7 +72,7 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 		Link:         cfg.CI,
 		UseRawOutput: cfg.UseRawOutput,
 	})
-	body, err = template.Execute()
+	body, err = templateExecute(template)
 	if err != nil {
 		return result.ExitCode, err
 	}
@@ -113,7 +115,7 @@ func (g *NotifyService) notifyDestroyWarning(body string, result terraform.Parse
 		Link:         cfg.CI,
 		UseRawOutput: cfg.UseRawOutput,
 	})
-	body, err := destroyWarningTemplate.Execute()
+	body, err := templateExecute(destroyWarningTemplate)
 	if err != nil {
 		return err
 	}
@@ -143,4 +145,21 @@ func (g *NotifyService) removeResultLabels() error {
 	}
 
 	return nil
+}
+
+func templateExecute(template terraform.Template) (string, error) {
+	body, err := template.Execute()
+	if err != nil {
+		return "", err
+	}
+
+	if utf8.RuneCountInString(body) <= 65536 {
+		return body, nil
+	}
+
+	templateValues := template.GetValue()
+	templateValues.Body = "Body is too long. Please check the CI result."
+
+	template.SetValue(templateValues)
+	return template.Execute()
 }
