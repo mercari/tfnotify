@@ -2,7 +2,6 @@ package gitlab
 
 import (
 	"errors"
-	"net/http"
 	"os"
 	"strings"
 
@@ -66,15 +65,22 @@ func NewClient(cfg Config) (*Client, error) {
 	if token == "" {
 		return &Client{}, errors.New("gitlab token is missing")
 	}
-	client := gitlab.NewClient(http.DefaultClient, token)
 
 	baseURL := cfg.BaseURL
 	baseURL = strings.TrimPrefix(baseURL, "$")
 	if baseURL == EnvBaseURL {
 		baseURL = os.Getenv(EnvBaseURL)
 	}
+
+	option := make([]gitlab.ClientOptionFunc, 0, 1)
 	if baseURL != "" {
-		client.SetBaseURL(baseURL)
+		option = append(option, gitlab.WithBaseURL(baseURL))
+	}
+
+	client, err := gitlab.NewClient(token, option...)
+
+	if err != nil {
+		return &Client{}, err
 	}
 
 	c := &Client{
