@@ -450,6 +450,22 @@ message
 			},
 			resp: `a-b-c-d`,
 		},
+		{
+			// this one tests a sprig function
+			template: `{{ index (regexSplit "(?m)^---+$\n" .Body -1 ) 1 }}`,
+			value: CommonTemplate{
+				Title:   "a",
+				Message: "b",
+				Result:  "c",
+				Body: `junk
+----
+text
+----
+junk`,
+			},
+			resp: `text
+`,
+		},
 	}
 	for _, testCase := range testCases {
 		template := NewPlanTemplate(testCase.template)
