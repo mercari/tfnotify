@@ -2,6 +2,7 @@ package terraform
 
 import (
 	"bytes"
+	"github.com/Masterminds/sprig"
 	htmltemplate "html/template"
 	texttemplate "text/template"
 )
@@ -199,7 +200,7 @@ func generateOutput(kind, template string, data map[string]interface{}, useRawOu
 	var b bytes.Buffer
 
 	if useRawOutput {
-		tpl, err := texttemplate.New(kind).Parse(template)
+		tpl, err := texttemplate.New(kind).Funcs(sprig.TxtFuncMap()).Parse(template)
 		if err != nil {
 			return "", err
 		}
@@ -207,7 +208,7 @@ func generateOutput(kind, template string, data map[string]interface{}, useRawOu
 			return "", err
 		}
 	} else {
-		tpl, err := htmltemplate.New(kind).Parse(template)
+		tpl, err := htmltemplate.New(kind).Funcs(sprig.HtmlFuncMap()).Parse(template)
 		if err != nil {
 			return "", err
 		}
