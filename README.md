@@ -25,6 +25,8 @@ You can do this by using this command.
 
 <img src="./misc/images/3.png" width="600">
 
+<img src="./misc/images/4.png" width="500">
+
 ## Installation
 
 Grab the binary from GitHub Releases (Recommended)
@@ -328,38 +330,71 @@ notifier:
 terraform:
   fmt:
     template: |
-      {{ .Title }}
-
-      {{ .Message }}
-
+      {{if .Message}}**`Message`**: {{ .Message }}{{end}}
+      **`Context`**:  [*(Click me) Explore the change(s) further*]( {{ .Link }} )
+      
+      {{if .Result}}
+      ## Result
+      ```
       {{ .Result }}
+      ```
+      {{end}}
 
+      ## Details
+
+      View the summary below
+
+      ```
       {{ .Body }}
+      ```
+
   plan:
     template: |
-      {{ .Title }} <sup>[CI link]( {{ .Link }} )</sup>
-      {{ .Message }}
+      {{if .Message}}**`Message`**: {{ .Message }}{{end}}
+      **`Context`**:  [*(Click me) Explore the change(s) further*]( {{ .Link }} )
+      
       {{if .Result}}
-      <pre><code>{{ .Result }}
-      </pre></code>
+      ## Result
+      ```
+      {{ .Result }}
+      ```
       {{end}}
-      <details><summary>Details (Click me)</summary>
 
-      <pre><code>{{ .Body }}
-      </pre></code></details>
+      ## Details
+
+      View the summary below
+
+      ```
+      {{ .Body }}
+      ```
+  
+    when_destroy:
+      template: |
+        ## :warning: WARNING: Resource Deletion will happen :warning:
+
+        This plan contains **resource deletion**. Please check the plan result very carefully!
   apply:
     template: |
-      {{ .Title }}
-      {{ .Message }}
+      {{if .Message}}**`Message`**: {{ .Message }}{{end}}
+      **`Context`**:  [*(Click me) Explore the change(s) further*]( {{ .Link }} )
+      
       {{if .Result}}
-      <pre><code>{{ .Result }}
-      </pre></code>
+      ## Result
+      ```
+      {{ .Result }}
+      ```
       {{end}}
-      <details><summary>Details (Click me)</summary>
 
-      <pre><code>{{ .Body }}
-      </pre></code></details>
+      ## Details
+
+      View the summary below
+
+      ```
+      {{ .Body }}
+      ```
 ```
+
+> Note, for `notifier.mattermost.bot` to work override, you must ensure you enable application/ webhook overrides on your Mattermost system. If you do not, the webhook will, by default, take the name of its creator. If you cannot enable application/ webhook overrides, you might have to consider creating a dedicated `tfnotify` Mattermost user account.
 
 </details>
 

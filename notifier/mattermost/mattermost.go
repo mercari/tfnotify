@@ -32,6 +32,7 @@ func (m *Mattermost) ChatPostMessage(attachments []slack.Attachment) error {
 		Channel:     m.Channel,
 		IconUrl:     "https://docs.mattermost.com/_images/icon-76x76.png",
 		Attachments: attachments,
+		Markdown:    true,
 	}
 
 	errs := slack.Send(m.Webhook, "", payload)
