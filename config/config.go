@@ -183,7 +183,7 @@ func (cfg *Config) Validation() error {
 
 	if cfg.isDefinedMattermost() {
 		if cfg.Notifier.Mattermost.Channel == "" {
-			fmt.Println("mattermost channel id not provided.\nTargetting webhook's default channel")
+			fmt.Println("[info] mattermost channel id not provided. Targetting webhook's default channel")
 		}
 
 		if cfg.Notifier.Mattermost.Webhook == "" {

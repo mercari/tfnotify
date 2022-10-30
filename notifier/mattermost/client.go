@@ -12,13 +12,13 @@ import (
 // EnvWebhook is Mattermost webhook
 const EnvWebhook = "MATTERMOST_WEBHOOK"
 
-// EnvChannelID is Slack channel ID
-const EnvChannelID = "SLACK_CHANNEL_ID"
+// EnvChannelID is Mattermost channel ID
+const EnvChannelID = "MATTERMOST_CHANNEL_ID"
 
-// EnvBotName is Slack bot name
-const EnvBotName = "SLACK_BOT_NAME"
+// EnvBotName is Mattermost bot name
+const EnvBotName = "MATTERMOST_BOT_NAME"
 
-// Client is a API client for Slack
+// Client is a API client for Mattermost
 type Client struct {
 	*slack.Payload
 
