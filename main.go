@@ -9,6 +9,7 @@ import (
 	"github.com/mercari/tfnotify/notifier"
 	"github.com/mercari/tfnotify/notifier/github"
 	"github.com/mercari/tfnotify/notifier/gitlab"
+	"github.com/mercari/tfnotify/notifier/mattermost"
 	"github.com/mercari/tfnotify/notifier/slack"
 	"github.com/mercari/tfnotify/notifier/typetalk"
 	"github.com/mercari/tfnotify/terraform"
@@ -143,6 +144,21 @@ func (t *tfnotify) Run() error {
 				Title:    t.context.String("title"),
 				Message:  t.context.String("message"),
 			},
+			CI:       ci.URL,
+			Parser:   t.parser,
+			Template: t.template,
+		})
+		if err != nil {
+			return err
+		}
+		notifier = client.Notify
+	case "mattermost":
+		client, err := mattermost.NewClient(mattermost.Config{
+			Webhook:  t.config.Notifier.Mattermost.Webhook,
+			Channel:  t.config.Notifier.Mattermost.Channel,
+			Botname:  t.config.Notifier.Mattermost.Bot,
+			Title:    t.context.String("title"),
+			Message:  t.context.String("message"),
 			CI:       ci.URL,
 			Parser:   t.parser,
 			Template: t.template,

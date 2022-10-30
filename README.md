@@ -313,6 +313,56 @@ terraform:
 ```
 </details>
 
+
+<details>
+<summary>For Mattermost</summary>
+
+```yaml
+---
+ci: circleci
+notifier:
+  mattermost:
+    webhook: $MATTERMOST_WEBHOOK
+    channel: $MATTERMOST_CHANNEL
+    bot: $MATTERMOST_BOT_NAME
+terraform:
+  fmt:
+    template: |
+      {{ .Title }}
+
+      {{ .Message }}
+
+      {{ .Result }}
+
+      {{ .Body }}
+  plan:
+    template: |
+      {{ .Title }} <sup>[CI link]( {{ .Link }} )</sup>
+      {{ .Message }}
+      {{if .Result}}
+      <pre><code>{{ .Result }}
+      </pre></code>
+      {{end}}
+      <details><summary>Details (Click me)</summary>
+
+      <pre><code>{{ .Body }}
+      </pre></code></details>
+  apply:
+    template: |
+      {{ .Title }}
+      {{ .Message }}
+      {{if .Result}}
+      <pre><code>{{ .Result }}
+      </pre></code>
+      {{end}}
+      <details><summary>Details (Click me)</summary>
+
+      <pre><code>{{ .Body }}
+      </pre></code></details>
+```
+
+</details>
+
 <details>
 <summary>For Slack</summary>
 
