@@ -6,9 +6,9 @@ import (
 
 type fakeAPI struct {
 	API
-	FakeChatPostMessage func(attachments []slack.Attachment) error
+	ChatPostMessageError error
 }
 
 func (f *fakeAPI) ChatPostMessage(attachments []slack.Attachment) error {
-	return f.FakeChatPostMessage(attachments)
+	return f.ChatPostMessageError
 }
