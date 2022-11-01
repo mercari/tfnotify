@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/ashwanthkumar/slack-go-webhook v0.0.0-20200209025033-430dd4e66960
+	github.com/elazarl/goproxy v0.0.0-20221015165544-a0805db90819 // indirect
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/lestrrat-go/slack v0.0.0-20190827134815-1aaae719550a
@@ -11,6 +12,8 @@ require (
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/nulab/go-typetalk v2.1.1+incompatible
 	github.com/parnurzeal/gorequest v0.2.16 // indirect
+	github.com/smartystreets/goconvey v1.7.2 // indirect
+	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli v1.22.2
 	github.com/xanzy/go-gitlab v0.22.3
 	golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa // indirect
