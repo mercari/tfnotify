@@ -165,8 +165,6 @@ func githubActions() (ci CI, err error) {
 		ci.PR.Number = pr
 	}
 
-	fmt.Printf("ci: %+v, err: %v, os.Getenv(GITHUB_REF): %v, os.Getenv(GITHUB_SHA): %v", ci, err, os.Getenv("GITHUB_REF"), os.Getenv("GITHUB_SHA"))
-
 	return ci, err
 }
 

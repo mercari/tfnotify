@@ -20,8 +20,6 @@ type PostOptions struct {
 
 // Post posts comment
 func (g *CommentService) Post(body string, opt PostOptions) error {
-	fmt.Printf("%v", opt)
-
 	if opt.Number != 0 {
 		_, _, err := g.client.API.IssuesCreateComment(
 			context.Background(),
