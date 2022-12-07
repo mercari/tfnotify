@@ -90,7 +90,7 @@ func (p *DefaultParser) Parse(body string) ParseResult {
 func (p *FmtParser) Parse(body string) ParseResult {
 	result := ParseResult{}
 	if p.Fail.MatchString(body) {
-		result.Result = "There is diff in your .tf file (need to be formatted)"
+		result.Result = body
 		result.ExitCode = ExitFail
 	}
 	return result
