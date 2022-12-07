@@ -32,6 +32,12 @@ type FmtParser struct {
 	Fail *regexp.Regexp
 }
 
+// DriftParser is a parser for terraform Drift
+type DriftParser struct {
+	Pass *regexp.Regexp
+	Fail *regexp.Regexp
+}
+
 // PlanParser is a parser for terraform plan
 type PlanParser struct {
 	Pass         *regexp.Regexp
@@ -55,6 +61,14 @@ func NewDefaultParser() *DefaultParser {
 func NewFmtParser() *FmtParser {
 	return &FmtParser{
 		Fail: regexp.MustCompile(`(?m)^@@[^@]+@@`),
+	}
+}
+
+// NewDriftParser is DriftParser initialized with its Regexp
+func NewDriftParser() *DriftParser {
+	return &DriftParser{
+		Pass: regexp.MustCompile(`(?m)^((Plan: \d|No changes.)|(Changes to Outputs:))`),
+		Fail: regexp.MustCompile(`(?m)^(│\s{1})?(Error: )`),
 	}
 }
 
@@ -88,6 +102,16 @@ func (p *DefaultParser) Parse(body string) ParseResult {
 
 // Parse returns ParseResult related with terraform fmt
 func (p *FmtParser) Parse(body string) ParseResult {
+	result := ParseResult{}
+	if p.Fail.MatchString(body) {
+		result.Result = body
+		result.ExitCode = ExitFail
+	}
+	return result
+}
+
+// Parse returns ParseResult related with terraform Drift
+func (p *DriftParser) Parse(body string) ParseResult {
 	result := ParseResult{}
 	if p.Fail.MatchString(body) {
 		result.Result = body
