@@ -66,6 +66,7 @@ type Terraform struct {
 	Fmt          Fmt     `yaml:"fmt"`
 	Plan         Plan    `yaml:"plan"`
 	Apply        Apply   `yaml:"apply"`
+	Drift        Drift   `yaml:"drift"`
 	UseRawOutput bool    `yaml:"use_raw_output,omitempty"`
 }
 
@@ -76,6 +77,11 @@ type Default struct {
 
 // Fmt is a terraform fmt config
 type Fmt struct {
+	Template string `yaml:"template"`
+}
+
+// Drift is a terraform drift config
+type Drift struct {
 	Template string `yaml:"template"`
 }
 
