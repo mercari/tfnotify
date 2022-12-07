@@ -41,22 +41,20 @@ const (
 	DefaultFmtTemplate = `
 {{ .Title }}
 
-{{ .Message }}
+<details><summary>Details (Click me)</summary>
 
-{{ .Result }}
-
-{{ .Body }}
+<pre><code>{{ .Body }}
+</pre></code></details>
 `
 
 	// DefaultDriftTemplate is a default template for terraform Drift
 	DefaultDriftTemplate = `
 {{ .Title }}
 
-{{ .Message }}
+<details><summary>Details (Click me)</summary>
 
-{{ .Result }}
-
-{{ .Body }}
+<pre><code>{{ .Body }}
+</pre></code></details>
 `
 
 	// DefaultPlanTemplate is a default template for terraform plan
