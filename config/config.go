@@ -62,11 +62,12 @@ type TypetalkNotifier struct {
 
 // Terraform represents terraform configurations
 type Terraform struct {
-	Default      Default `yaml:"default"`
-	Fmt          Fmt     `yaml:"fmt"`
-	Plan         Plan    `yaml:"plan"`
-	Apply        Apply   `yaml:"apply"`
-	UseRawOutput bool    `yaml:"use_raw_output,omitempty"`
+	Default      Default  `yaml:"default"`
+	Fmt          Fmt      `yaml:"fmt"`
+	Plan         Plan     `yaml:"plan"`
+	Apply        Apply    `yaml:"apply"`
+	UseRawOutput bool     `yaml:"use_raw_output,omitempty"`
+	Validate     Validate `yaml:"validate"`
 }
 
 // Default is a default setting for terraform commands
@@ -76,6 +77,11 @@ type Default struct {
 
 // Fmt is a terraform fmt config
 type Fmt struct {
+	Template string `yaml:"template"`
+}
+
+// Validate is a terraform validate config
+type Validate struct {
 	Template string `yaml:"template"`
 }
 
@@ -174,7 +180,7 @@ func (cfg *Config) Validation() error {
 	}
 	if cfg.isDefinedTypetalk() {
 		if cfg.Notifier.Typetalk.TopicID == "" {
-			return fmt.Errorf("Typetalk topic id is missing")
+			return fmt.Errorf("typetalk topic id is missing")
 		}
 	}
 	notifier := cfg.GetNotifierType()
