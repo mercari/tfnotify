@@ -42,6 +42,26 @@ versions.tf
  }
 `
 
+// terraform validate
+const validateFailResult0_11 = `
+Error: 
+Terraform doesn't allow running any operations against a state
+that was written by a future Terraform version. The state is
+reporting it is written by Terraform '0.11.15'
+
+
+A newer version of Terraform is required to make changes to the current
+workspace.
+`
+
+const validateFailResult0_11_second = `
+xxxxxxxxx
+xxxxxxxxx
+xxxxxxxxx
+
+Error: module 'iam-profile': unknown resource 'data.aws_iam_policy_document.policy' referenced in variable data.aws_iam_policy_document.policy.json
+`
+
 const planSuccessResult = `
 Refreshing Terraform state in-memory prior to plan...
 The refreshed state will be used to calculate this plan, but will not be
@@ -508,6 +528,48 @@ func TestFmtParserParse(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		result := NewFmtParser().Parse(testCase.body)
+		if !reflect.DeepEqual(result, testCase.result) {
+			t.Errorf("got %v but want %v", result, testCase.result)
+		}
+	}
+}
+
+func TestValidateParserParse(t *testing.T) {
+	testCases := []struct {
+		name   string
+		body   string
+		result ParseResult
+	}{
+		{
+			name: "error",
+			body: validateFailResult0_11,
+			result: ParseResult{
+				Result:   "There is a validation error in your Terraform code",
+				ExitCode: 1,
+				Error:    nil,
+			},
+		},
+		{
+			name: "error_2",
+			body: validateFailResult0_11_second,
+			result: ParseResult{
+				Result:   "There is a validation error in your Terraform code",
+				ExitCode: 1,
+				Error:    nil,
+			},
+		},
+		{
+			name: "no stdin",
+			body: "",
+			result: ParseResult{
+				Result:   "",
+				ExitCode: 0,
+				Error:    nil,
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		result := NewValidateParser().Parse(testCase.body)
 		if !reflect.DeepEqual(result, testCase.result) {
 			t.Errorf("got %v but want %v", result, testCase.result)
 		}
