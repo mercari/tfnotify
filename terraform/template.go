@@ -241,8 +241,8 @@ func (t *FmtTemplate) Execute() (string, error) {
 	data := map[string]interface{}{
 		"Title":   t.Title,
 		"Message": t.Message,
-		"Result":  "",
-		"Body":    t.Result,
+		"Result":  t.Result,
+		"Body":    t.Body,
 		"Link":    t.Link,
 	}
 
