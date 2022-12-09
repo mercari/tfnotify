@@ -1,6 +1,7 @@
 package github
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/mercari/tfnotify/terraform"
@@ -82,6 +83,24 @@ func TestNotifyNotify(t *testing.T) {
 				Template: terraform.NewPlanTemplate(terraform.DefaultPlanTemplate),
 			},
 			body:     "Plan: 1 to add",
+			ok:       true,
+			exitCode: 0,
+		},
+		{
+			// valid, isPR, and cannot comment details because body is too long
+			config: Config{
+				Token: "token",
+				Owner: "owner",
+				Repo:  "repo",
+				PR: PullRequest{
+					Revision: "",
+					Number:   1,
+					Message:  "message",
+				},
+				Parser:   terraform.NewPlanParser(),
+				Template: terraform.NewPlanTemplate(terraform.DefaultPlanTemplate),
+			},
+			body:     fmt.Sprintf("Plan: 1 to add \n%065537s", "0"),
 			ok:       true,
 			exitCode: 0,
 		},
