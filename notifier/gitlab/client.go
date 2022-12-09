@@ -2,7 +2,6 @@ package gitlab
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"strings"
 
