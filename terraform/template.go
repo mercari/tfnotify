@@ -39,10 +39,17 @@ const (
 	DefaultFmtTemplate = `
 {{ .Title }}
 
+{{ .Message }}
+
+{{if .Result}}
+<pre><code>{{ .Result }}
+</code></pre>
+{{end}}
+
 <details><summary>Details (Click me)</summary>
 
 <pre><code>{{ .Body }}
-</pre></code></details>
+</code></pre></details>
 `
 
 	// DefaultPlanTemplate is a default template for terraform plan
