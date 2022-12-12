@@ -66,7 +66,6 @@ b
 </code></pre></details>
 `,
 		},
-
 		{
 			template: "",
 			value: CommonTemplate{
@@ -193,7 +192,10 @@ func TestFmtTemplateExecute(t *testing.T) {
 
 
 
+<details><summary>Details (Click me)</summary>
 
+<pre><code>
+</code></pre></details>
 `,
 		},
 		{
@@ -208,7 +210,10 @@ message
 
 
 
+<details><summary>Details (Click me)</summary>
 
+<pre><code>
+</code></pre></details>
 `,
 		},
 		{
@@ -225,11 +230,16 @@ a
 b
 
 
+<pre><code>c
+</code></pre>
 
-c
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>d
+</code></pre></details>
 `,
 		},
-
 		{
 			template: "",
 			value: CommonTemplate{
@@ -244,8 +254,14 @@ a
 b
 
 
+<pre><code>c
+</code></pre>
 
-c
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>d
+</code></pre></details>
 `,
 		},
 		{
@@ -262,8 +278,14 @@ a
 b
 
 
+<pre><code>This is a &#34;result&#34;.
+</code></pre>
 
-This is a &#34;result&#34;.
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>d
+</code></pre></details>
 `,
 		},
 		{
@@ -281,8 +303,14 @@ a
 b
 
 
+<pre><code>This is a "result".
+</code></pre>
 
-This is a "result".
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>d
+</code></pre></details>
 `,
 		},
 		{
@@ -290,10 +318,10 @@ This is a "result".
 			value: CommonTemplate{
 				Title:   "a",
 				Message: "b",
-				Result:  "should be used as body",
-				Body:    "should be empty",
+				Result:  "c",
+				Body:    "d",
 			},
-			resp: `a-b--should be used as body`,
+			resp: `a-b-c-d`,
 		},
 	}
 	for _, testCase := range testCases {

@@ -41,9 +41,15 @@ const (
 
 {{ .Message }}
 
-{{ .Result }}
+{{if .Result}}
+<pre><code>{{ .Result }}
+</code></pre>
+{{end}}
 
-{{ .Body }}
+<details><summary>Details (Click me)</summary>
+
+<pre><code>{{ .Body }}
+</code></pre></details>
 `
 
 	// DefaultPlanTemplate is a default template for terraform plan
@@ -242,8 +248,8 @@ func (t *FmtTemplate) Execute() (string, error) {
 	data := map[string]interface{}{
 		"Title":   t.Title,
 		"Message": t.Message,
-		"Result":  "",
-		"Body":    t.Result,
+		"Result":  t.Result,
+		"Body":    t.Body,
 		"Link":    t.Link,
 	}
 
