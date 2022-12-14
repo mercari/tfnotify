@@ -221,6 +221,21 @@ func main() {
 			},
 		},
 		{
+			Name:   "validate",
+			Usage:  "Parse stdin as a validate result",
+			Action: cmdValidate,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "title, t",
+					Usage: "Specify the title to use for notification",
+				},
+				cli.StringFlag{
+					Name:  "message, m",
+					Usage: "Specify the message to use for notification",
+				},
+			},
+		},
+		{
 			Name:   "plan",
 			Usage:  "Parse stdin as a plan result",
 			Action: cmdPlan,
@@ -288,6 +303,20 @@ func cmdFmt(ctx *cli.Context) error {
 		context:  ctx,
 		parser:   terraform.NewFmtParser(),
 		template: terraform.NewFmtTemplate(cfg.Terraform.Fmt.Template),
+	}
+	return t.Run()
+}
+
+func cmdValidate(ctx *cli.Context) error {
+	cfg, err := newConfig(ctx)
+	if err != nil {
+		return err
+	}
+	t := &tfnotify{
+		config:   cfg,
+		context:  ctx,
+		parser:   terraform.NewValidateParser(),
+		template: terraform.NewValidateTemplate(cfg.Terraform.Validate.Template),
 	}
 	return t.Run()
 }

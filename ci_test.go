@@ -713,6 +713,7 @@ func TestGitHubActions(t *testing.T) {
 		"GITHUB_SHA",
 		"GITHUB_REPOSITORY",
 		"GITHUB_RUN_ID",
+		"GITHUB_REF",
 	}
 	saveEnvs := make(map[string]string)
 	for _, key := range envs {
@@ -746,6 +747,22 @@ func TestGitHubActions(t *testing.T) {
 			},
 			ok: true,
 		},
+		{
+			fn: func() {
+				os.Setenv("GITHUB_SHA", "abcdefg")
+				os.Setenv("GITHUB_REPOSITORY", "mercari/tfnotify")
+				os.Setenv("GITHUB_RUN_ID", "12345")
+				os.Setenv("GITHUB_REF", "refs/pull/123/merge")
+			},
+			ci: CI{
+				PR: PullRequest{
+					Revision: "abcdefg",
+					Number:   123,
+				},
+				URL: "https://github.com/mercari/tfnotify/actions/runs/12345",
+			},
+			ok: true,
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -766,6 +783,7 @@ func TestCloudBuild(t *testing.T) {
 		"BUILD_ID",
 		"PROJECT_ID",
 		"_PR_NUMBER",
+		"REGION",
 	}
 	saveEnvs := make(map[string]string)
 	for _, key := range envs {
@@ -790,13 +808,14 @@ func TestCloudBuild(t *testing.T) {
 				os.Setenv("BUILD_ID", "build-id")
 				os.Setenv("PROJECT_ID", "gcp-project-id")
 				os.Setenv("_PR_NUMBER", "123")
+				os.Setenv("_REGION", "asia-northeast1")
 			},
 			ci: CI{
 				PR: PullRequest{
 					Revision: "abcdefg",
 					Number:   123,
 				},
-				URL: "https://console.cloud.google.com/cloud-build/builds/build-id?project=gcp-project-id",
+				URL: "https://console.cloud.google.com/cloud-build/builds;region=asia-northeast1/build-id?project=gcp-project-id",
 			},
 			ok: true,
 		},
@@ -806,13 +825,14 @@ func TestCloudBuild(t *testing.T) {
 				os.Setenv("BUILD_ID", "build-id")
 				os.Setenv("PROJECT_ID", "gcp-project-id")
 				os.Setenv("_PR_NUMBER", "")
+				os.Setenv("_REGION", "")
 			},
 			ci: CI{
 				PR: PullRequest{
 					Revision: "",
 					Number:   0,
 				},
-				URL: "https://console.cloud.google.com/cloud-build/builds/build-id?project=gcp-project-id",
+				URL: "https://console.cloud.google.com/cloud-build/builds;region=global/build-id?project=gcp-project-id",
 			},
 			ok: true,
 		},
@@ -828,7 +848,7 @@ func TestCloudBuild(t *testing.T) {
 					Revision: "",
 					Number:   0,
 				},
-				URL: "https://console.cloud.google.com/cloud-build/builds/build-id?project=gcp-project-id",
+				URL: "https://console.cloud.google.com/cloud-build/builds;region=global/build-id?project=gcp-project-id",
 			},
 			ok: false,
 		},

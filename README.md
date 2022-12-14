@@ -412,6 +412,7 @@ GitHub private repositories require the `repo` and `write:discussion` permission
   - `BUILD_ID`
   - `PROJECT_ID`
   - `_PR_NUMBER`
+  - `_REGION`
 - Recommended trigger events
   - `terraform plan`: Pull request
   - `terraform apply`: Push to branch

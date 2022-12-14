@@ -42,6 +42,26 @@ versions.tf
  }
 `
 
+// terraform validate
+const validateFailResult0_11 = `
+Error: 
+Terraform doesn't allow running any operations against a state
+that was written by a future Terraform version. The state is
+reporting it is written by Terraform '0.11.15'
+
+
+A newer version of Terraform is required to make changes to the current
+workspace.
+`
+
+const validateFailResult0_11_second = `
+xxxxxxxxx
+xxxxxxxxx
+xxxxxxxxx
+
+Error: module 'iam-profile': unknown resource 'data.aws_iam_policy_document.policy' referenced in variable data.aws_iam_policy_document.policy.json
+`
+
 const planSuccessResult = `
 Refreshing Terraform state in-memory prior to plan...
 The refreshed state will be used to calculate this plan, but will not be
@@ -86,7 +106,81 @@ can't guarantee that exactly these actions will be performed if
 "terraform apply" is subsequently run.
 `
 
-const planFailureResult = `
+const planOnlyOutputChangesSuccessResult0_12 = `
+Refreshing Terraform state in-memory prior to plan...
+The refreshed state will be used to calculate this plan, but will not be
+persisted to local or remote state storage.
+
+data.terraform_remote_state.teams_platform_development: Refreshing state...
+google_project.my_project: Refreshing state...
+aws_iam_policy.datadog_aws_integration: Refreshing state...
+aws_iam_user.teams_terraform: Refreshing state...
+aws_iam_role.datadog_aws_integration: Refreshing state...
+google_project_services.my_project: Refreshing state...
+google_bigquery_dataset.gateway_access_log: Refreshing state...
+aws_iam_role_policy_attachment.datadog_aws_integration: Refreshing state...
+google_logging_project_sink.gateway_access_log_bigquery_sink: Refreshing state...
+google_project_iam_member.gateway_access_log_bigquery_sink_writer_is_bigquery_data_editor: Refreshing state...
+google_dns_managed_zone.tfnotifyapps_com: Refreshing state...
+google_dns_record_set.dev_tfnotifyapps_com: Refreshing state...
+
+------------------------------------------------------------------------
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+Plan: 0 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + aws_instance_name = "my-instance"
+
+------------------------------------------------------------------------
+
+Note: You didn't specify an "-out" parameter to save this plan, so Terraform
+can't guarantee that exactly these actions will be performed if
+"terraform apply" is subsequently run.
+`
+
+const planOnlyOutputChangesSuccessResult0_15 = `
+Refreshing Terraform state in-memory prior to plan...
+The refreshed state will be used to calculate this plan, but will not be
+persisted to local or remote state storage.
+
+data.terraform_remote_state.teams_platform_development: Refreshing state...
+google_project.my_project: Refreshing state...
+aws_iam_policy.datadog_aws_integration: Refreshing state...
+aws_iam_user.teams_terraform: Refreshing state...
+aws_iam_role.datadog_aws_integration: Refreshing state...
+google_project_services.my_project: Refreshing state...
+google_bigquery_dataset.gateway_access_log: Refreshing state...
+aws_iam_role_policy_attachment.datadog_aws_integration: Refreshing state...
+google_logging_project_sink.gateway_access_log_bigquery_sink: Refreshing state...
+google_project_iam_member.gateway_access_log_bigquery_sink_writer_is_bigquery_data_editor: Refreshing state...
+google_dns_managed_zone.tfnotifyapps_com: Refreshing state...
+google_dns_record_set.dev_tfnotifyapps_com: Refreshing state...
+
+------------------------------------------------------------------------
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+Changes to Outputs:
+  + aws_instance_name = "my-instance"
+
+------------------------------------------------------------------------
+
+Note: You didn't specify an "-out" parameter to save this plan, so Terraform
+can't guarantee that exactly these actions will be performed if
+"terraform apply" is subsequently run.
+`
+
+const planFailureResult0_12 = `
 xxxxxxxxx
 xxxxxxxxx
 xxxxxxxxx
@@ -97,6 +191,21 @@ Error: Error refreshing state: 4 error(s) occurred:
 
 * google_sql_database.main: google_sql_database.main: Error reading SQL Database "main" in instance "main-master-instance": googleapi: Error 409: The instance or operation is not in an appropriate state to handle the request., invalidState
 * google_sql_user.proxyuser_main: 1 error(s) occurred:
+`
+
+const planFailureResult0_15 = `
+xxxxxxxxx
+xxxxxxxxx
+xxxxxxxxx
+
+╷
+│ Error: Error refreshing state: 4 error(s) occurred:
+│
+│ * google_sql_database.main: 1 error(s) occurred:
+│ 
+│ * google_sql_database.main: google_sql_database.main: Error reading SQL Database "main" in instance "main-master-instance": googleapi: Error 409: The instance or operation is not in an appropriate state to handle the request., invalidState
+│ * google_sql_user.proxyuser_main: 1 error(s) occurred:
+╵
 `
 
 const planNoChanges = `
@@ -300,7 +409,7 @@ google_dns_record_set.dev_tfnotifyapps_com: Refreshing state...
 Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
 `
 
-const applyFailureResult = `
+const applyFailureResult0_12 = `
 data.terraform_remote_state.teams_platform_development: Refreshing state...
 google_project.tfnotify_jp_tfnotify_prod: Refreshing state...
 google_project_services.tfnotify_jp_tfnotify_prod: Refreshing state...
@@ -329,6 +438,36 @@ Error: Batch "project/tfnotify-jp-tfnotify-prod/services:batchEnable" for reques
    6: resource "google_project_service" "gcp_api_service" {
 
 
+`
+
+const applyFailureResult0_15 = `
+data.terraform_remote_state.teams_platform_development: Refreshing state...
+google_project.tfnotify_jp_tfnotify_prod: Refreshing state...
+google_project_services.tfnotify_jp_tfnotify_prod: Refreshing state...
+google_bigquery_dataset.gateway_access_log: Refreshing state...
+google_compute_global_address.reviews_web_tfnotify_in: Refreshing state...
+google_compute_global_address.chartmuseum_tfnotifyapps_com: Refreshing state...
+google_storage_bucket.chartmuseum: Refreshing state...
+google_storage_bucket.ark_tfnotify_prod: Refreshing state...
+google_compute_global_address.reviews_api_tfnotify_in: Refreshing state...
+google_logging_project_sink.gateway_access_log_bigquery_sink: Refreshing state...
+google_project_iam_member.gateway_access_log_bigquery_sink_writer_is_bigquery_data_editor: Refreshing state...
+aws_s3_bucket.terraform_backend: Refreshing state...
+aws_s3_bucket.teams_terraform_private_modules: Refreshing state...
+aws_iam_policy.datadog_aws_integration: Refreshing state...
+aws_iam_role.datadog_aws_integration: Refreshing state...
+aws_iam_user.teams_terraform: Refreshing state...
+aws_iam_user_policy.teams_terraform: Refreshing state...
+aws_iam_role_policy_attachment.datadog_aws_integration: Refreshing state...
+google_dns_managed_zone.tfnotifyapps_com: Refreshing state...
+google_dns_record_set.dev_tfnotifyapps_com: Refreshing state...
+
+╷
+│ Error: Batch "project/tfnotify-jp-tfnotify-prod/services:batchEnable" for request "Enable Project Services tfnotify-jp-tfnotify-prod: map[logging.googleapis.com:{}]" returned error: failed to send enable services request: googleapi: Error 403: The caller does not have permission, forbidden
+│
+│   on .terraform/modules/tfnotify-jp-tfnotify-prod/google_project_service.tf line 6, in resource "google_project_service" "gcp_api_service":
+│    6: resource "google_project_service" "gcp_api_service" {
+╵
 `
 
 func TestDefaultParserParse(t *testing.T) {
@@ -395,6 +534,48 @@ func TestFmtParserParse(t *testing.T) {
 	}
 }
 
+func TestValidateParserParse(t *testing.T) {
+	testCases := []struct {
+		name   string
+		body   string
+		result ParseResult
+	}{
+		{
+			name: "error",
+			body: validateFailResult0_11,
+			result: ParseResult{
+				Result:   "There is a validation error in your Terraform code",
+				ExitCode: 1,
+				Error:    nil,
+			},
+		},
+		{
+			name: "error_2",
+			body: validateFailResult0_11_second,
+			result: ParseResult{
+				Result:   "There is a validation error in your Terraform code",
+				ExitCode: 1,
+				Error:    nil,
+			},
+		},
+		{
+			name: "no stdin",
+			body: "",
+			result: ParseResult{
+				Result:   "",
+				ExitCode: 0,
+				Error:    nil,
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		result := NewValidateParser().Parse(testCase.body)
+		if !reflect.DeepEqual(result, testCase.result) {
+			t.Errorf("got %v but want %v", result, testCase.result)
+		}
+	}
+}
+
 func TestPlanParserParse(t *testing.T) {
 	testCases := []struct {
 		name   string
@@ -406,6 +587,32 @@ func TestPlanParserParse(t *testing.T) {
 			body: planSuccessResult,
 			result: ParseResult{
 				Result:             "Plan: 1 to add, 0 to change, 0 to destroy.",
+				HasAddOrUpdateOnly: true,
+				HasDestroy:         false,
+				HasNoChanges:       false,
+				HasPlanError:       false,
+				ExitCode:           0,
+				Error:              nil,
+			},
+		},
+		{
+			name: "plan output changes only pattern 0.12",
+			body: planOnlyOutputChangesSuccessResult0_12,
+			result: ParseResult{
+				Result:             "Plan: 0 to add, 0 to change, 0 to destroy.",
+				HasAddOrUpdateOnly: true,
+				HasDestroy:         false,
+				HasNoChanges:       false,
+				HasPlanError:       false,
+				ExitCode:           0,
+				Error:              nil,
+			},
+		},
+		{
+			name: "plan output changes only pattern 0.15",
+			body: planOnlyOutputChangesSuccessResult0_15,
+			result: ParseResult{
+				Result:             "Changes to Outputs:",
 				HasAddOrUpdateOnly: true,
 				HasDestroy:         false,
 				HasNoChanges:       false,
@@ -428,8 +635,8 @@ func TestPlanParserParse(t *testing.T) {
 			},
 		},
 		{
-			name: "plan ng pattern",
-			body: planFailureResult,
+			name: "plan ng pattern 0.12",
+			body: planFailureResult0_12,
 			result: ParseResult{
 				Result: `Error: Error refreshing state: 4 error(s) occurred:
 
@@ -437,6 +644,25 @@ func TestPlanParserParse(t *testing.T) {
 
 * google_sql_database.main: google_sql_database.main: Error reading SQL Database "main" in instance "main-master-instance": googleapi: Error 409: The instance or operation is not in an appropriate state to handle the request., invalidState
 * google_sql_user.proxyuser_main: 1 error(s) occurred:`,
+				HasAddOrUpdateOnly: false,
+				HasDestroy:         false,
+				HasNoChanges:       false,
+				HasPlanError:       true,
+				ExitCode:           1,
+				Error:              nil,
+			},
+		},
+		{
+			name: "plan ng pattern 0.15",
+			body: planFailureResult0_15,
+			result: ParseResult{
+				Result: `│ Error: Error refreshing state: 4 error(s) occurred:
+│
+│ * google_sql_database.main: 1 error(s) occurred:
+│ 
+│ * google_sql_database.main: google_sql_database.main: Error reading SQL Database "main" in instance "main-master-instance": googleapi: Error 409: The instance or operation is not in an appropriate state to handle the request., invalidState
+│ * google_sql_user.proxyuser_main: 1 error(s) occurred:
+╵`,
 				HasAddOrUpdateOnly: false,
 				HasDestroy:         false,
 				HasNoChanges:       false,
@@ -531,8 +757,8 @@ func TestApplyParserParse(t *testing.T) {
 			},
 		},
 		{
-			name: "apply ng pattern",
-			body: applyFailureResult,
+			name: "apply ng pattern 0.12",
+			body: applyFailureResult0_12,
 			result: ParseResult{
 				Result: `Error: Batch "project/tfnotify-jp-tfnotify-prod/services:batchEnable" for request "Enable Project Services tfnotify-jp-tfnotify-prod: map[logging.googleapis.com:{}]" returned error: failed to send enable services request: googleapi: Error 403: The caller does not have permission, forbidden
 
@@ -540,6 +766,19 @@ func TestApplyParserParse(t *testing.T) {
    6: resource "google_project_service" "gcp_api_service" {
 
 `,
+				ExitCode: 1,
+				Error:    nil,
+			},
+		},
+		{
+			name: "apply ng pattern 0.15",
+			body: applyFailureResult0_15,
+			result: ParseResult{
+				Result: `│ Error: Batch "project/tfnotify-jp-tfnotify-prod/services:batchEnable" for request "Enable Project Services tfnotify-jp-tfnotify-prod: map[logging.googleapis.com:{}]" returned error: failed to send enable services request: googleapi: Error 403: The caller does not have permission, forbidden
+│
+│   on .terraform/modules/tfnotify-jp-tfnotify-prod/google_project_service.tf line 6, in resource "google_project_service" "gcp_api_service":
+│    6: resource "google_project_service" "gcp_api_service" {
+╵`,
 				ExitCode: 1,
 				Error:    nil,
 			},
