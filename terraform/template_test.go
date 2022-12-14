@@ -337,6 +337,167 @@ b
 	}
 }
 
+func TestValidateTemplateExecute(t *testing.T) {
+	testCases := []struct {
+		template string
+		value    CommonTemplate
+		resp     string
+	}{
+		{
+			template: DefaultValidateTemplate,
+			value:    CommonTemplate{},
+			resp: `
+## Validate result
+
+
+
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>
+</code></pre></details>
+`,
+		},
+		{
+			template: DefaultValidateTemplate,
+			value: CommonTemplate{
+				Message: "message",
+			},
+			resp: `
+## Validate result
+
+message
+
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>
+</code></pre></details>
+`,
+		},
+		{
+			template: DefaultValidateTemplate,
+			value: CommonTemplate{
+				Title:   "a",
+				Message: "b",
+				Result:  "c",
+				Body:    "d",
+			},
+			resp: `
+a
+
+b
+
+
+<pre><code>c
+</code></pre>
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>d
+</code></pre></details>
+`,
+		},
+		{
+			template: "",
+			value: CommonTemplate{
+				Title:   "a",
+				Message: "b",
+				Result:  "c",
+				Body:    "d",
+			},
+			resp: `
+a
+
+b
+
+
+<pre><code>c
+</code></pre>
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>d
+</code></pre></details>
+`,
+		},
+		{
+			template: "",
+			value: CommonTemplate{
+				Title:   "a",
+				Message: "b",
+				Result:  `This is a "result".`,
+				Body:    "d",
+			},
+			resp: `
+a
+
+b
+
+
+<pre><code>This is a &#34;result&#34;.
+</code></pre>
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>d
+</code></pre></details>
+`,
+		},
+		{
+			template: "",
+			value: CommonTemplate{
+				Title:        "a",
+				Message:      "b",
+				Result:       `This is a "result".`,
+				Body:         "d",
+				UseRawOutput: true,
+			},
+			resp: `
+a
+
+b
+
+
+<pre><code>This is a "result".
+</code></pre>
+
+
+<details><summary>Details (Click me)</summary>
+
+<pre><code>d
+</code></pre></details>
+`,
+		},
+		{
+			template: `{{ .Title }}-{{ .Message }}-{{ .Result }}-{{ .Body }}`,
+			value: CommonTemplate{
+				Title:   "a",
+				Message: "b",
+				Result:  "c",
+				Body:    "d",
+			},
+			resp: `a-b-c-d`,
+		},
+	}
+	for _, testCase := range testCases {
+		template := NewValidateTemplate(testCase.template)
+		template.SetValue(testCase.value)
+		resp, err := template.Execute()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if resp != testCase.resp {
+			t.Errorf("got %q but want %q", resp, testCase.resp)
+		}
+	}
+}
+
 func TestPlanTemplateExecute(t *testing.T) {
 	testCases := []struct {
 		template string
