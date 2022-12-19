@@ -33,8 +33,8 @@ func (g *CommitsService) lastOne(commits []string, revision string) (string, err
 	if revision == "" {
 		return "", errors.New("no revision specified")
 	}
-	if len(commits) == 0 {
-		return "", errors.New("no commits")
+	if len(commits) < 2 {
+		return "", errors.New("not enough commits")
 	}
 
 	return commits[1], nil
