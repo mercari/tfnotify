@@ -711,6 +711,7 @@ func TestGitLabCI(t *testing.T) {
 func TestGitHubActions(t *testing.T) {
 	envs := []string{
 		"GITHUB_SHA",
+		"GITHUB_SERVER_URL",
 		"GITHUB_REPOSITORY",
 		"GITHUB_RUN_ID",
 		"GITHUB_REF",
@@ -735,6 +736,7 @@ func TestGitHubActions(t *testing.T) {
 		{
 			fn: func() {
 				os.Setenv("GITHUB_SHA", "abcdefg")
+				os.Setenv("GITHUB_SERVER_URL", "https://github.com")
 				os.Setenv("GITHUB_REPOSITORY", "mercari/tfnotify")
 				os.Setenv("GITHUB_RUN_ID", "12345")
 			},
