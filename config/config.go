@@ -21,10 +21,11 @@ type Config struct {
 
 // Notifier is a notification notifier
 type Notifier struct {
-	Github   GithubNotifier   `yaml:"github"`
-	Gitlab   GitlabNotifier   `yaml:"gitlab"`
-	Slack    SlackNotifier    `yaml:"slack"`
-	Typetalk TypetalkNotifier `yaml:"typetalk"`
+	Github     GithubNotifier     `yaml:"github"`
+	Gitlab     GitlabNotifier     `yaml:"gitlab"`
+	Slack      SlackNotifier      `yaml:"slack"`
+	Typetalk   TypetalkNotifier   `yaml:"typetalk"`
+	Mattermost MattermostNotifier `yaml:"mattermost"`
 }
 
 // GithubNotifier is a notifier for GitHub
@@ -50,6 +51,13 @@ type Repository struct {
 // SlackNotifier is a notifier for Slack
 type SlackNotifier struct {
 	Token   string `yaml:"token"`
+	Channel string `yaml:"channel"`
+	Bot     string `yaml:"bot"`
+}
+
+// MattermostNotifier is a notifier for Mattermost
+type MattermostNotifier struct {
+	Webhook string `yaml:"webhook"`
 	Channel string `yaml:"channel"`
 	Bot     string `yaml:"bot"`
 }
@@ -178,6 +186,17 @@ func (cfg *Config) Validation() error {
 			return fmt.Errorf("slack channel id is missing")
 		}
 	}
+
+	if cfg.isDefinedMattermost() {
+		if cfg.Notifier.Mattermost.Channel == "" {
+			fmt.Println("[info] mattermost channel id not provided. Targetting webhook's default channel")
+		}
+
+		if cfg.Notifier.Mattermost.Webhook == "" {
+			return fmt.Errorf("mattermost webhook is missing")
+		}
+	}
+
 	if cfg.isDefinedTypetalk() {
 		if cfg.Notifier.Typetalk.TopicID == "" {
 			return fmt.Errorf("typetalk topic id is missing")
@@ -200,6 +219,11 @@ func (cfg *Config) isDefinedGitlab() bool {
 	return cfg.Notifier.Gitlab != (GitlabNotifier{})
 }
 
+func (cfg *Config) isDefinedMattermost() bool {
+	// not empty
+	return cfg.Notifier.Mattermost != (MattermostNotifier{})
+}
+
 func (cfg *Config) isDefinedSlack() bool {
 	// not empty
 	return cfg.Notifier.Slack != (SlackNotifier{})
@@ -217,6 +241,9 @@ func (cfg *Config) GetNotifierType() string {
 	}
 	if cfg.isDefinedGitlab() {
 		return "gitlab"
+	}
+	if cfg.isDefinedMattermost() {
+		return "mattermost"
 	}
 	if cfg.isDefinedSlack() {
 		return "slack"

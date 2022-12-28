@@ -41,6 +41,11 @@ func TestLoadFile(t *testing.T) {
 						Token:   "",
 						TopicID: "",
 					},
+					Mattermost: MattermostNotifier{
+						Webhook: "",
+						Channel: "",
+						Bot:     "",
+					},
 				},
 				Terraform: Terraform{
 					Default: Default{
@@ -85,6 +90,11 @@ func TestLoadFile(t *testing.T) {
 					Typetalk: TypetalkNotifier{
 						Token:   "",
 						TopicID: "",
+					},
+					Mattermost: MattermostNotifier{
+						Webhook: "",
+						Channel: "",
+						Bot:     "",
 					},
 				},
 				Terraform: Terraform{
@@ -142,6 +152,11 @@ func TestLoadFile(t *testing.T) {
 					Typetalk: TypetalkNotifier{
 						Token:   "",
 						TopicID: "",
+					},
+					Mattermost: MattermostNotifier{
+						Webhook: "",
+						Channel: "",
+						Bot:     "",
 					},
 				},
 				Terraform: Terraform{
@@ -246,6 +261,14 @@ func TestValidation(t *testing.T) {
 			expected: "repository owner is missing",
 		},
 		{
+			contents: []byte("ci: circleci\nnotifier:\n  mattermost:\n    channel: test-channel\n"),
+			expected: "mattermost webhook is missing",
+		},
+		{
+			contents: []byte("ci: circleci\nnotifier:\n  mattermost:\n    webhook: webhook\n"),
+			expected: "",
+		},
+		{
 			contents: []byte(`
 ci: circleci
 notifier:
@@ -275,6 +298,25 @@ notifier:
   slack:
 `),
 			expected: "notifier is missing",
+		},
+		{
+			contents: []byte(`
+ci: circleci
+notifier:
+  mattermost:
+    channel: channel
+`),
+			expected: "mattermost webhook is missing",
+		},
+		{
+			contents: []byte(`
+ci: circleci
+notifier:
+  mattermost:
+    webhook: webhook
+    channel: channel
+`),
+			expected: "",
 		},
 		{
 			contents: []byte(`
@@ -402,6 +444,10 @@ func TestGetNotifierType(t *testing.T) {
 		{
 			contents: []byte("repository:\n  owner: a\n  name: b\nci: gitlabci\nnotifier:\n  gitlab:\n    token: token\n"),
 			expected: "gitlab",
+		},
+		{
+			contents: []byte("repository:\n  owner: a\n  name: b\nci: circleci\nnotifier:\n  mattermost:\n    webhook: webhook\n"),
+			expected: "mattermost",
 		},
 	}
 	for _, testCase := range testCases {
