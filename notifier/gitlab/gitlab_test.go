@@ -7,45 +7,45 @@ import (
 
 type fakeAPI struct {
 	API
-	FakeCreateMergeRequestNote func(mergeRequest int, opt *gitlab.CreateMergeRequestNoteOptions, options ...gitlab.OptionFunc) (*gitlab.Note, *gitlab.Response, error)
-	FakeDeleteMergeRequestNote func(mergeRequest, note int, options ...gitlab.OptionFunc) (*gitlab.Response, error)
-	FakeListMergeRequestNotes  func(mergeRequest int, opt *gitlab.ListMergeRequestNotesOptions, options ...gitlab.OptionFunc) ([]*gitlab.Note, *gitlab.Response, error)
-	FakePostCommitComment      func(sha string, opt *gitlab.PostCommitCommentOptions, options ...gitlab.OptionFunc) (*gitlab.CommitComment, *gitlab.Response, error)
-	FakeListCommits            func(opt *gitlab.ListCommitsOptions, options ...gitlab.OptionFunc) ([]*gitlab.Commit, *gitlab.Response, error)
+	FakeCreateMergeRequestNote func(mergeRequest int, opt *gitlab.CreateMergeRequestNoteOptions, options ...gitlab.RequestOptionFunc) (*gitlab.Note, *gitlab.Response, error)
+	FakeDeleteMergeRequestNote func(mergeRequest, note int, options ...gitlab.RequestOptionFunc) (*gitlab.Response, error)
+	FakeListMergeRequestNotes  func(mergeRequest int, opt *gitlab.ListMergeRequestNotesOptions, options ...gitlab.RequestOptionFunc) ([]*gitlab.Note, *gitlab.Response, error)
+	FakePostCommitComment      func(sha string, opt *gitlab.PostCommitCommentOptions, options ...gitlab.RequestOptionFunc) (*gitlab.CommitComment, *gitlab.Response, error)
+	FakeListCommits            func(opt *gitlab.ListCommitsOptions, options ...gitlab.RequestOptionFunc) ([]*gitlab.Commit, *gitlab.Response, error)
 }
 
-func (g *fakeAPI) CreateMergeRequestNote(mergeRequest int, opt *gitlab.CreateMergeRequestNoteOptions, options ...gitlab.OptionFunc) (*gitlab.Note, *gitlab.Response, error) {
+func (g *fakeAPI) CreateMergeRequestNote(mergeRequest int, opt *gitlab.CreateMergeRequestNoteOptions, options ...gitlab.RequestOptionFunc) (*gitlab.Note, *gitlab.Response, error) {
 	return g.FakeCreateMergeRequestNote(mergeRequest, opt, options...)
 }
 
-func (g *fakeAPI) DeleteMergeRequestNote(mergeRequest, note int, options ...gitlab.OptionFunc) (*gitlab.Response, error) {
+func (g *fakeAPI) DeleteMergeRequestNote(mergeRequest, note int, options ...gitlab.RequestOptionFunc) (*gitlab.Response, error) {
 	return g.FakeDeleteMergeRequestNote(mergeRequest, note, options...)
 }
 
-func (g *fakeAPI) ListMergeRequestNotes(mergeRequest int, opt *gitlab.ListMergeRequestNotesOptions, options ...gitlab.OptionFunc) ([]*gitlab.Note, *gitlab.Response, error) {
+func (g *fakeAPI) ListMergeRequestNotes(mergeRequest int, opt *gitlab.ListMergeRequestNotesOptions, options ...gitlab.RequestOptionFunc) ([]*gitlab.Note, *gitlab.Response, error) {
 	return g.FakeListMergeRequestNotes(mergeRequest, opt, options...)
 }
 
-func (g *fakeAPI) PostCommitComment(sha string, opt *gitlab.PostCommitCommentOptions, options ...gitlab.OptionFunc) (*gitlab.CommitComment, *gitlab.Response, error) {
+func (g *fakeAPI) PostCommitComment(sha string, opt *gitlab.PostCommitCommentOptions, options ...gitlab.RequestOptionFunc) (*gitlab.CommitComment, *gitlab.Response, error) {
 	return g.FakePostCommitComment(sha, opt, options...)
 }
 
-func (g *fakeAPI) ListCommits(opt *gitlab.ListCommitsOptions, options ...gitlab.OptionFunc) ([]*gitlab.Commit, *gitlab.Response, error) {
+func (g *fakeAPI) ListCommits(opt *gitlab.ListCommitsOptions, options ...gitlab.RequestOptionFunc) ([]*gitlab.Commit, *gitlab.Response, error) {
 	return g.FakeListCommits(opt, options...)
 }
 
 func newFakeAPI() fakeAPI {
 	return fakeAPI{
-		FakeCreateMergeRequestNote: func(mergeRequest int, opt *gitlab.CreateMergeRequestNoteOptions, options ...gitlab.OptionFunc) (*gitlab.Note, *gitlab.Response, error) {
+		FakeCreateMergeRequestNote: func(mergeRequest int, opt *gitlab.CreateMergeRequestNoteOptions, options ...gitlab.RequestOptionFunc) (*gitlab.Note, *gitlab.Response, error) {
 			return &gitlab.Note{
 				ID:   371748792,
 				Body: "comment 1",
 			}, nil, nil
 		},
-		FakeDeleteMergeRequestNote: func(mergeRequest, note int, options ...gitlab.OptionFunc) (*gitlab.Response, error) {
+		FakeDeleteMergeRequestNote: func(mergeRequest, note int, options ...gitlab.RequestOptionFunc) (*gitlab.Response, error) {
 			return nil, nil
 		},
-		FakeListMergeRequestNotes: func(mergeRequest int, opt *gitlab.ListMergeRequestNotesOptions, options ...gitlab.OptionFunc) ([]*gitlab.Note, *gitlab.Response, error) {
+		FakeListMergeRequestNotes: func(mergeRequest int, opt *gitlab.ListMergeRequestNotesOptions, options ...gitlab.RequestOptionFunc) ([]*gitlab.Note, *gitlab.Response, error) {
 			var comments []*gitlab.Note
 			comments = []*gitlab.Note{
 				&gitlab.Note{
@@ -59,12 +59,12 @@ func newFakeAPI() fakeAPI {
 			}
 			return comments, nil, nil
 		},
-		FakePostCommitComment: func(sha string, opt *gitlab.PostCommitCommentOptions, options ...gitlab.OptionFunc) (*gitlab.CommitComment, *gitlab.Response, error) {
+		FakePostCommitComment: func(sha string, opt *gitlab.PostCommitCommentOptions, options ...gitlab.RequestOptionFunc) (*gitlab.CommitComment, *gitlab.Response, error) {
 			return &gitlab.CommitComment{
 				Note: "comment 1",
 			}, nil, nil
 		},
-		FakeListCommits: func(opt *gitlab.ListCommitsOptions, options ...gitlab.OptionFunc) ([]*gitlab.Commit, *gitlab.Response, error) {
+		FakeListCommits: func(opt *gitlab.ListCommitsOptions, options ...gitlab.RequestOptionFunc) ([]*gitlab.Commit, *gitlab.Response, error) {
 			var commits []*gitlab.Commit
 			commits = []*gitlab.Commit{
 				&gitlab.Commit{

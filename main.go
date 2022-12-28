@@ -169,14 +169,15 @@ func (t *tfnotify) Run() error {
 		notifier = client.Notify
 	case "slack":
 		client, err := slack.NewClient(slack.Config{
-			Token:    t.config.Notifier.Slack.Token,
-			Channel:  t.config.Notifier.Slack.Channel,
-			Botname:  t.config.Notifier.Slack.Bot,
-			Title:    t.context.String("title"),
-			Message:  t.context.String("message"),
-			CI:       ci.URL,
-			Parser:   t.parser,
-			Template: t.template,
+			Token:        t.config.Notifier.Slack.Token,
+			Channel:      t.config.Notifier.Slack.Channel,
+			Botname:      t.config.Notifier.Slack.Bot,
+			Title:        t.context.String("title"),
+			Message:      t.context.String("message"),
+			CI:           ci.URL,
+			Parser:       t.parser,
+			UseRawOutput: t.config.Terraform.UseRawOutput,
+			Template:     t.template,
 		})
 		if err != nil {
 			return err
@@ -224,6 +225,21 @@ func main() {
 			Name:   "fmt",
 			Usage:  "Parse stdin as a fmt result",
 			Action: cmdFmt,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "title, t",
+					Usage: "Specify the title to use for notification",
+				},
+				cli.StringFlag{
+					Name:  "message, m",
+					Usage: "Specify the message to use for notification",
+				},
+			},
+		},
+		{
+			Name:   "validate",
+			Usage:  "Parse stdin as a validate result",
+			Action: cmdValidate,
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "title, t",
@@ -303,6 +319,20 @@ func cmdFmt(ctx *cli.Context) error {
 		context:  ctx,
 		parser:   terraform.NewFmtParser(),
 		template: terraform.NewFmtTemplate(cfg.Terraform.Fmt.Template),
+	}
+	return t.Run()
+}
+
+func cmdValidate(ctx *cli.Context) error {
+	cfg, err := newConfig(ctx)
+	if err != nil {
+		return err
+	}
+	t := &tfnotify{
+		config:   cfg,
+		context:  ctx,
+		parser:   terraform.NewValidateParser(),
+		template: terraform.NewValidateTemplate(cfg.Terraform.Validate.Template),
 	}
 	return t.Run()
 }

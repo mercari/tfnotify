@@ -54,6 +54,9 @@ func TestLoadFile(t *testing.T) {
 					Fmt: Fmt{
 						Template: "",
 					},
+					Validate: Validate{
+						Template: "",
+					},
 					Plan: Plan{
 						Template:    "{{ .Title }}\n{{ .Message }}\n{{if .Result}}\n<pre><code>{{ .Result }}\n</pre></code>\n{{end}}\n<details><summary>Details (Click me)</summary>\n\n<pre><code>{{ .Body }}\n</pre></code></details>\n",
 						WhenDestroy: WhenDestroy{},
@@ -99,6 +102,9 @@ func TestLoadFile(t *testing.T) {
 						Template: "",
 					},
 					Fmt: Fmt{
+						Template: "",
+					},
+					Validate: Validate{
 						Template: "",
 					},
 					Plan: Plan{
@@ -158,6 +164,9 @@ func TestLoadFile(t *testing.T) {
 						Template: "",
 					},
 					Fmt: Fmt{
+						Template: "",
+					},
+					Validate: Validate{
 						Template: "",
 					},
 					Plan: Plan{
@@ -384,7 +393,7 @@ notifier:
   typetalk:
     token: token
 `),
-			expected: "Typetalk topic id is missing",
+			expected: "typetalk topic id is missing",
 		},
 		{
 			contents: []byte(`
