@@ -23,11 +23,12 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 	}
 
 	template.SetValue(terraform.CommonTemplate{
-		Title:   cfg.MR.Title,
-		Message: cfg.MR.Message,
-		Result:  result.Result,
-		Body:    body,
-		Link:    cfg.CI,
+		Title:        cfg.MR.Title,
+		Message:      cfg.MR.Message,
+		Result:       result.Result,
+		Body:         body,
+		Link:         cfg.CI,
+		UseRawOutput: cfg.UseRawOutput,
 	})
 	body, err = template.Execute()
 	if err != nil {
