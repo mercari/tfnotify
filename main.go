@@ -143,9 +143,10 @@ func (t *tfnotify) Run() error {
 				Title:    t.context.String("title"),
 				Message:  t.context.String("message"),
 			},
-			CI:       ci.URL,
-			Parser:   t.parser,
-			Template: t.template,
+			CI:           ci.URL,
+			Parser:       t.parser,
+			Template:     t.template,
+			UseRawOutput: t.config.Terraform.UseRawOutput,
 		})
 		if err != nil {
 			return err
