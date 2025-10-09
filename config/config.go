@@ -3,20 +3,53 @@ package config
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 
-	"gopkg.in/yaml.v2"
+	"github.com/suzuki-shunsuke/go-findconfig/findconfig"
+	"gopkg.in/yaml.v3"
 )
 
 // Config is for tfnotify config structure
 type Config struct {
-	CI        string    `yaml:"ci"`
-	Notifier  Notifier  `yaml:"notifier"`
-	Terraform Terraform `yaml:"terraform"`
+	CI                 CI                `json:"-" yaml:"-"`
+	Terraform          Terraform         `json:"terraform,omitempty"`
+	Vars               map[string]string `json:"-" yaml:"-"`
+	EmbeddedVarNames   []string          `json:"embedded_var_names,omitempty" yaml:"embedded_var_names"`
+	Templates          map[string]string `json:"templates,omitempty"`
+	Log                Log               `json:"log,omitempty"`
+	GHEBaseURL         string            `json:"ghe_base_url,omitempty" yaml:"ghe_base_url"`
+	GHEGraphQLEndpoint string            `json:"ghe_graphql_endpoint,omitempty" yaml:"ghe_graphql_endpoint"`
+	PlanPatch          bool              `json:"plan_patch,omitempty" yaml:"plan_patch"`
+	RepoOwner          string            `json:"repo_owner,omitempty" yaml:"repo_owner"`
+	RepoName           string            `json:"repo_name,omitempty" yaml:"repo_name"`
+	Output             string            `json:"-" yaml:"-"`
+	Masks              []*Mask           `json:"-" yaml:"-"`
+
+	// Legacy fields for backward compatibility
+	Notifier Notifier `yaml:"notifier"`
 
 	path string
+}
+
+type Mask struct {
+	Type   string
+	Value  string
+	Regexp *regexp.Regexp
+}
+
+type CI struct {
+	Name     string
+	Owner    string
+	Repo     string
+	SHA      string
+	Link     string
+	PRNumber int
+}
+
+type Log struct {
+	Level string `json:"level,omitempty"`
 }
 
 // Notifier is a notification notifier
@@ -62,12 +95,14 @@ type TypetalkNotifier struct {
 
 // Terraform represents terraform configurations
 type Terraform struct {
-	Default      Default  `yaml:"default"`
-	Fmt          Fmt      `yaml:"fmt"`
-	Plan         Plan     `yaml:"plan"`
-	Apply        Apply    `yaml:"apply"`
-	UseRawOutput bool     `yaml:"use_raw_output,omitempty"`
-	Validate     Validate `yaml:"validate"`
+	Plan         Plan  `json:"plan,omitempty"`
+	Apply        Apply `json:"apply,omitempty"`
+	UseRawOutput bool  `json:"use_raw_output,omitempty" yaml:"use_raw_output"`
+
+	// Legacy fields for backward compatibility
+	Default  Default  `yaml:"default"`
+	Fmt      Fmt      `yaml:"fmt"`
+	Validate Validate `yaml:"validate"`
 }
 
 // Default is a default setting for terraform commands
@@ -87,32 +122,49 @@ type Validate struct {
 
 // Plan is a terraform plan config
 type Plan struct {
-	Template            string              `yaml:"template"`
-	WhenAddOrUpdateOnly WhenAddOrUpdateOnly `yaml:"when_add_or_update_only,omitempty"`
-	WhenDestroy         WhenDestroy         `yaml:"when_destroy,omitempty"`
-	WhenNoChanges       WhenNoChanges       `yaml:"when_no_changes,omitempty"`
-	WhenPlanError       WhenPlanError       `yaml:"when_plan_error,omitempty"`
+	Template            string              `json:"template,omitempty"`
+	WhenAddOrUpdateOnly WhenAddOrUpdateOnly `json:"when_add_or_update_only,omitempty" yaml:"when_add_or_update_only"`
+	WhenDestroy         WhenDestroy         `json:"when_destroy,omitempty" yaml:"when_destroy"`
+	WhenNoChanges       WhenNoChanges       `json:"when_no_changes,omitempty" yaml:"when_no_changes"`
+	WhenPlanError       WhenPlanError       `json:"when_plan_error,omitempty" yaml:"when_plan_error"`
+	WhenParseError      WhenParseError      `json:"when_parse_error,omitempty" yaml:"when_parse_error"`
+	DisableLabel        bool                `json:"disable_label,omitempty" yaml:"disable_label"`
+	IgnoreWarning       bool                `json:"ignore_warning,omitempty" yaml:"ignore_warning"`
 }
 
 // WhenAddOrUpdateOnly is a configuration to notify the plan result contains new or updated in place resources
 type WhenAddOrUpdateOnly struct {
-	Label string `yaml:"label,omitempty"`
+	Label        string `json:"label,omitempty"`
+	Color        string `json:"label_color,omitempty" yaml:"label_color"`
+	DisableLabel bool   `json:"disable_label,omitempty" yaml:"disable_label"`
 }
 
 // WhenDestroy is a configuration to notify the plan result contains destroy operation
 type WhenDestroy struct {
-	Label    string `yaml:"label,omitempty"`
-	Template string `yaml:"template,omitempty"`
+	Label        string `json:"label,omitempty"`
+	Color        string `json:"label_color,omitempty" yaml:"label_color"`
+	DisableLabel bool   `json:"disable_label,omitempty" yaml:"disable_label"`
+	Template     string `json:"template,omitempty" yaml:"template,omitempty"`
 }
 
-// WhenNoChange is a configuration to add a label when the plan result contains no change
+// WhenNoChanges is a configuration to add a label when the plan result contains no change
 type WhenNoChanges struct {
-	Label string `yaml:"label,omitempty"`
+	Label          string `json:"label,omitempty"`
+	Color          string `json:"label_color,omitempty" yaml:"label_color"`
+	DisableLabel   bool   `json:"disable_label,omitempty" yaml:"disable_label"`
+	DisableComment bool   `json:"disable_comment,omitempty" yaml:"disable_comment"`
 }
 
 // WhenPlanError is a configuration to notify the plan result returns an error
 type WhenPlanError struct {
-	Label string `yaml:"label,omitempty"`
+	Label        string `json:"label,omitempty"`
+	Color        string `json:"label_color,omitempty" yaml:"label_color"`
+	DisableLabel bool   `json:"disable_label,omitempty" yaml:"disable_label"`
+}
+
+// WhenParseError is a configuration to notify the plan result returns an error
+type WhenParseError struct {
+	Template string `json:"template,omitempty"`
 }
 
 // Apply is a terraform apply config
@@ -127,13 +179,16 @@ func (cfg *Config) LoadFile(path string) error {
 	if err != nil {
 		return fmt.Errorf("%s: no config file", cfg.path)
 	}
-	raw, _ := ioutil.ReadFile(cfg.path)
+	raw, err := os.ReadFile(cfg.path)
+	if err != nil {
+		return fmt.Errorf("failed to read config file: %w", err)
+	}
 	return yaml.Unmarshal(raw, cfg)
 }
 
 // Validation validates config file
 func (cfg *Config) Validation() error {
-	switch strings.ToLower(cfg.CI) {
+	switch strings.ToLower(cfg.CI.Name) {
 	case "":
 		return errors.New("ci: need to be set")
 	case "circleci", "circle-ci":
@@ -155,7 +210,7 @@ func (cfg *Config) Validation() error {
 	case "cloud-build", "cloudbuild":
 		// ok pattern
 	default:
-		return fmt.Errorf("%s: not supported yet", cfg.CI)
+		return fmt.Errorf("%s: not supported yet", cfg.CI.Name)
 	}
 	if cfg.isDefinedGithub() {
 		if cfg.Notifier.Github.Repository.Owner == "" {
@@ -229,22 +284,28 @@ func (cfg *Config) GetNotifierType() string {
 
 // Find returns config path
 func (cfg *Config) Find(file string) (string, error) {
-	var files []string
-	if file == "" {
-		files = []string{
-			"tfnotify.yaml",
-			"tfnotify.yml",
-			".tfnotify.yaml",
-			".tfnotify.yml",
-		}
-	} else {
-		files = []string{file}
+	if file != "" {
+		return file, nil
 	}
-	for _, file := range files {
-		_, err := os.Stat(file)
-		if err == nil {
-			return file, nil
-		}
+
+	// Use findconfig to search for config files
+	configFiles := []string{
+		"tfnotify.yaml",
+		"tfnotify.yml",
+		".tfnotify.yaml",
+		".tfnotify.yml",
+		"tfcmt.yaml",
+		"tfcmt.yml",
+		".tfcmt.yaml",
+		".tfcmt.yml",
 	}
-	return "", errors.New("config for tfnotify is not found at all")
+
+	return findconfig.Find("", func(s string) bool {
+		for _, file := range configFiles {
+			if s == file {
+				return true
+			}
+		}
+		return false
+	})
 }

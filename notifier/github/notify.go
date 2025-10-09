@@ -47,7 +47,7 @@ func (g *NotifyService) Notify(body string) (exit int, err error) {
 				labelToAdd = cfg.ResultLabels.DestroyLabel
 			} else if result.HasNoChanges {
 				labelToAdd = cfg.ResultLabels.NoChangesLabel
-			} else if result.HasPlanError {
+			} else if result.HasError {
 				labelToAdd = cfg.ResultLabels.PlanErrorLabel
 			}
 
