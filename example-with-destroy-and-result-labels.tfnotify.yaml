@@ -1,31 +1,25 @@
-ci: circleci
-notifier:
-  github:
-    token: $GITHUB_TOKEN
-    repository:
-      owner: "mercari"
-      name: "tfnotify"
 terraform:
   plan:
     template: |
-      {{ .Title }}
-      {{ .Message }}
+      {{if .HasDestroy}}
+      ## :warning: WARNING: Resource Deletion will happen
+
+      This plan contains **resource deletion**. Please check the plan result very carefully!
+      {{else}}
+      ## Plan Result
       {{if .Result}}
       <pre><code>{{ .Result }}
       </pre></code>
       {{end}}
       <details><summary>Details (Click me)</summary>
 
-      <pre><code>{{ .Body }}
+      <pre><code>{{ .CombinedOutput }}
       </pre></code></details>
+      {{end}}
     when_add_or_update_only:
       label: "add-or-update"
     when_destroy:
       label: "destroy"
-      template: |
-        ## :warning: WARNING: Resource Deletion will happen :warning:
-
-        This plan contains **resource deletion**. Please check the plan result very carefully!
     when_no_changes:
       label: "no-changes"
     when_plan_error:

@@ -1,0 +1,16 @@
+---
+name: Deploy GitHub Pages
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - website/**
+      - .github/workflows/deploy_doc.yaml
+permissions: {}
+jobs:
+  deploy-doc:
+    uses: ./.github/workflows/workflow_call_deploy_doc.yaml
+    permissions:
+      contents: write
+      issues: write

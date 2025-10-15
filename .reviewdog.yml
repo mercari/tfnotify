@@ -1,3 +1,0 @@
-runner:
-  golint:
-    cmd: golint $(go list ./...)

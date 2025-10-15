@@ -1,0 +1,16 @@
+---
+name: watch-star
+on:
+  watch:
+    types:
+      - started
+jobs:
+  watch-star:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: suzuki-shunsuke/watch-star-action@2b3d259ce2ea06d53270dfe33a66d5642c8010ca # v0.1.1
+        with:
+          number: 918 # https://github.com/suzuki-shunsuke/tfcmt/issues/918
