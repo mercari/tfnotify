@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mercari/tfnotify/v1/pkg/config/config",
+  "$ref": "#/$defs/Config",
+  "$defs": {
+    "Apply": {
+      "properties": {
+        "template": {
+          "type": "string"
+        },
+        "when_parse_error": {
+          "$ref": "#/$defs/WhenParseError"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Config": {
+      "properties": {
+        "terraform": {
+          "$ref": "#/$defs/Terraform"
+        },
+        "embedded_var_names": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "templates": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "log": {
+          "$ref": "#/$defs/Log"
+        },
+        "ghe_base_url": {
+          "type": "string"
+        },
+        "ghe_graphql_endpoint": {
+          "type": "string"
+        },
+        "plan_patch": {
+          "type": "boolean"
+        },
+        "repo_owner": {
+          "type": "string"
+        },
+        "repo_name": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Log": {
+      "properties": {
+        "level": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Plan": {
+      "properties": {
+        "template": {
+          "type": "string"
+        },
+        "when_add_or_update_only": {
+          "$ref": "#/$defs/WhenAddOrUpdateOnly"
+        },
+        "when_destroy": {
+          "$ref": "#/$defs/WhenDestroy"
+        },
+        "when_no_changes": {
+          "$ref": "#/$defs/WhenNoChanges"
+        },
+        "when_plan_error": {
+          "$ref": "#/$defs/WhenPlanError"
+        },
+        "when_parse_error": {
+          "$ref": "#/$defs/WhenParseError"
+        },
+        "disable_label": {
+          "type": "boolean"
+        },
+        "ignore_warning": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Terraform": {
+      "properties": {
+        "plan": {
+          "$ref": "#/$defs/Plan"
+        },
+        "apply": {
+          "$ref": "#/$defs/Apply"
+        },
+        "use_raw_output": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "WhenAddOrUpdateOnly": {
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "label_color": {
+          "type": "string"
+        },
+        "disable_label": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "WhenDestroy": {
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "label_color": {
+          "type": "string"
+        },
+        "disable_label": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "WhenNoChanges": {
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "label_color": {
+          "type": "string"
+        },
+        "disable_label": {
+          "type": "boolean"
+        },
+        "disable_comment": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "WhenParseError": {
+      "properties": {
+        "template": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "WhenPlanError": {
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "label_color": {
+          "type": "string"
+        },
+        "disable_label": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}

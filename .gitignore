@@ -1,5 +1,8 @@
 # Created by https://www.gitignore.io/api/go
 
+.terraform
+*.backup
+
 ### Go ###
 # Binaries for programs and plugins
 *.exe
@@ -17,6 +20,9 @@
 
 # End of https://www.gitignore.io/api/go
 
-tfnotify
 vendor
 dist
+
+.DS_Store
+
+third_party_licenses

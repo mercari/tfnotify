@@ -1,3 +1,4 @@
+version: 2
 project_name: tfnotify
 env:
   - GO111MODULE=on
@@ -5,7 +6,8 @@ before:
   hooks:
     - go mod tidy
 builds:
-  - main: .
+  - id: tfnotify
+    main: ./cmd/tfnotify
     binary: tfnotify
     ldflags: 
       - -s -w
@@ -14,12 +16,6 @@ builds:
       - CGO_ENABLED=0
 archives:
   - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-    replacements:
-      darwin: 'darwin'
-      linux: 'linux'
-      windows: 'windows'
-      386: '386'
-      amd64: 'amd64'
     format_overrides:
       - goos: 'windows'
         format: 'zip'

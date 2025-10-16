@@ -1,20 +1,19 @@
-ci: circleci
-notifier:
-  github:
-    token: $GITHUB_TOKEN
-    repository:
-      owner: "mercari"
-      name: "tfnotify"
+ci:
+  owner:
+  - type: envsubst
+    value: mercari
+  repo:
+  - type: envsubst
+    value: tfnotify
 terraform:
   plan:
     template: |
-      {{ .Title }}
-      {{ .Message }}
+      ## Plan Result
       {{if .Result}}
       <pre><code>{{ .Result }}
       </pre></code>
       {{end}}
       <details><summary>Details (Click me)</summary>
 
-      <pre><code>{{ .Body }}
+      <pre><code>{{ .CombinedOutput }}
       </pre></code></details>
