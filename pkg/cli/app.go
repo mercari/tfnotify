@@ -24,17 +24,17 @@ func New(flags *LDFlags) *cli.Command {
 			&cli.StringFlag{
 				Name:    "owner",
 				Usage:   "GitHub Repository owner name",
-				Sources: cli.EnvVars("TFCMT_REPO_OWNER"),
+				Sources: cli.EnvVars("TFNOTIFY_REPO_OWNER"),
 			},
 			&cli.StringFlag{
 				Name:    "repo",
 				Usage:   "GitHub Repository name",
-				Sources: cli.EnvVars("TFCMT_REPO_NAME"),
+				Sources: cli.EnvVars("TFNOTIFY_REPO_NAME"),
 			},
 			&cli.StringFlag{
 				Name:    "sha",
 				Usage:   "commit SHA (revision)",
-				Sources: cli.EnvVars("TFCMT_SHA"),
+				Sources: cli.EnvVars("TFNOTIFY_SHA"),
 			},
 			&cli.StringFlag{
 				Name:  "build-url",
@@ -47,12 +47,12 @@ func New(flags *LDFlags) *cli.Command {
 			&cli.IntFlag{
 				Name:    "pr",
 				Usage:   "pull request number",
-				Sources: cli.EnvVars("TFCMT_PR_NUMBER"),
+				Sources: cli.EnvVars("TFNOTIFY_PR_NUMBER"),
 			},
 			&cli.StringFlag{
 				Name:    "config",
 				Usage:   "config path",
-				Sources: cli.EnvVars("TFCMT_CONFIG"),
+				Sources: cli.EnvVars("TFNOTIFY_CONFIG"),
 			},
 			&cli.StringSliceFlag{
 				Name:  "var",
@@ -76,22 +76,48 @@ $ tfnotify [<global options>] plan [-patch] [-skip-no-changes] -- terraform plan
 					&cli.BoolFlag{
 						Name:    "patch",
 						Usage:   "update an existing comment instead of creating a new comment. If there is no existing comment, a new comment is created.",
-						Sources: cli.EnvVars("TFCMT_PLAN_PATCH"),
+						Sources: cli.EnvVars("TFNOTIFY_PLAN_PATCH"),
 					},
 					&cli.BoolFlag{
 						Name:    "skip-no-changes",
 						Usage:   "If there is no change tfnotify updates a label but doesn't post a comment",
-						Sources: cli.EnvVars("TFCMT_SKIP_NO_CHANGES"),
+						Sources: cli.EnvVars("TFNOTIFY_SKIP_NO_CHANGES"),
 					},
 					&cli.BoolFlag{
 						Name:    "ignore-warning",
 						Usage:   "If skip-no-changes is enabled, comment is posted even if there is a warning. If skip-no-changes is disabled, warning is removed from the comment.",
-						Sources: cli.EnvVars("TFCMT_IGNORE_WARNING"),
+						Sources: cli.EnvVars("TFNOTIFY_IGNORE_WARNING"),
 					},
 					&cli.BoolFlag{
 						Name:    "disable-label",
 						Usage:   "Disable to add or update a label",
-						Sources: cli.EnvVars("TFCMT_DISABLE_LABEL"),
+						Sources: cli.EnvVars("TFNOTIFY_DISABLE_LABEL"),
+					},
+					&cli.BoolFlag{
+						Name:    "summary",
+						Usage:   "Generate AI-powered summary of plan consequences",
+						Sources: cli.EnvVars("TFNOTIFY_AI_SUMMARY"),
+					},
+					&cli.StringFlag{
+						Name:    "summary-provider",
+						Usage:   "AI provider for summary generation (openai, anthropic, google)",
+						Value:   "litellm",
+						Sources: cli.EnvVars("TFNOTIFY_AI_PROVIDER"),
+					},
+					&cli.StringFlag{
+						Name:    "summary-model",
+						Usage:   "AI model to use for summary generation",
+						Sources: cli.EnvVars("TFNOTIFY_AI_MODEL"),
+					},
+					&cli.StringFlag{
+						Name:    "summary-template",
+						Usage:   "Path to custom AI prompt template file",
+						Sources: cli.EnvVars("TFNOTIFY_AI_TEMPLATE"),
+					},
+					&cli.StringFlag{
+						Name:    "session-id",
+						Usage:   "Devin session ID to use (for Devin provider only)",
+						Sources: cli.EnvVars("TFNOTIFY_SESSION_ID", "DEVIN_SESSION_ID"),
 					},
 				},
 			},

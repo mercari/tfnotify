@@ -16,6 +16,7 @@ const (
 
 {{if .Link}}[CI link]({{.Link}}){{end}}
 
+{{template "ai_summary" .}}
 {{template "deletion_warning" .}}
 {{template "result" .}}
 {{template "updated_resources" .}}
@@ -31,7 +32,7 @@ const (
 
 {{if .Link}}[CI link]({{.Link}}){{end}}
 
-{{if ne .ExitCode 0}}{{template "guide_apply_failure" .}}{{end}}
+{{if ne .ExitCode 0}}{{template "guide_apply_failure" .}}{{template "ai_summary" .}}{{end}}
 
 {{template "result" .}}
 
@@ -45,7 +46,7 @@ const (
 {{template "plan_title" .}}
 
 {{if .Link}}[CI link]({{.Link}}){{end}}
-
+{{template "ai_summary" .}}
 It failed to parse the result.
 
 <details><summary>Details (Click me)</summary>
@@ -58,7 +59,7 @@ It failed to parse the result.
 {{template "apply_title" .}}
 
 {{if .Link}}[CI link]({{.Link}}){{end}}
-
+{{template "ai_summary" .}}
 {{template "guide_apply_parse_error" .}}
 
 It failed to parse the result.
@@ -66,6 +67,10 @@ It failed to parse the result.
 <details><summary>Details (Click me)</summary>
 {{wrapCode .CombinedOutput}}
 </details>
+`
+
+	DefaultAISummaryTemplate = `
+{{template "ai_summary" .}}
 `
 )
 
@@ -92,6 +97,7 @@ type CommonTemplate struct {
 	ReplacedResources      []string
 	MovedResources         []*MovedResource
 	ImportedResources      []string
+	AISummary              string
 }
 
 // Template is a default template for terraform commands
@@ -217,12 +223,14 @@ func (t *Template) Execute() (string, error) {
 		"MovedResources":         t.MovedResources,
 		"ImportedResources":      t.ImportedResources,
 		"HasDestroy":             t.HasDestroy,
+		"AISummary":              t.AISummary,
 	}
 
 	templates := map[string]string{
 		"plan_title":  "## {{if or (eq .ExitCode 1) .HasError}}:x: Plan Failed{{else}}Plan Result{{end}}{{if .Vars.target}} ({{.Vars.target}}){{end}}",
 		"apply_title": "## {{if and (eq .ExitCode 0) (not .HasError)}}:white_check_mark: Apply Succeeded{{else}}:x: Apply Failed{{end}}{{if .Vars.target}} ({{.Vars.target}}){{end}}",
 		"result":      "{{if .Result}}<pre><code>{{ .Result }}</code></pre>{{end}}",
+		"ai_summary":  "{{if .AISummary}}<details><summary>AI Summary (Click me)</summary>{{.AISummary}}</details>{{end}}",
 		"updated_resources": `{{if .CreatedResources}}
 * Create
 {{- range .CreatedResources}}

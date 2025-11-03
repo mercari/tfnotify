@@ -25,12 +25,23 @@ type Config struct {
 	RepoName           string            `json:"repo_name,omitempty" yaml:"repo_name"`
 	Output             string            `json:"-" yaml:"-"`
 	Masks              []*Mask           `json:"-" yaml:"-"`
+	AISummary          AISummary         `json:"ai_summary,omitempty" yaml:"ai_summary"`
 }
 
 type Mask struct {
 	Type   string
 	Value  string
 	Regexp *regexp.Regexp
+}
+
+// AISummary configuration for AI-powered summary generation
+type AISummary struct {
+	Enabled      bool   `json:"enabled,omitempty" yaml:"enabled"`
+	Provider     string `json:"provider,omitempty" yaml:"provider"`
+	Model        string `json:"model,omitempty" yaml:"model"`
+	Template     string `json:"template,omitempty" yaml:"template"`
+	TemplateFile string `json:"template_file,omitempty" yaml:"template_file"`
+	MaxTokens    int    `json:"max_tokens,omitempty" yaml:"max_tokens"`
 }
 
 type CI struct {

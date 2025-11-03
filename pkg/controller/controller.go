@@ -19,6 +19,11 @@ type Controller struct {
 	Parser             terraform.Parser
 	Template           *terraform.Template
 	ParseErrorTemplate *terraform.Template
+	AISummarizer       AISummarizer
+}
+
+type AISummarizer interface {
+	GenerateSummary(ctx context.Context, data interface{}) (string, error)
 }
 
 type Command struct {
