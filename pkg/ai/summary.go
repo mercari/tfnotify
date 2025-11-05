@@ -231,25 +231,71 @@ func (s *Summarizer) loadTemplateFromPath(templatePath string) (string, error) {
 	// Try to find the template file relative to the executable
 	// This allows templates to work in different deployment scenarios
 
-	// First, try relative to current working directory
-	content, err := os.ReadFile(templatePath)
-	if err == nil {
-		s.logger.WithField("template", templatePath).Debug("loaded template from working directory")
-		return string(content), nil
+	// Try multiple locations in order:
+	locationsToTry := []string{}
+
+	// 1. Current working directory
+	locationsToTry = append(locationsToTry, templatePath)
+
+	// 2. Relative to executable location
+	if execPath, err := os.Executable(); err == nil {
+		execDir := filepath.Dir(execPath)
+		locationsToTry = append(locationsToTry, filepath.Join(execDir, templatePath))
 	}
 
-	// Try finding templates relative to the binary location
-	execPath, err := os.Executable()
-	if err == nil {
-		execDir := filepath.Dir(execPath)
-		fullPath := filepath.Join(execDir, templatePath)
-		content, err := os.ReadFile(fullPath)
-		if err == nil {
-			s.logger.WithField("template", fullPath).Debug("loaded template from executable directory")
-			return string(content), nil
+	// 3. Strip leading "./" and try again (for cases where it's already in templates/)
+	cleanPath := templatePath
+	if len(cleanPath) > 2 && cleanPath[:2] == "./" {
+		cleanPath = cleanPath[2:]
+		locationsToTry = append(locationsToTry, cleanPath)
+
+		// Also try relative to executable
+		if execPath, err := os.Executable(); err == nil {
+			execDir := filepath.Dir(execPath)
+			locationsToTry = append(locationsToTry, filepath.Join(execDir, cleanPath))
 		}
 	}
-	return "", fmt.Errorf("template file not found: %s", templatePath)
+
+	// 4. Search upward from current directory to find templates folder
+	// This handles cases where binary is called from a subdirectory
+	if cwd, err := os.Getwd(); err == nil {
+		currentDir := cwd
+		// Search up to 10 levels up (reasonable limit)
+		for i := 0; i < 10; i++ {
+			// Try with original path
+			candidatePath := filepath.Join(currentDir, templatePath)
+			locationsToTry = append(locationsToTry, candidatePath)
+
+			// Try with clean path (without ./)
+			if cleanPath != templatePath {
+				candidatePath = filepath.Join(currentDir, cleanPath)
+				locationsToTry = append(locationsToTry, candidatePath)
+			}
+
+			// Move up one directory
+			parentDir := filepath.Dir(currentDir)
+			if parentDir == currentDir {
+				// Reached root directory
+				break
+			}
+			currentDir = parentDir
+		}
+	}
+
+	// Try each location
+	for _, path := range locationsToTry {
+		content, err := os.ReadFile(path)
+		if err == nil {
+			s.logger.WithField("template", path).Debug("loaded template")
+			return string(content), nil
+		}
+		s.logger.WithFields(logrus.Fields{
+			"path":  path,
+			"error": err.Error(),
+		}).Debug("template not found at path")
+	}
+
+	return "", fmt.Errorf("template file not found: %s (tried %d locations)", templatePath, len(locationsToTry))
 }
 
 // renderPrompt renders the template with plan data
