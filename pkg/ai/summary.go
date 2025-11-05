@@ -13,11 +13,11 @@ import (
 
 // Template file paths relative to project root
 const (
-	TemplatePlanSuccess  = "templates/plan-success.md"
-	TemplatePlanFailure  = "templates/plan-failure.md"
-	TemplateApplySuccess = "templates/apply-success.md"
-	TemplateApplyFailure = "templates/apply-failure.md"
-	TemplateDefault      = "templates/default.md"
+	TemplatePlanSuccess  = "./templates/plan-success.md"
+	TemplatePlanFailure  = "./templates/plan-failure.md"
+	TemplateApplySuccess = "./templates/apply-success.md"
+	TemplateApplyFailure = "./templates/apply-failure.md"
+	TemplateDefault      = "./templates/default.md"
 )
 
 // SummaryConfig holds configuration for AI summary generation
