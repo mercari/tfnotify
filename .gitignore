@@ -2,7 +2,7 @@
 
 .terraform
 *.backup
-
+tfnotify
 ### Go ###
 # Binaries for programs and plugins
 *.exe
