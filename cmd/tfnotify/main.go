@@ -27,5 +27,9 @@ func core() int {
 		Commit:  commit,
 		Date:    date,
 	})
-	return apperr.HandleExit(app.Run(ctx, os.Args))
+	exitCode, errorMessage := apperr.HandleExit(app.Run(ctx, os.Args))
+	if errorMessage != "" {
+		_, _ = os.Stderr.WriteString(errorMessage + "\n")
+	}
+	return exitCode
 }
