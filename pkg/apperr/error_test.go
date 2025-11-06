@@ -48,7 +48,7 @@ func TestHandleError(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 			// TODO: test stderr
-			exitCode := HandleExit(testCase.err)
+			exitCode, _ := HandleExit(testCase.err)
 			if exitCode != testCase.exitCode {
 				t.Errorf("got %d but want %d", exitCode, testCase.exitCode)
 			}
