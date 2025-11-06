@@ -102,7 +102,7 @@ func (s *Summarizer) createDevinSessionAndSendMessage(ctx context.Context, promp
 
 	// Return information about the session creation
 	// Note: Devin works asynchronously, so we can't wait for a response immediately
-	return fmt.Sprintf("**Devin Session Created**\n\nSession ID: `%s`\n\nDevin is now analyzing the Terraform plan failure. View progress at: %s\n\nNote: Devin works asynchronously, please wait for it's comment.", session.SessionID, session.URL), nil
+	return fmt.Sprintf("**Devin Session Created**\n\nSession ID: `%s`\n\nDevin is now analyzing the Terraform operation. View progress at: %s\n\nNote: Devin works asynchronously, please wait for it's comment.", session.SessionID, session.URL), nil
 }
 
 // GetSessionStatus checks the status of a Devin session
