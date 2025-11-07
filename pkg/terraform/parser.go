@@ -60,8 +60,8 @@ type ApplyParser struct {
 func NewPlanParser() *PlanParser {
 	return &PlanParser{
 		Pass:           regexp.MustCompile(`(?m)^(Plan: \d|No changes.)`),
-		Fail:           regexp.MustCompile(`(?m)^([│|] )?(Error: )`),
-		Warning:        regexp.MustCompile(`(?m)^([│|] )?(Warning: )`),
+		Fail:           regexp.MustCompile(`(?m)^([│|╵] )?(Error: )`),
+		Warning:        regexp.MustCompile(`(?m)^([│|╵] )?(Warning: )`),
 		OutputsChanges: regexp.MustCompile(`(?m)^Changes to Outputs:`),
 		// "0 to destroy" should be treated as "no destroy"
 		HasDestroy: regexp.MustCompile(`(?m)([1-9][0-9]* to destroy.)`),
@@ -83,7 +83,7 @@ func NewPlanParser() *PlanParser {
 func NewApplyParser() *ApplyParser {
 	return &ApplyParser{
 		Pass: regexp.MustCompile(`(?m)^(Apply complete!)`),
-		Fail: regexp.MustCompile(`(?m)^(Error: )`),
+		Fail: regexp.MustCompile(`(?m)^([│|╵] )?(Error: )`),
 	}
 }
 
