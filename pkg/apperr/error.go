@@ -54,9 +54,9 @@ func (ee *ExitError) ExitCode() int {
 // HandleExit returns int value that shell interpreter can interpret as the exit code
 // If err has error message, it will be displayed to stderr
 // This function is heavily inspired by urfave/cli.HandleExitCoder
-func HandleExit(err error) int {
+func HandleExit(err error) (int, string) {
 	if err == nil {
-		return ExitCodeOK
+		return ExitCodeOK, ""
 	}
 
 	logE := logrus.NewEntry(logrus.New())
@@ -71,14 +71,14 @@ func HandleExit(err error) int {
 			}
 		}
 		if code := exitErr.ExitCode(); code != 0 {
-			return code
+			return code, errMsg
 		}
 		if errMsg == "" {
-			return ExitCodeOK
+			return ExitCodeOK, ""
 		}
-		return ExitCodeError
+		return ExitCodeError, errMsg
 	}
 
 	logerr.WithError(logE, err).Error("tfnotify failed")
-	return ExitCodeError
+	return ExitCodeError, err.Error()
 }

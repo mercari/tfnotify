@@ -66,7 +66,7 @@ type service struct {
 }
 
 func getToken() (string, error) {
-	if token := os.Getenv("TFCMT_GITHUB_TOKEN"); token != "" {
+	if token := os.Getenv("TFNOTIFY_GITHUB_TOKEN"); token != "" {
 		return token, nil
 	}
 	if token := os.Getenv("GITHUB_TOKEN"); token != "" {

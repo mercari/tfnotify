@@ -43,6 +43,57 @@ func (g *NotifyService) Plan(ctx context.Context, param *notifier.ParamExec) err
 		result.Warning = ""
 	}
 
+	// Generate AI summary if summarizer is provided
+	var aiSummary string
+	if param.AISummarizer != nil {
+		logrus.Info("AI summarizer enabled, generating summary...")
+
+		// Determine operation type and success status for template selection
+		operationType := "plan"
+		isSuccess := !result.HasError && param.ExitCode == 0
+
+		planData := map[string]interface{}{
+			"Result":                 result.Result,
+			"CreatedResources":       result.CreatedResources,
+			"UpdatedResources":       result.UpdatedResources,
+			"DeletedResources":       result.DeletedResources,
+			"ReplacedResources":      result.ReplacedResources,
+			"MovedResources":         result.MovedResources,
+			"ImportedResources":      result.ImportedResources,
+			"HasDestroy":             result.HasDestroy,
+			"HasError":               result.HasError,
+			"Warning":                result.Warning,
+			"ChangeOutsideTerraform": result.OutsideTerraform,
+			"ErrorMessages":          errMsgs,
+			"ExitCode":               param.ExitCode,
+			"CombinedOutput":         param.CombinedOutput,
+			"OperationType":          operationType,
+			"IsSuccess":              isSuccess,
+			"PRNumber":               cfg.PR.Number,
+		}
+		logrus.WithFields(logrus.Fields{
+			"created":        len(result.CreatedResources),
+			"updated":        len(result.UpdatedResources),
+			"deleted":        len(result.DeletedResources),
+			"replaced":       len(result.ReplacedResources),
+			"has_error":      result.HasError,
+			"error_count":    len(errMsgs),
+			"exit_code":      param.ExitCode,
+			"operation_type": operationType,
+			"is_success":     isSuccess,
+		}).Debug("plan data for AI summary")
+
+		summary, err := param.AISummarizer.GenerateSummary(ctx, planData)
+		if err != nil {
+			logrus.WithError(err).Warn("failed to generate AI summary")
+		} else {
+			logrus.WithField("length", len(summary)).Info("AI summary generated successfully")
+			aiSummary = summary
+		}
+	} else {
+		logrus.Debug("AI summarizer not configured, skipping AI summary generation")
+	}
+
 	template.SetValue(terraform.CommonTemplate{
 		Result:                 result.Result,
 		ChangedResult:          result.ChangedResult,
@@ -65,6 +116,7 @@ func (g *NotifyService) Plan(ctx context.Context, param *notifier.ParamExec) err
 		ReplacedResources:      result.ReplacedResources,
 		MovedResources:         result.MovedResources,
 		ImportedResources:      result.ImportedResources,
+		AISummary:              aiSummary,
 	})
 	body, err := template.Execute()
 	if err != nil {

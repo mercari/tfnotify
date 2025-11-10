@@ -13,7 +13,7 @@ import (
 )
 
 func ParseMasksFromEnv() ([]*config.Mask, error) {
-	return ParseMasks(os.Getenv("TFCMT_MASKS"), os.Getenv("TFCMT_MASKS_SEPARATOR"))
+	return ParseMasks(os.Getenv("TFNOTIFY_MASKS"), os.Getenv("TFNOTIFY_MASKS_SEPARATOR"))
 }
 
 func ParseMasks(maskStr, maskSep string) ([]*config.Mask, error) {
