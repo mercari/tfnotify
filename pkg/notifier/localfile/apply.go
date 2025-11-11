@@ -11,7 +11,7 @@ import (
 )
 
 // Apply posts comment optimized for notifications
-func (g *NotifyService) Apply(_ context.Context, param *notifier.ParamExec) error {
+func (g *NotifyService) Apply(ctx context.Context, param *notifier.ParamExec) error {
 	cfg := g.client.Config
 	parser := g.client.Config.Parser
 	template := g.client.Config.Template
@@ -27,6 +27,56 @@ func (g *NotifyService) Apply(_ context.Context, param *notifier.ParamExec) erro
 		if result.Result == "" {
 			return result.Error
 		}
+	}
+
+	// Generate AI summary if summarizer is provided
+	var aiSummary string
+	if param.AISummarizer != nil {
+		logrus.Info("AI summarizer enabled for apply, generating summary...")
+
+		// Determine operation type and success status for template selection
+		operationType := "apply"
+		isSuccess := !result.HasError && param.ExitCode == 0
+
+		applyData := map[string]interface{}{
+			"Result":                 result.Result,
+			"CreatedResources":       result.CreatedResources,
+			"UpdatedResources":       result.UpdatedResources,
+			"DeletedResources":       result.DeletedResources,
+			"ReplacedResources":      result.ReplacedResources,
+			"MovedResources":         result.MovedResources,
+			"ImportedResources":      result.ImportedResources,
+			"HasDestroy":             result.HasDestroy,
+			"HasError":               result.HasError,
+			"Warning":                result.Warning,
+			"ChangeOutsideTerraform": result.OutsideTerraform,
+			"ErrorMessages":          errMsgs,
+			"ExitCode":               param.ExitCode,
+			"CombinedOutput":         param.CombinedOutput,
+			"OperationType":          operationType,
+			"IsSuccess":              isSuccess,
+		}
+		logrus.WithFields(logrus.Fields{
+			"created":        len(result.CreatedResources),
+			"updated":        len(result.UpdatedResources),
+			"deleted":        len(result.DeletedResources),
+			"replaced":       len(result.ReplacedResources),
+			"has_error":      result.HasError,
+			"error_count":    len(errMsgs),
+			"exit_code":      param.ExitCode,
+			"operation_type": operationType,
+			"is_success":     isSuccess,
+		}).Debug("apply data for AI summary")
+
+		summary, err := param.AISummarizer.GenerateSummary(ctx, applyData)
+		if err != nil {
+			logrus.WithError(err).Warn("failed to generate AI summary for apply")
+		} else {
+			logrus.WithField("length", len(summary)).Info("AI summary generated successfully for apply")
+			aiSummary = summary
+		}
+	} else {
+		logrus.Debug("AI summarizer not configured, skipping AI summary generation for apply")
 	}
 
 	template.SetValue(terraform.CommonTemplate{
@@ -49,6 +99,7 @@ func (g *NotifyService) Apply(_ context.Context, param *notifier.ParamExec) erro
 		UpdatedResources:       result.UpdatedResources,
 		DeletedResources:       result.DeletedResources,
 		ReplacedResources:      result.ReplacedResources,
+		AISummary:              aiSummary,
 	})
 	body, err := template.Execute()
 	if err != nil {
