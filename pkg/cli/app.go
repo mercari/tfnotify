@@ -106,7 +106,7 @@ $ tfnotify [<global options>] plan [-patch] [-skip-no-changes] -- terraform plan
 					},
 					&cli.StringFlag{
 						Name:    "summary-model",
-						Usage:   "AI model to use for summary generation",
+						Usage:   "AI model to use for summary generation (not used for Devin provider)",
 						Sources: cli.EnvVars("TFNOTIFY_AI_MODEL"),
 					},
 					&cli.StringFlag{
@@ -143,8 +143,7 @@ $ tfnotify [<global options>] apply -- terraform apply [<terraform apply options
 					},
 					&cli.StringFlag{
 						Name:    "summary-model",
-						Usage:   "AI model to use for summary generation",
-						Value:   "gpt-4o-mini",
+						Usage:   "AI model to use for summary generation (not used for Devin provider)",
 						Sources: cli.EnvVars("TFNOTIFY_AI_MODEL"),
 					},
 					&cli.StringFlag{

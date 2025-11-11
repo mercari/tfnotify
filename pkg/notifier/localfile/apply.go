@@ -31,8 +31,9 @@ func (g *NotifyService) Apply(ctx context.Context, param *notifier.ParamExec) er
 
 	// Generate AI summary if summarizer is provided
 	var aiSummary string
-	if param.AISummarizer != nil {
-		logrus.Info("AI summarizer enabled for apply, generating summary...")
+	// Only generate AI summary for failed applies (exit code != 0)
+	if param.AISummarizer != nil && param.ExitCode != 0 {
+		logrus.Info("AI summarizer enabled for apply failure, generating summary...")
 
 		// Determine operation type and success status for template selection
 		operationType := "apply"

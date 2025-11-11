@@ -56,5 +56,6 @@ func (c *Controller) Apply(ctx context.Context, command Command) error {
 		CombinedOutput: combinedOutput.String(),
 		CIName:         c.Config.CI.Name,
 		ExitCode:       cmd.ProcessState.ExitCode(),
+		AISummarizer:   c.AISummarizer,
 	}))
 }
