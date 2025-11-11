@@ -35,7 +35,8 @@ func cmdApply(ctx context.Context, cmd *cli.Command) error {
 		if provider := cmd.String("summary-provider"); provider != "" {
 			cfg.AISummary.Provider = provider
 		}
-		if model := cmd.String("summary-model"); model != "" {
+		// Model is not used for Devin provider
+		if model := cmd.String("summary-model"); model != "" && cfg.AISummary.Provider != "devin" {
 			cfg.AISummary.Model = model
 		}
 		if template := cmd.String("summary-template"); template != "" {
