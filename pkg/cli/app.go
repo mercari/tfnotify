@@ -129,6 +129,35 @@ $ tfnotify [<global options>] plan [-patch] [-skip-no-changes] -- terraform plan
 
 $ tfnotify [<global options>] apply -- terraform apply [<terraform apply options>]`,
 				Action: cmdApply,
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:    "summary",
+						Usage:   "Generate AI-powered summary of apply consequences",
+						Sources: cli.EnvVars("TFNOTIFY_AI_SUMMARY"),
+					},
+					&cli.StringFlag{
+						Name:    "summary-provider",
+						Usage:   "AI provider for summary generation (openai, anthropic, google, devin, litellm)",
+						Value:   "litellm",
+						Sources: cli.EnvVars("TFNOTIFY_AI_PROVIDER"),
+					},
+					&cli.StringFlag{
+						Name:    "summary-model",
+						Usage:   "AI model to use for summary generation",
+						Value:   "gpt-4o-mini",
+						Sources: cli.EnvVars("TFNOTIFY_AI_MODEL"),
+					},
+					&cli.StringFlag{
+						Name:    "summary-template",
+						Usage:   "Custom template file for AI summary prompt",
+						Sources: cli.EnvVars("TFNOTIFY_AI_TEMPLATE"),
+					},
+					&cli.StringFlag{
+						Name:    "session-id",
+						Usage:   "Devin session ID to use (for Devin provider only)",
+						Sources: cli.EnvVars("TFNOTIFY_SESSION_ID", "DEVIN_SESSION_ID"),
+					},
+				},
 			},
 			vcmd.New(&vcmd.Command{
 				Name:    "tfnotify",
