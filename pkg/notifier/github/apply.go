@@ -108,6 +108,7 @@ func (g *NotifyService) Apply(ctx context.Context, param *notifier.ParamExec) er
 		DeletedResources:       result.DeletedResources,
 		ReplacedResources:      result.ReplacedResources,
 		AISummary:              aiSummary,
+		SummaryEnabled:         param.AISummarizer != nil,
 	})
 	body, err := template.Execute()
 	if err != nil {
