@@ -98,6 +98,7 @@ type CommonTemplate struct {
 	MovedResources         []*MovedResource
 	ImportedResources      []string
 	AISummary              string
+	SummaryEnabled         bool
 }
 
 // Template is a default template for terraform commands
@@ -224,13 +225,14 @@ func (t *Template) Execute() (string, error) {
 		"ImportedResources":      t.ImportedResources,
 		"HasDestroy":             t.HasDestroy,
 		"AISummary":              t.AISummary,
+		"SummaryEnabled":         t.SummaryEnabled,
 	}
 
 	templates := map[string]string{
 		"plan_title":  "## {{if or (eq .ExitCode 1) .HasError}}:x: Plan Failed{{else}}Plan Result{{end}}{{if .Vars.target}} ({{.Vars.target}}){{end}}",
 		"apply_title": "## {{if and (eq .ExitCode 0) (not .HasError)}}:white_check_mark: Apply Succeeded{{else}}:x: Apply Failed{{end}}{{if .Vars.target}} ({{.Vars.target}}){{end}}",
 		"result":      "{{if .Result}}<pre><code>{{ .Result }}</code></pre>{{end}}",
-		"ai_summary":  "{{if .AISummary}}<details><summary>AI Summary (Click me)</summary>{{.AISummary}}</details>{{end}}",
+		"ai_summary":  "{{if .SummaryEnabled}}{{if .AISummary}}<details><summary>AI Summary (Click me)</summary>{{.AISummary}}</details>{{end}}{{end}}",
 		"updated_resources": `{{if .CreatedResources}}
 * Create
 {{- range .CreatedResources}}

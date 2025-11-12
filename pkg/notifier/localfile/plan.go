@@ -110,6 +110,7 @@ func (g *NotifyService) Plan(ctx context.Context, param *notifier.ParamExec) err
 		MovedResources:         result.MovedResources,
 		ImportedResources:      result.ImportedResources,
 		AISummary:              aiSummary,
+		SummaryEnabled:         param.AISummarizer != nil,
 	})
 	body, err := template.Execute()
 	if err != nil {
