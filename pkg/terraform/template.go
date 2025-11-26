@@ -238,7 +238,7 @@ func (t *Template) Execute() (string, error) {
 		"plan_title":  "## {{if or (eq .ExitCode 1) .HasError}}:x: Plan Failed{{else}}Plan Result{{end}}{{if .Vars.target}} ({{.Vars.target}}){{end}}",
 		"apply_title": "## {{if and (eq .ExitCode 0) (not .HasError)}}:white_check_mark: Apply Succeeded{{else}}:x: Apply Failed{{end}}{{if .Vars.target}} ({{.Vars.target}}){{end}}",
 		"result":      "{{if .Result}}<pre><code>{{ .Result }}</code></pre>{{end}}",
-		"ai_summary":  "{{if .SummaryEnabled}}{{if .AISummary}}<details><summary>AI Summary (Click me)</summary>\n\n{{escapeHTML .AISummary}}\n\n</details>{{end}}{{end}}",
+		"ai_summary":  "{{if .SummaryEnabled}}{{if .AISummary}}<details><summary>AI Summary (Click me)</summary>\n\n{{.AISummary}}\n\n</details>{{end}}{{end}}",
 		"updated_resources": `{{if .CreatedResources}}
 * Create
 {{- range .CreatedResources}}
