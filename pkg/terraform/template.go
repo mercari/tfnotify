@@ -14,7 +14,7 @@ const (
 	DefaultPlanTemplate = `
 {{template "plan_title" .}}
 
-{{if .Link}}[CI link]({{.Link}}){{end}}
+{{if .Link}}[CI link]({{avoidHTMLEscape .Link}}){{end}}
 
 {{template "ai_summary" .}}
 {{template "deletion_warning" .}}
@@ -30,7 +30,7 @@ const (
 	DefaultApplyTemplate = `
 {{template "apply_title" .}}
 
-{{if .Link}}[CI link]({{.Link}}){{end}}
+{{if .Link}}[CI link]({{avoidHTMLEscape .Link}}){{end}}
 
 {{if ne .ExitCode 0}}{{template "guide_apply_failure" .}}{{template "ai_summary" .}}{{end}}
 
@@ -45,7 +45,7 @@ const (
 	DefaultPlanParseErrorTemplate = `
 {{template "plan_title" .}}
 
-{{if .Link}}[CI link]({{.Link}}){{end}}
+{{if .Link}}[CI link]({{avoidHTMLEscape .Link}}){{end}}
 {{template "ai_summary" .}}
 It failed to parse the result.
 
@@ -58,7 +58,7 @@ It failed to parse the result.
 	DefaultApplyParseErrorTemplate = `
 {{template "apply_title" .}}
 
-{{if .Link}}[CI link]({{.Link}}){{end}}
+{{if .Link}}[CI link]({{avoidHTMLEscape .Link}}){{end}}
 {{template "ai_summary" .}}
 {{template "guide_apply_parse_error" .}}
 
