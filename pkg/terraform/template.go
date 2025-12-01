@@ -14,7 +14,7 @@ const (
 	DefaultPlanTemplate = `
 {{template "plan_title" .}}
 
-{{if .Link}}[CI link]({{.Link}}){{end}}
+{{if .Link}}[CI link]({{avoidHTMLEscape .Link}}){{end}}
 
 {{template "ai_summary" .}}
 {{template "deletion_warning" .}}
@@ -30,7 +30,7 @@ const (
 	DefaultApplyTemplate = `
 {{template "apply_title" .}}
 
-{{if .Link}}[CI link]({{.Link}}){{end}}
+{{if .Link}}[CI link]({{avoidHTMLEscape .Link}}){{end}}
 
 {{if ne .ExitCode 0}}{{template "guide_apply_failure" .}}{{template "ai_summary" .}}{{end}}
 
@@ -45,7 +45,7 @@ const (
 	DefaultPlanParseErrorTemplate = `
 {{template "plan_title" .}}
 
-{{if .Link}}[CI link]({{.Link}}){{end}}
+{{if .Link}}[CI link]({{avoidHTMLEscape .Link}}){{end}}
 {{template "ai_summary" .}}
 It failed to parse the result.
 
@@ -58,7 +58,7 @@ It failed to parse the result.
 	DefaultApplyParseErrorTemplate = `
 {{template "apply_title" .}}
 
-{{if .Link}}[CI link]({{.Link}}){{end}}
+{{if .Link}}[CI link]({{avoidHTMLEscape .Link}}){{end}}
 {{template "ai_summary" .}}
 {{template "guide_apply_parse_error" .}}
 
@@ -150,6 +150,10 @@ func avoidHTMLEscape(text string) htmltemplate.HTML {
 	return htmltemplate.HTML(text) //nolint:gosec
 }
 
+func escapeHTML(text string) string {
+	return htmltemplate.HTMLEscapeString(text)
+}
+
 func wrapCode(text string) any {
 	header := ""
 	if len(text) > 60000 { //nolint:mnd
@@ -178,6 +182,7 @@ func generateOutput(kind, template string, data map[string]any, useRawOutput boo
 	if useRawOutput {
 		tpl, err := texttemplate.New(kind).Funcs(texttemplate.FuncMap{
 			"avoidHTMLEscape": avoidHTMLEscape,
+			"escapeHTML":      escapeHTML,
 			"wrapCode":        wrapCode,
 		}).Funcs(tmpl.TxtFuncMap()).Parse(template)
 		if err != nil {
@@ -189,6 +194,7 @@ func generateOutput(kind, template string, data map[string]any, useRawOutput boo
 	} else {
 		tpl, err := htmltemplate.New(kind).Funcs(htmltemplate.FuncMap{
 			"avoidHTMLEscape": avoidHTMLEscape,
+			"escapeHTML":      escapeHTML,
 			"wrapCode":        wrapCode,
 		}).Funcs(tmpl.FuncMap()).Parse(template)
 		if err != nil {
@@ -232,7 +238,7 @@ func (t *Template) Execute() (string, error) {
 		"plan_title":  "## {{if or (eq .ExitCode 1) .HasError}}:x: Plan Failed{{else}}Plan Result{{end}}{{if .Vars.target}} ({{.Vars.target}}){{end}}",
 		"apply_title": "## {{if and (eq .ExitCode 0) (not .HasError)}}:white_check_mark: Apply Succeeded{{else}}:x: Apply Failed{{end}}{{if .Vars.target}} ({{.Vars.target}}){{end}}",
 		"result":      "{{if .Result}}<pre><code>{{ .Result }}</code></pre>{{end}}",
-		"ai_summary":  "{{if .SummaryEnabled}}{{if .AISummary}}<details><summary>AI Summary (Click me)</summary>{{.AISummary}}</details>{{end}}{{end}}",
+		"ai_summary":  "{{if .SummaryEnabled}}{{if .AISummary}}<details><summary>AI Summary (Click me)</summary>\n\n{{avoidHTMLEscape .AISummary}}\n\n</details>{{end}}{{end}}",
 		"updated_resources": `{{if .CreatedResources}}
 * Create
 {{- range .CreatedResources}}
