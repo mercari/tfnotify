@@ -29,9 +29,10 @@ type SummaryConfig struct {
 	Template      string
 	TemplateFile  string
 	MaxTokens     int
-	OperationType string // "plan" or "apply"
-	IsSuccess     bool   // true for success, false for failure
-	SessionID     string // Optional: existing Devin session ID to use
+	OperationType string   // "plan" or "apply"
+	IsSuccess     bool     // true for success, false for failure
+	SessionID     string   // Optional: existing Devin session ID to use
+	PlaybookIDs   []string // Optional: Devin playbook IDs to guide behavior (for Devin provider only)
 }
 
 // PlanData contains the terraform plan data to be summarized

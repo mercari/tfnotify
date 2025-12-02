@@ -15,6 +15,7 @@ import (
 // Devin API structures for creating sessions
 type CreateSessionRequest struct {
 	Prompt       string   `json:"prompt"`                  // Required: The task description for Devin
+	PlaybookID   []string `json:"playbook_id,omitempty"`   // Optional: ID of a playbook to guide Devin's behavior
 	SnapshotID   *string  `json:"snapshot_id,omitempty"`   // Optional: ID of a machine snapshot to use
 	Unlisted     *bool    `json:"unlisted,omitempty"`      // Optional: Whether the session should be unlisted
 	Idempotent   *bool    `json:"idempotent,omitempty"`    // Optional: Enable idempotent session creation
@@ -90,14 +91,19 @@ func (s *Summarizer) callDevin(ctx context.Context, sessionID string, prompt str
 
 // createDevinSessionAndSendMessage creates a new session and sends the initial message
 func (s *Summarizer) createDevinSessionAndSendMessage(ctx context.Context, prompt string) (string, error) {
-	session, err := s.CreateSession(ctx, prompt, nil)
+	options := &CreateSessionRequest{
+		PlaybookID: s.config.PlaybookIDs,
+	}
+
+	session, err := s.CreateSession(ctx, prompt, options)
 	if err != nil {
 		return "", fmt.Errorf("create Devin session: %w", err)
 	}
 
 	s.logger.WithFields(logrus.Fields{
-		"session_id": session.SessionID,
-		"url":        session.URL,
+		"session_id":  session.SessionID,
+		"url":         session.URL,
+		"playbook_id": s.config.PlaybookIDs,
 	}).Info("new Devin session created")
 
 	// Return information about the session creation
@@ -250,6 +256,9 @@ func (s *Summarizer) CreateSession(ctx context.Context, prompt string, options *
 
 	// Merge optional parameters if provided
 	if options != nil {
+		if options.PlaybookID != nil {
+			reqBody.PlaybookID = options.PlaybookID
+		}
 		if options.SnapshotID != nil {
 			reqBody.SnapshotID = options.SnapshotID
 		}

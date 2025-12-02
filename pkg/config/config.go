@@ -36,12 +36,13 @@ type Mask struct {
 
 // AISummary configuration for AI-powered summary generation
 type AISummary struct {
-	Enabled      bool   `json:"enabled,omitempty" yaml:"enabled"`
-	Provider     string `json:"provider,omitempty" yaml:"provider"`
-	Model        string `json:"model,omitempty" yaml:"model"`
-	Template     string `json:"template,omitempty" yaml:"template"`
-	TemplateFile string `json:"template_file,omitempty" yaml:"template_file"`
-	MaxTokens    int    `json:"max_tokens,omitempty" yaml:"max_tokens"`
+	Enabled      bool     `json:"enabled,omitempty" yaml:"enabled"`
+	Provider     string   `json:"provider,omitempty" yaml:"provider"`
+	Model        string   `json:"model,omitempty" yaml:"model"`
+	Template     string   `json:"template,omitempty" yaml:"template"`
+	TemplateFile string   `json:"template_file,omitempty" yaml:"template_file"`
+	MaxTokens    int      `json:"max_tokens,omitempty" yaml:"max_tokens"`
+	PlaybookIDs  []string `json:"playbook_ids,omitempty" yaml:"playbook_ids"`
 }
 
 type CI struct {
