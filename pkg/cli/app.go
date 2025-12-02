@@ -109,6 +109,11 @@ $ tfnotify [<global options>] plan [-patch] [-skip-no-changes] -- terraform plan
 						Usage:   "AI model to use for summary generation (not used for Devin provider)",
 						Sources: cli.EnvVars("TFNOTIFY_AI_MODEL"),
 					},
+					&cli.StringSliceFlag{
+						Name:    "playbook-id",
+						Usage:   "Devin playbook IDs to guide behavior (for Devin provider only, can be specified multiple times)",
+						Sources: cli.EnvVars("TFNOTIFY_PLAYBOOK_IDS", "DEVIN_PLAYBOOK_IDS"),
+					},
 					&cli.StringFlag{
 						Name:    "summary-template",
 						Usage:   "Path to custom AI prompt template file",
@@ -145,6 +150,11 @@ $ tfnotify [<global options>] apply -- terraform apply [<terraform apply options
 						Name:    "summary-model",
 						Usage:   "AI model to use for summary generation (not used for Devin provider)",
 						Sources: cli.EnvVars("TFNOTIFY_AI_MODEL"),
+					},
+					&cli.StringSliceFlag{
+						Name:    "playbook-id",
+						Usage:   "Devin playbook IDs to guide behavior (for Devin provider only, can be specified multiple times)",
+						Sources: cli.EnvVars("TFNOTIFY_PLAYBOOK_IDS", "DEVIN_PLAYBOOK_IDS"),
 					},
 					&cli.StringFlag{
 						Name:    "summary-template",

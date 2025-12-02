@@ -42,6 +42,10 @@ func cmdApply(ctx context.Context, cmd *cli.Command) error {
 		if template := cmd.String("summary-template"); template != "" {
 			cfg.AISummary.TemplateFile = template
 		}
+		// Playbook IDs for Devin provider
+		if playbookIDs := cmd.StringSlice("playbook-id"); len(playbookIDs) > 0 {
+			cfg.AISummary.PlaybookIDs = playbookIDs
+		}
 	}
 
 	// Get session ID if provided
@@ -75,12 +79,14 @@ func cmdApply(ctx context.Context, cmd *cli.Command) error {
 			TemplateFile:  cfg.AISummary.TemplateFile,
 			MaxTokens:     cfg.AISummary.MaxTokens,
 			SessionID:     sessionID,
+			PlaybookIDs:   cfg.AISummary.PlaybookIDs,
 			OperationType: "apply",
 		})
 		t.AISummarizer = summarizer
 		logrus.WithFields(logrus.Fields{
-			"provider": cfg.AISummary.Provider,
-			"model":    cfg.AISummary.Model,
+			"provider":    cfg.AISummary.Provider,
+			"model":       cfg.AISummary.Model,
+			"playbook_id": cfg.AISummary.PlaybookIDs,
 		}).Info("AI summary enabled for apply")
 	}
 
