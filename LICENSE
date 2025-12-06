@@ -1,4 +1,7 @@
 Copyright (c) 2018 Mercari, Inc.
+Copyright (c) 2020 Shunsuke Suzuki
+
+This project was synced with [suzuki-shunsuke/tfcmt](https://github.com/suzuki-shunsuke/tfcmt) at v4.14.12.
 
 MIT License
 
@@ -20,6 +23,3 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
----
-This project was synced with [mercari/tfnotify](https://github.com/suzuki-shunsuke/tfcmt) at v4.14.12.
