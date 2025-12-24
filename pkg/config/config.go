@@ -63,6 +63,7 @@ type Terraform struct {
 	Plan         Plan  `json:"plan,omitempty"`
 	Apply        Apply `json:"apply,omitempty"`
 	UseRawOutput bool  `json:"use_raw_output,omitempty" yaml:"use_raw_output"`
+	Consolidated bool  `json:"consolidated,omitempty" yaml:"consolidated"`
 }
 
 // Plan is a terraform plan config

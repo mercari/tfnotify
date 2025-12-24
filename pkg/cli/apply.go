@@ -47,6 +47,11 @@ func cmdApply(ctx context.Context, cmd *cli.Command) error {
 	// Get session ID if provided
 	sessionID := cmd.String("session-id")
 
+	// Check if consolidated flag is set
+	if cmd.Bool("consolidated") {
+		cfg.Terraform.Consolidated = true
+	}
+
 	t := &controller.Controller{
 		Config:             cfg,
 		Parser:             terraform.NewApplyParser(),

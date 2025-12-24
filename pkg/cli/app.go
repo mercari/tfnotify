@@ -94,6 +94,11 @@ $ tfnotify [<global options>] plan [-patch] [-skip-no-changes] -- terraform plan
 						Sources: cli.EnvVars("TFNOTIFY_DISABLE_LABEL"),
 					},
 					&cli.BoolFlag{
+						Name:    "consolidated",
+						Usage:   "For Terragrunt: consolidate all module results into a single comment instead of posting per module",
+						Sources: cli.EnvVars("TFNOTIFY_CONSOLIDATED"),
+					},
+					&cli.BoolFlag{
 						Name:    "summary",
 						Usage:   "Generate AI-powered summary of plan consequences",
 						Sources: cli.EnvVars("TFNOTIFY_AI_SUMMARY"),
@@ -130,6 +135,11 @@ $ tfnotify [<global options>] plan [-patch] [-skip-no-changes] -- terraform plan
 $ tfnotify [<global options>] apply -- terraform apply [<terraform apply options>]`,
 				Action: cmdApply,
 				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:    "consolidated",
+						Usage:   "For Terragrunt: consolidate all module results into a single comment instead of posting per module",
+						Sources: cli.EnvVars("TFNOTIFY_CONSOLIDATED"),
+					},
 					&cli.BoolFlag{
 						Name:    "summary",
 						Usage:   "Generate AI-powered summary of apply consequences",

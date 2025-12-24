@@ -56,6 +56,26 @@ type ApplyParser struct {
 	Fail *regexp.Regexp
 }
 
+// TerragruntParser is a parser for terragrunt run-all commands
+type TerragruntParser struct {
+	Pass           *regexp.Regexp
+	Fail           *regexp.Regexp
+	Warning        *regexp.Regexp
+	OutputsChanges *regexp.Regexp
+	HasDestroy     *regexp.Regexp
+	HasNoChanges   *regexp.Regexp
+	Create         *regexp.Regexp
+	Update         *regexp.Regexp
+	Delete         *regexp.Regexp
+	Replace        *regexp.Regexp
+	ReplaceOption  *regexp.Regexp
+	Move           *regexp.Regexp
+	Import         *regexp.Regexp
+	ImportedFrom   *regexp.Regexp
+	MovedFrom      *regexp.Regexp
+	ModuleHeader   *regexp.Regexp
+}
+
 // NewPlanParser is PlanParser initialized with its Regexp
 func NewPlanParser() *PlanParser {
 	return &PlanParser{
@@ -84,6 +104,28 @@ func NewApplyParser() *ApplyParser {
 	return &ApplyParser{
 		Pass: regexp.MustCompile(`(?m)^(Apply complete!)`),
 		Fail: regexp.MustCompile(`(?m)^([│|╵] )?(Error: )`),
+	}
+}
+
+// NewTerragruntParser is TerragruntParser initialized with its Regexp
+func NewTerragruntParser() *TerragruntParser {
+	return &TerragruntParser{
+		Pass:           regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )?(Plan: \d|No changes\.)`),
+		Fail:           regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )?([│|╵] )?(Error: )`),
+		Warning:        regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )?([│|╵] )?(Warning: )`),
+		OutputsChanges: regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )?Changes to Outputs:`),
+		HasDestroy:     regexp.MustCompile(`(?m)([1-9][0-9]* to destroy\.)`),
+		HasNoChanges:   regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )?(No changes\.|Plan: 0 to add, 0 to change, 0 to destroy\.)`),
+		Create:         regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# (.*) will be created$`),
+		Update:         regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# (.*) will be updated in-place$`),
+		Delete:         regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# (.*) will be destroyed$`),
+		Replace:        regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# (.*?)(?: is tainted, so)? must be replaced$`),
+		ReplaceOption:  regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# (.*?) will be replaced, as requested$`),
+		Move:           regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# (.*?) has moved to (.*?)$`),
+		Import:         regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# (.*?) will be imported$`),
+		ImportedFrom:   regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# \(imported from (.*?)\)$`),
+		MovedFrom:      regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# \(moved from (.*?)\)$`),
+		ModuleHeader:   regexp.MustCompile(`^(?:Group \d+|Module) (.+?)(?:\s+\[run-all\])?$`),
 	}
 }
 
@@ -311,6 +353,169 @@ func (p *ApplyParser) Parse(body string) ParseResult {
 	}
 }
 
+// Parse returns ParseResult related with terragrunt run-all
+func (p *TerragruntParser) Parse(body string) ParseResult {
+	return p.ParseWithConsolidation(body, false)
+}
+
+// ParseWithConsolidation returns ParseResult with optional consolidation
+// If consolidated=true, all modules are combined into a single result
+func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool) ParseResult { //nolint:cyclop,maintidx
+	switch {
+	case p.Fail.MatchString(body):
+	case p.Pass.MatchString(body) || p.OutputsChanges.MatchString(body):
+	default:
+		return ParseResult{
+			Result:        "",
+			HasParseError: true,
+			Error:         errors.New("cannot parse terragrunt result"),
+		}
+	}
+
+	lines := strings.Split(body, "\n")
+	var result string
+	var allCreatedResources, allUpdatedResources, allDeletedResources, allReplacedResources, allImportedResources []string
+	var allMovedResources []*MovedResource
+	var hasDestroy, hasNoChanges, hasError bool
+	var changeResults []string
+	var warnings []string
+
+	// Track current module context
+	currentModule := ""
+	moduleResults := make(map[string]*ParseResult)
+
+	for i, line := range lines {
+		// Detect module boundaries
+		if match := p.ModuleHeader.FindStringSubmatch(line); len(match) > 1 {
+			currentModule = match[1]
+			if _, exists := moduleResults[currentModule]; !exists {
+				moduleResults[currentModule] = &ParseResult{
+					CreatedResources:  []string{},
+					UpdatedResources:  []string{},
+					DeletedResources:  []string{},
+					ReplacedResources: []string{},
+					MovedResources:    []*MovedResource{},
+					ImportedResources: []string{},
+				}
+			}
+			continue
+		}
+
+		// Parse plan results
+		if p.Pass.MatchString(line) || p.OutputsChanges.MatchString(line) {
+			if result == "" {
+				result = line
+			}
+			if p.HasDestroy.MatchString(line) {
+				hasDestroy = true
+			}
+			if p.HasNoChanges.MatchString(line) {
+				hasNoChanges = true
+			}
+		}
+
+		if p.Fail.MatchString(line) {
+			hasError = true
+			if result == "" {
+				result = line
+			}
+		}
+
+		// Extract resources
+		if rsc := extractResource(p.Create, line); rsc != "" {
+			allCreatedResources = append(allCreatedResources, rsc)
+			if currentModule != "" && moduleResults[currentModule] != nil {
+				moduleResults[currentModule].CreatedResources = append(moduleResults[currentModule].CreatedResources, rsc)
+			}
+		} else if rsc := extractResource(p.Update, line); rsc != "" {
+			allUpdatedResources = append(allUpdatedResources, rsc)
+			if currentModule != "" && moduleResults[currentModule] != nil {
+				moduleResults[currentModule].UpdatedResources = append(moduleResults[currentModule].UpdatedResources, rsc)
+			}
+		} else if rsc := extractResource(p.Delete, line); rsc != "" {
+			allDeletedResources = append(allDeletedResources, rsc)
+			if currentModule != "" && moduleResults[currentModule] != nil {
+				moduleResults[currentModule].DeletedResources = append(moduleResults[currentModule].DeletedResources, rsc)
+			}
+		} else if rsc := extractResource(p.Replace, line); rsc != "" {
+			allReplacedResources = append(allReplacedResources, rsc)
+			if currentModule != "" && moduleResults[currentModule] != nil {
+				moduleResults[currentModule].ReplacedResources = append(moduleResults[currentModule].ReplacedResources, rsc)
+			}
+		} else if rsc := extractResource(p.ReplaceOption, line); rsc != "" {
+			allReplacedResources = append(allReplacedResources, rsc)
+			if currentModule != "" && moduleResults[currentModule] != nil {
+				moduleResults[currentModule].ReplacedResources = append(moduleResults[currentModule].ReplacedResources, rsc)
+			}
+		} else if rsc := extractResource(p.Import, line); rsc != "" {
+			allImportedResources = append(allImportedResources, rsc)
+			if currentModule != "" && moduleResults[currentModule] != nil {
+				moduleResults[currentModule].ImportedResources = append(moduleResults[currentModule].ImportedResources, rsc)
+			}
+		} else if rsc := extractResource(p.ImportedFrom, line); rsc != "" {
+			if i > 0 {
+				if toRsc := p.changedResources(lines[i-1]); toRsc != "" {
+					allImportedResources = append(allImportedResources, toRsc)
+					if currentModule != "" && moduleResults[currentModule] != nil {
+						moduleResults[currentModule].ImportedResources = append(moduleResults[currentModule].ImportedResources, toRsc)
+					}
+				}
+			}
+		} else if rsc := extractMovedResource(p.Move, line); rsc != nil {
+			allMovedResources = append(allMovedResources, rsc)
+			if currentModule != "" && moduleResults[currentModule] != nil {
+				moduleResults[currentModule].MovedResources = append(moduleResults[currentModule].MovedResources, rsc)
+			}
+		} else if fromRsc := extractResource(p.MovedFrom, line); fromRsc != "" {
+			if i > 0 {
+				if toRsc := p.changedResources(lines[i-1]); toRsc != "" {
+					moved := &MovedResource{Before: fromRsc, After: toRsc}
+					allMovedResources = append(allMovedResources, moved)
+					if currentModule != "" && moduleResults[currentModule] != nil {
+						moduleResults[currentModule].MovedResources = append(moduleResults[currentModule].MovedResources, moved)
+					}
+				}
+			}
+		}
+
+		// Collect warnings
+		if p.Warning.MatchString(line) {
+			warnings = append(warnings, line)
+		}
+	}
+
+	// Build consolidated result
+	hasAddOrUpdateOnly := !hasNoChanges && !hasDestroy && !hasError
+
+	return ParseResult{
+		Result:             strings.TrimSpace(result),
+		ChangedResult:      strings.Join(changeResults, "\n"),
+		Warning:            strings.Join(warnings, "\n"),
+		HasAddOrUpdateOnly: hasAddOrUpdateOnly,
+		HasDestroy:         hasDestroy,
+		HasNoChanges:       hasNoChanges,
+		HasError:           hasError,
+		Error:              nil,
+		CreatedResources:   allCreatedResources,
+		UpdatedResources:   allUpdatedResources,
+		DeletedResources:   allDeletedResources,
+		ReplacedResources:  allReplacedResources,
+		MovedResources:     allMovedResources,
+		ImportedResources:  allImportedResources,
+	}
+}
+
+func (p *TerragruntParser) changedResources(line string) string {
+	if rsc := extractResource(p.Update, line); rsc != "" {
+		return rsc
+	} else if rsc := extractResource(p.Replace, line); rsc != "" {
+		return rsc
+	} else if rsc := extractResource(p.ReplaceOption, line); rsc != "" {
+		return rsc
+	}
+	return ""
+}
+
 func trimLastNewline(s []string) []string {
 	if len(s) == 0 {
 		return s
@@ -328,4 +533,11 @@ func trimBars(list []string) []string {
 		ret[i] = strings.TrimPrefix(strings.TrimPrefix(strings.TrimPrefix(elem, "|"), "│"), "╵")
 	}
 	return ret
+}
+
+// stripTerragruntPrefix removes Terragrunt timestamp prefixes like "09:32:46.963 STDOUT terraform: "
+func stripTerragruntPrefix(line string) string {
+	// Match pattern: HH:MM:SS.mmm STDOUT/STDERR terraform:
+	re := regexp.MustCompile(`^\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: `)
+	return re.ReplaceAllString(line, "")
 }
