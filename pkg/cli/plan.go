@@ -49,6 +49,7 @@ func cmdPlan(ctx context.Context, cmd *cli.Command) error {
 	// Check if consolidated flag is set
 	if cmd.Bool("consolidated") {
 		cfg.Terraform.Consolidated = true
+		logrus.Info("Terragrunt consolidated mode enabled")
 	}
 
 	t := &controller.Controller{
