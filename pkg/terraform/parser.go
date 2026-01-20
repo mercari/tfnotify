@@ -2,6 +2,7 @@ package terraform
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 )
@@ -379,6 +380,7 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 	var hasDestroy, hasNoChanges, hasError bool
 	var changeResults []string
 	var warnings []string
+	var currentModuleBuff []string
 
 	// Track current module context
 	currentModule := ""
@@ -387,7 +389,17 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 	for i, line := range lines {
 		// Detect module boundaries
 		if match := p.ModuleHeader.FindStringSubmatch(line); len(match) > 1 {
+			// Flush previous module if it had changes
+			if len(currentModuleBuff) > 0 {
+				changeResults = append(changeResults, strings.Join(currentModuleBuff, "\n"))
+				currentModuleBuff = []string{}
+			}
+
 			currentModule = match[1]
+			if consolidated {
+				currentModuleBuff = append(currentModuleBuff, fmt.Sprintf("<details><summary>%s</summary>", currentModule))
+				currentModuleBuff = append(currentModuleBuff, "")
+			}
 			if _, exists := moduleResults[currentModule]; !exists {
 				moduleResults[currentModule] = &ParseResult{
 					CreatedResources:  []string{},
@@ -418,6 +430,23 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 			hasError = true
 			if result == "" {
 				result = line
+			}
+		}
+
+		// Capture content for consolidation
+		if consolidated && currentModule != "" {
+			// Filter out noise? For now capture everything relevant inside the module block
+			// But maybe we only want to capture the "plan" output part.
+			// The current parser logic is iterating line by line.
+			// Terragrunt output is interleaved.
+			// We only want to capture the relevant lines for the "diff".
+			// Let's capture lines that look like a change.
+			if p.Create.MatchString(line) || p.Update.MatchString(line) || p.Delete.MatchString(line) ||
+				p.Replace.MatchString(line) || p.ReplaceOption.MatchString(line) || p.Import.MatchString(line) ||
+				p.ImportedFrom.MatchString(line) || p.Move.MatchString(line) || p.MovedFrom.MatchString(line) ||
+				strings.Contains(line, "will be created") || strings.Contains(line, "will be updated") ||
+				strings.Contains(line, "will be destroyed") || strings.Contains(line, "must be replaced") {
+				currentModuleBuff = append(currentModuleBuff, stripTerragruntPrefix(line))
 			}
 		}
 
@@ -482,6 +511,14 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 		if p.Warning.MatchString(line) {
 			warnings = append(warnings, line)
 		}
+	}
+
+	// Flush final module
+	if len(currentModuleBuff) > 0 {
+		if consolidated {
+			currentModuleBuff = append(currentModuleBuff, "</details>")
+		}
+		changeResults = append(changeResults, strings.Join(currentModuleBuff, "\n"))
 	}
 
 	// Build consolidated result

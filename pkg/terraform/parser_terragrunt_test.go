@@ -1,6 +1,7 @@
 package terraform
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -168,7 +169,7 @@ func TestTerragruntParser_ParseWithConsolidation(t *testing.T) {
 	parser := NewTerragruntParser()
 
 	multiModuleInput := `Group 1
-- Module /path/to/app1
+Module /path/to/app1
 
 09:32:46.963 STDOUT terraform:   # null_resource.app1_resource will be created
 09:32:46.963 STDOUT terraform:   + resource "null_resource" "app1_resource" {
@@ -181,7 +182,7 @@ func TestTerragruntParser_ParseWithConsolidation(t *testing.T) {
 09:32:46.963 STDOUT terraform: Plan: 2 to add, 0 to change, 0 to destroy.
 
 Group 2
-- Module /path/to/app2
+Module /path/to/app2
 
 09:33:12.145 STDOUT terraform:   # null_resource.app2_resource will be created
 09:33:12.145 STDOUT terraform:   + resource "null_resource" "app2_resource" {
@@ -215,6 +216,20 @@ Group 2
 			if !found {
 				t.Errorf("Expected resource %s not found in results", rsc)
 			}
+		}
+
+		// Check that the output contains the plan details
+		if result.ChangedResult == "" {
+			t.Error("ChangedResult is empty, expected aggregated plan output")
+		} else {
+			t.Logf("ChangedResult content:\n%s", result.ChangedResult)
+		}
+
+		if !strings.Contains(result.ChangedResult, "/path/to/app1") {
+			t.Error("ChangedResult missing /path/to/app1 summary")
+		}
+		if !strings.Contains(result.ChangedResult, "null_resource.app1_resource will be created") {
+			t.Error("ChangedResult missing app1_resource details")
 		}
 	})
 
