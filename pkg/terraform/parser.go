@@ -111,22 +111,22 @@ func NewApplyParser() *ApplyParser {
 // NewTerragruntParser is TerragruntParser initialized with its Regexp
 func NewTerragruntParser() *TerragruntParser {
 	return &TerragruntParser{
-		Pass:           regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )?(Plan: \d|No changes\.)`),
-		Fail:           regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )?([│|╵] )?(Error: )`),
-		Warning:        regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )?([│|╵] )?(Warning: )`),
-		OutputsChanges: regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )?Changes to Outputs:`),
+		Pass:           regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )?(Plan: \d|No changes\.)`),
+		Fail:           regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )?([│|╵] )?(Error: )`),
+		Warning:        regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )?([│|╵] )?(Warning: )`),
+		OutputsChanges: regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )?Changes to Outputs:`),
 		HasDestroy:     regexp.MustCompile(`(?m)([1-9][0-9]* to destroy\.)`),
-		HasNoChanges:   regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )?(No changes\.|Plan: 0 to add, 0 to change, 0 to destroy\.)`),
-		Create:         regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# (.*) will be created$`),
-		Update:         regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# (.*) will be updated in-place$`),
-		Delete:         regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# (.*) will be destroyed$`),
-		Replace:        regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# (.*?)(?: is tainted, so)? must be replaced$`),
-		ReplaceOption:  regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# (.*?) will be replaced, as requested$`),
-		Move:           regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# (.*?) has moved to (.*?)$`),
-		Import:         regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# (.*?) will be imported$`),
-		ImportedFrom:   regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# \(imported from (.*?)\)$`),
-		MovedFrom:      regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: )? *# \(moved from (.*?)\)$`),
-		ModuleHeader:   regexp.MustCompile(`^(?:Group \d+|Module) (.+?)(?:\s+\[run-all\])?$`),
+		HasNoChanges:   regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )?(No changes\.|Plan: 0 to add, 0 to change, 0 to destroy\.)`),
+		Create:         regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )? *# (.*) will be created$`),
+		Update:         regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )? *# (.*) will be updated in-place$`),
+		Delete:         regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )? *# (.*) will be destroyed$`),
+		Replace:        regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )? *# (.*?)(?: is tainted, so)? must be replaced$`),
+		ReplaceOption:  regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )? *# (.*?) will be replaced, as requested$`),
+		Move:           regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )? *# (.*?) has moved to (.*?)$`),
+		Import:         regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )? *# (.*?) will be imported$`),
+		ImportedFrom:   regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )? *# \(imported from (.*?)\)$`),
+		MovedFrom:      regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )? *# \(moved from (.*?)\)$`),
+		ModuleHeader:   regexp.MustCompile(`^(?:(?:Group \d+)|(?:- )?Module) (.+?)(?:\s+\[run-all\])?$`),
 	}
 }
 
@@ -391,6 +391,9 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 		if match := p.ModuleHeader.FindStringSubmatch(line); len(match) > 1 {
 			// Flush previous module if it had changes
 			if len(currentModuleBuff) > 0 {
+				if consolidated {
+					currentModuleBuff = append(currentModuleBuff, "</details>")
+				}
 				changeResults = append(changeResults, strings.Join(currentModuleBuff, "\n"))
 				currentModuleBuff = []string{}
 			}
@@ -574,7 +577,7 @@ func trimBars(list []string) []string {
 
 // stripTerragruntPrefix removes Terragrunt timestamp prefixes like "09:32:46.963 STDOUT terraform: "
 func stripTerragruntPrefix(line string) string {
-	// Match pattern: HH:MM:SS.mmm STDOUT/STDERR terraform:
-	re := regexp.MustCompile(`^\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) terraform: `)
+	// Match pattern: HH:MM:SS.mmm STDOUT/STDERR (terraform|tf):
+	re := regexp.MustCompile(`^\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): `)
 	return re.ReplaceAllString(line, "")
 }
