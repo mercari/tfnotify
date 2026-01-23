@@ -6,7 +6,7 @@ import (
 )
 
 func TestTerragruntParser_Parse(t *testing.T) {
-	parser := NewTerragruntParser()
+	parser := NewTerragruntParser(false)
 
 	tests := []struct {
 		name              string
@@ -21,14 +21,14 @@ func TestTerragruntParser_Parse(t *testing.T) {
 	}{
 		{
 			name: "single module with timestamp prefix",
-			input: `09:32:46.963 STDOUT terraform: 
+			input: `09:32:46.963 STDOUT terraform:
 09:32:46.963 STDOUT terraform: Terraform will perform the following actions:
-09:32:46.963 STDOUT terraform: 
+09:32:46.963 STDOUT terraform:
 09:32:46.963 STDOUT terraform:   # null_resource.test will be created
 09:32:46.963 STDOUT terraform:   + resource "null_resource" "test" {
 09:32:46.963 STDOUT terraform:       + id = (known after apply)
 09:32:46.963 STDOUT terraform:     }
-09:32:46.963 STDOUT terraform: 
+09:32:46.963 STDOUT terraform:
 09:32:46.963 STDOUT terraform: Plan: 1 to add, 0 to change, 0 to destroy.`,
 			wantHasError:     false,
 			wantHasDestroy:   false,
@@ -61,7 +61,7 @@ Group 2
 		},
 		{
 			name: "no changes",
-			input: `09:32:46.963 STDOUT terraform: 
+			input: `09:32:46.963 STDOUT terraform:
 09:32:46.963 STDOUT terraform: No changes. Your infrastructure matches the configuration.`,
 			wantHasError:     false,
 			wantHasDestroy:   false,
@@ -70,7 +70,7 @@ Group 2
 		},
 		{
 			name: "with destroy",
-			input: `09:32:46.963 STDOUT terraform: 
+			input: `09:32:46.963 STDOUT terraform:
 09:32:46.963 STDOUT terraform:   # null_resource.test will be destroyed
 09:32:46.963 STDOUT terraform:   - resource "null_resource" "test" {
 09:32:46.963 STDOUT terraform:       - id = "123" -> null
@@ -83,7 +83,7 @@ Group 2
 		},
 		{
 			name: "with update",
-			input: `09:32:46.963 STDOUT terraform: 
+			input: `09:32:46.963 STDOUT terraform:
 09:32:46.963 STDOUT terraform:   # null_resource.test will be updated in-place
 09:32:46.963 STDOUT terraform:   ~ resource "null_resource" "test" {
 09:32:46.963 STDOUT terraform:       id = "123"
@@ -96,7 +96,7 @@ Group 2
 		},
 		{
 			name: "with replace",
-			input: `09:32:46.963 STDOUT terraform: 
+			input: `09:32:46.963 STDOUT terraform:
 09:32:46.963 STDOUT terraform:   # null_resource.test must be replaced
 09:32:46.963 STDOUT terraform: -/+ resource "null_resource" "test" {
 09:32:46.963 STDOUT terraform:       id = "123"
@@ -109,9 +109,9 @@ Group 2
 		},
 		{
 			name: "with error",
-			input: `09:32:46.963 STDOUT terraform: 
+			input: `09:32:46.963 STDOUT terraform:
 09:32:46.963 STDERR terraform: Error: Invalid configuration
-09:32:46.963 STDERR terraform: 
+09:32:46.963 STDERR terraform:
 09:32:46.963 STDERR terraform: Something went wrong`,
 			wantHasError: true,
 		},
@@ -166,7 +166,7 @@ Plan: 1 to add, 0 to change, 0 to destroy.`,
 }
 
 func TestTerragruntParser_ParseWithConsolidation(t *testing.T) {
-	parser := NewTerragruntParser()
+	parser := NewTerragruntParser(false)
 
 	multiModuleInput := `Group 1
 Module /path/to/app1

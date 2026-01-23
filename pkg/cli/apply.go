@@ -53,9 +53,17 @@ func cmdApply(ctx context.Context, cmd *cli.Command) error {
 		logrus.Info("Terragrunt consolidated mode enabled")
 	}
 
+	// Select parser based on configuration
+	var parser terraform.Parser
+	if cfg.Terraform.Consolidated {
+		parser = terraform.NewTerragruntParser(true)
+	} else {
+		parser = terraform.NewApplyParser()
+	}
+
 	t := &controller.Controller{
 		Config:             cfg,
-		Parser:             terraform.NewApplyParser(),
+		Parser:             parser,
 		Template:           terraform.NewApplyTemplate(cfg.Terraform.Apply.Template),
 		ParseErrorTemplate: terraform.NewApplyParseErrorTemplate(cfg.Terraform.Apply.WhenParseError.Template),
 	}

@@ -75,6 +75,7 @@ type TerragruntParser struct {
 	ImportedFrom   *regexp.Regexp
 	MovedFrom      *regexp.Regexp
 	ModuleHeader   *regexp.Regexp
+	Consolidated   bool
 }
 
 // NewPlanParser is PlanParser initialized with its Regexp
@@ -109,7 +110,8 @@ func NewApplyParser() *ApplyParser {
 }
 
 // NewTerragruntParser is TerragruntParser initialized with its Regexp
-func NewTerragruntParser() *TerragruntParser {
+// Pass consolidated=true to enable consolidated output mode for terragrunt run-all
+func NewTerragruntParser(consolidated bool) *TerragruntParser {
 	return &TerragruntParser{
 		Pass:           regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )?(Plan: \d|No changes\.)`),
 		Fail:           regexp.MustCompile(`(?m)^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )?([│|╵] )?(Error: )`),
@@ -127,6 +129,7 @@ func NewTerragruntParser() *TerragruntParser {
 		ImportedFrom:   regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )? *# \(imported from (.*?)\)$`),
 		MovedFrom:      regexp.MustCompile(`^(?:\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR) (?:terraform|tf): )? *# \(moved from (.*?)\)$`),
 		ModuleHeader:   regexp.MustCompile(`^(?:(?:Group \d+)|(?:- )?Module) (.+?)(?:\s+\[run-all\])?$`),
+		Consolidated:   consolidated,
 	}
 }
 
@@ -356,7 +359,7 @@ func (p *ApplyParser) Parse(body string) ParseResult {
 
 // Parse returns ParseResult related with terragrunt run-all
 func (p *TerragruntParser) Parse(body string) ParseResult {
-	return p.ParseWithConsolidation(body, false)
+	return p.ParseWithConsolidation(body, p.Consolidated)
 }
 
 // ParseWithConsolidation returns ParseResult with optional consolidation

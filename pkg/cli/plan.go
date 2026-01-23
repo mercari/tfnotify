@@ -55,7 +55,7 @@ func cmdPlan(ctx context.Context, cmd *cli.Command) error {
 	// Select parser based on configuration
 	var parser terraform.Parser
 	if cfg.Terraform.Consolidated {
-		parser = terraform.NewTerragruntParser()
+		parser = terraform.NewTerragruntParser(true)
 	} else {
 		parser = terraform.NewPlanParser()
 	}
