@@ -260,6 +260,26 @@ func TestStripTerragruntPrefix(t *testing.T) {
 			want:  "Error: something failed",
 		},
 		{
+			name:  "with INFO prefix",
+			input: "18:13:47.247 INFO tfwrapper.sh: Terraform has been successfully initialized!",
+			want:  "Terraform has been successfully initialized!",
+		},
+		{
+			name:  "with ERROR prefix",
+			input: "18:13:47.247 ERROR tfwrapper.sh: Error: something failed",
+			want:  "Error: something failed",
+		},
+		{
+			name:  "with module path",
+			input: "18:13:47.247 ERROR  [cluster-citadel-2g/regions/tokyo/shared-vpc] tfwrapper.sh: No changes.",
+			want:  "No changes.",
+		},
+		{
+			name:  "with STDOUT and module path",
+			input: "18:14:11.466 STDOUT [cluster-citadel-2g/regions/tokyo/cluster] tfwrapper.sh: Plan: 1 to add, 0 to change, 0 to destroy.",
+			want:  "Plan: 1 to add, 0 to change, 0 to destroy.",
+		},
+		{
 			name:  "without prefix",
 			input: "Plan: 1 to add",
 			want:  "Plan: 1 to add",
