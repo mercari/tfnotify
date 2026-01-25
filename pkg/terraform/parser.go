@@ -441,30 +441,36 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 				result = line
 			}
 		}
-
 		// Capture content for consolidation
-		if consolidated && currentModule != "" {
+		if consolidated && currentModule != "" && currentModule != "." {
 			stripped := stripTerragruntPrefix(line)
 			
-			// Capture plan summaries and no-changes messages
-			if p.Pass.MatchString(line) || p.HasNoChanges.MatchString(line) {
-				currentModuleBuff = append(currentModuleBuff, stripped)
-			} else if p.Create.MatchString(line) || p.Update.MatchString(line) || p.Delete.MatchString(line) ||
-				p.Replace.MatchString(line) || p.ReplaceOption.MatchString(line) || p.Import.MatchString(line) ||
-				p.ImportedFrom.MatchString(line) || p.Move.MatchString(line) || p.MovedFrom.MatchString(line) {
-				currentModuleBuff = append(currentModuleBuff, stripped)
-			} else if strings.HasPrefix(stripped, "  #") || strings.HasPrefix(stripped, "  +") ||
-				strings.HasPrefix(stripped, "  -") || strings.HasPrefix(stripped, "  ~") ||
-				strings.HasPrefix(stripped, " +/-") || strings.HasPrefix(stripped, "-/+") {
-				// Capture resource diff details
-				currentModuleBuff = append(currentModuleBuff, stripped)
-			} else if strings.HasPrefix(stripped, "Terraform will perform") ||
-				strings.Contains(stripped, "infrastructure matches") ||
-				strings.HasPrefix(stripped, "Changes to Outputs:") {
-				// Capture terraform action headers
-				currentModuleBuff = append(currentModuleBuff, stripped)
+			// Skip if already captured to avoid duplicates
+			isDuplicate := len(currentModuleBuff) > 0 && currentModuleBuff[len(currentModuleBuff)-1] == stripped
+			
+			if !isDuplicate {
+				if p.Pass.MatchString(line) || p.HasNoChanges.MatchString(line) {
+					// Capture plan summaries and no-changes messages
+					currentModuleBuff = append(currentModuleBuff, stripped)
+				} else if p.Create.MatchString(line) || p.Update.MatchString(line) || p.Delete.MatchString(line) ||
+					p.Replace.MatchString(line) || p.ReplaceOption.MatchString(line) || p.Import.MatchString(line) ||
+					p.ImportedFrom.MatchString(line) || p.Move.MatchString(line) || p.MovedFrom.MatchString(line) {
+					currentModuleBuff = append(currentModuleBuff, stripped)
+				} else if strings.HasPrefix(stripped, "  #") || strings.HasPrefix(stripped, "  +") ||
+					strings.HasPrefix(stripped, "  -") || strings.HasPrefix(stripped, "  ~") ||
+					strings.HasPrefix(stripped, " +/-") || strings.HasPrefix(stripped, "-/+") {
+					// Capture resource diff details
+					currentModuleBuff = append(currentModuleBuff, stripped)
+				} else if strings.HasPrefix(stripped, "Terraform will perform") ||
+					strings.Contains(stripped, "infrastructure matches") ||
+					strings.HasPrefix(stripped, "Changes to Outputs:") {
+					// Capture terraform action headers
+					currentModuleBuff = append(currentModuleBuff, stripped)
+				}
 			}
 		}
+
+
 
 
 		// Extract resources
