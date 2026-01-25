@@ -2,7 +2,6 @@ package terraform
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"strings"
 )
@@ -397,16 +396,17 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 		if match := p.ModuleHeader.FindStringSubmatch(line); len(match) > 1 {
 			// Flush previous module if it had changes
 			if len(currentModuleBuff) > 0 {
-				if consolidated {
-					currentModuleBuff = append(currentModuleBuff, "</details>")
-				}
 				changeResults = append(changeResults, strings.Join(currentModuleBuff, "\n"))
 				currentModuleBuff = []string{}
 			}
 
 			currentModule = match[1]
 			if consolidated {
-				currentModuleBuff = append(currentModuleBuff, fmt.Sprintf("<details><summary>%s</summary>", currentModule))
+				// Skip the root module "." to avoid empty sections
+				if currentModule == "." {
+					continue
+				}
+				currentModuleBuff = append(currentModuleBuff, currentModule)
 				currentModuleBuff = append(currentModuleBuff, "")
 			}
 			if _, exists := moduleResults[currentModule]; !exists {
@@ -444,10 +444,10 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 		// Capture content for consolidation
 		if consolidated && currentModule != "" && currentModule != "." {
 			stripped := stripTerragruntPrefix(line)
-			
+
 			// Skip if already captured to avoid duplicates
 			isDuplicate := len(currentModuleBuff) > 0 && currentModuleBuff[len(currentModuleBuff)-1] == stripped
-			
+
 			if !isDuplicate {
 				if p.Pass.MatchString(line) || p.HasNoChanges.MatchString(line) {
 					// Capture plan summaries and no-changes messages
@@ -469,9 +469,6 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 				}
 			}
 		}
-
-
-
 
 		// Extract resources
 		if rsc := extractResource(p.Create, line); rsc != "" {
@@ -538,9 +535,6 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 
 	// Flush final module
 	if len(currentModuleBuff) > 0 {
-		if consolidated {
-			currentModuleBuff = append(currentModuleBuff, "</details>")
-		}
 		changeResults = append(changeResults, strings.Join(currentModuleBuff, "\n"))
 	}
 
