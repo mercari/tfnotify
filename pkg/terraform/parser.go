@@ -444,20 +444,28 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 
 		// Capture content for consolidation
 		if consolidated && currentModule != "" {
-			// Filter out noise? For now capture everything relevant inside the module block
-			// But maybe we only want to capture the "plan" output part.
-			// The current parser logic is iterating line by line.
-			// Terragrunt output is interleaved.
-			// We only want to capture the relevant lines for the "diff".
-			// Let's capture lines that look like a change.
-			if p.Create.MatchString(line) || p.Update.MatchString(line) || p.Delete.MatchString(line) ||
+			stripped := stripTerragruntPrefix(line)
+			
+			// Capture plan summaries and no-changes messages
+			if p.Pass.MatchString(line) || p.HasNoChanges.MatchString(line) {
+				currentModuleBuff = append(currentModuleBuff, stripped)
+			} else if p.Create.MatchString(line) || p.Update.MatchString(line) || p.Delete.MatchString(line) ||
 				p.Replace.MatchString(line) || p.ReplaceOption.MatchString(line) || p.Import.MatchString(line) ||
-				p.ImportedFrom.MatchString(line) || p.Move.MatchString(line) || p.MovedFrom.MatchString(line) ||
-				strings.Contains(line, "will be created") || strings.Contains(line, "will be updated") ||
-				strings.Contains(line, "will be destroyed") || strings.Contains(line, "must be replaced") {
-				currentModuleBuff = append(currentModuleBuff, stripTerragruntPrefix(line))
+				p.ImportedFrom.MatchString(line) || p.Move.MatchString(line) || p.MovedFrom.MatchString(line) {
+				currentModuleBuff = append(currentModuleBuff, stripped)
+			} else if strings.HasPrefix(stripped, "  #") || strings.HasPrefix(stripped, "  +") ||
+				strings.HasPrefix(stripped, "  -") || strings.HasPrefix(stripped, "  ~") ||
+				strings.HasPrefix(stripped, " +/-") || strings.HasPrefix(stripped, "-/+") {
+				// Capture resource diff details
+				currentModuleBuff = append(currentModuleBuff, stripped)
+			} else if strings.HasPrefix(stripped, "Terraform will perform") ||
+				strings.Contains(stripped, "infrastructure matches") ||
+				strings.HasPrefix(stripped, "Changes to Outputs:") {
+				// Capture terraform action headers
+				currentModuleBuff = append(currentModuleBuff, stripped)
 			}
 		}
+
 
 		// Extract resources
 		if rsc := extractResource(p.Create, line); rsc != "" {
