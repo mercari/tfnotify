@@ -429,6 +429,11 @@ https://www.mercari.com/cla/
 
 ## License
 
-Copyright 2018 Mercari, Inc.
-
 Licensed under the MIT License.
+See [LICENSE](LICENSE) for details.
+
+Copyright © 2018 Mercari, Inc.
+
+This project includes substantial portions of code from [suzuki-shunsuke/tfcmt](https://github.com/suzuki-shunsuke/tfcmt).
+
+Copyright © 2020 Shunsuke Suzuki
