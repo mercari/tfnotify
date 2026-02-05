@@ -47,9 +47,23 @@ func cmdApply(ctx context.Context, cmd *cli.Command) error {
 	// Get session ID if provided
 	sessionID := cmd.String("session-id")
 
+	// Check if consolidated flag is set
+	if cmd.Bool("consolidated") {
+		cfg.Terraform.Consolidated = true
+		logrus.Info("Terragrunt consolidated mode enabled")
+	}
+
+	// Select parser based on configuration
+	var parser terraform.Parser
+	if cfg.Terraform.Consolidated {
+		parser = terraform.NewTerragruntParser(true)
+	} else {
+		parser = terraform.NewApplyParser()
+	}
+
 	t := &controller.Controller{
 		Config:             cfg,
-		Parser:             terraform.NewApplyParser(),
+		Parser:             parser,
 		Template:           terraform.NewApplyTemplate(cfg.Terraform.Apply.Template),
 		ParseErrorTemplate: terraform.NewApplyParseErrorTemplate(cfg.Terraform.Apply.WhenParseError.Template),
 	}

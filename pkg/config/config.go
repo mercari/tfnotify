@@ -14,6 +14,7 @@ import (
 type Config struct {
 	CI                 CI                `json:"-" yaml:"-"`
 	Terraform          Terraform         `json:"terraform,omitempty"`
+	Slack              Slack             `json:"slack,omitempty"`
 	Vars               map[string]string `json:"-" yaml:"-"`
 	EmbeddedVarNames   []string          `json:"embedded_var_names,omitempty" yaml:"embedded_var_names"`
 	Templates          map[string]string `json:"templates,omitempty"`
@@ -58,11 +59,29 @@ type Log struct {
 	// Format string
 }
 
+// Slack represents slack notification configurations
+type Slack struct {
+	Enabled            bool   `json:"enabled,omitempty"`
+	Token              string `json:"-" yaml:"-"`                                                   // Read from env var SLACK_BOT_TOKEN
+	ChannelID          string `json:"-" yaml:"-"`                                                   // Read from env var SLACK_CHANNEL_ID
+	BotName            string `json:"-" yaml:"-"`                                                   // Read from env var SLACK_BOT_NAME
+	Title              string `json:"title,omitempty"`                                              // Default title template for Slack messages
+	Message            string `json:"message,omitempty"`                                            // Default message template for Slack messages
+	ApplyTitle         string `json:"apply_title,omitempty" yaml:"apply_title"`                     // Title template for apply notifications
+	ApplyMessage       string `json:"apply_message,omitempty" yaml:"apply_message"`                 // Message template for apply notifications
+	PlanTitle          string `json:"plan_title,omitempty" yaml:"plan_title"`                       // Title template for plan notifications
+	PlanMessage        string `json:"plan_message,omitempty" yaml:"plan_message"`                   // Message template for plan notifications
+	NotifyOnPlanError  bool   `json:"notify_on_plan_error,omitempty" yaml:"notify_on_plan_error"`   // Send Slack notification on plan failures
+	NotifyOnApplyError bool   `json:"notify_on_apply_error,omitempty" yaml:"notify_on_apply_error"` // Send Slack notification on apply failures
+	UseThreads         bool   `json:"use_threads,omitempty" yaml:"use_threads"`                     // Send error details in a thread reply
+}
+
 // Terraform represents terraform configurations
 type Terraform struct {
 	Plan         Plan  `json:"plan,omitempty"`
 	Apply        Apply `json:"apply,omitempty"`
 	UseRawOutput bool  `json:"use_raw_output,omitempty" yaml:"use_raw_output"`
+	Consolidated bool  `json:"consolidated,omitempty" yaml:"consolidated"`
 }
 
 // Plan is a terraform plan config

@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"text/template"
 
 	"github.com/mercari/tfnotify/v1/pkg/config"
 	"github.com/mercari/tfnotify/v1/pkg/notifier"
 	"github.com/mercari/tfnotify/v1/pkg/notifier/github"
 	"github.com/mercari/tfnotify/v1/pkg/notifier/localfile"
+	"github.com/mercari/tfnotify/v1/pkg/notifier/slack"
 	tmpl "github.com/mercari/tfnotify/v1/pkg/template"
 	"github.com/mercari/tfnotify/v1/pkg/terraform"
 )
@@ -128,6 +130,51 @@ func (c *Controller) renderGitHubLabels() (github.ResultLabels, error) { //nolin
 }
 
 func (c *Controller) getPlanNotifier(ctx context.Context) (notifier.Notifier, error) {
+	// Check if Slack is enabled and configured
+	if c.Config.Slack.Enabled {
+		token := os.Getenv("SLACK_BOT_TOKEN")
+		channelID := os.Getenv("SLACK_CHANNEL_ID")
+		botName := os.Getenv("SLACK_BOT_NAME")
+
+		if token != "" && channelID != "" {
+			// Allow overriding titles and messages via environment variables
+			planTitle := c.Config.Slack.PlanTitle
+			if envTitle := os.Getenv("SLACK_PLAN_TITLE"); envTitle != "" {
+				planTitle = envTitle
+			}
+
+			planMessage := c.Config.Slack.PlanMessage
+			if envMessage := os.Getenv("SLACK_PLAN_MESSAGE"); envMessage != "" {
+				planMessage = envMessage
+			}
+
+			client, err := slack.NewClient(&slack.Config{
+				Token:              token,
+				ChannelID:          channelID,
+				BotName:            botName,
+				CI:                 c.Config.CI,
+				Parser:             c.Parser,
+				Template:           c.Template,
+				ParseErrorTemplate: c.ParseErrorTemplate,
+				Terraform:          c.Config.Terraform,
+				Vars:               c.Config.Vars,
+				Templates:          c.Config.Templates,
+				UseRawOutput:       c.Config.Terraform.UseRawOutput,
+				Title:              c.Config.Slack.Title,
+				Message:            c.Config.Slack.Message,
+				PlanTitle:          planTitle,
+				PlanMessage:        planMessage,
+				NotifyOnPlanError:  c.Config.Slack.NotifyOnPlanError,
+				NotifyOnApplyError: c.Config.Slack.NotifyOnApplyError,
+				UseThreads:         c.Config.Slack.UseThreads,
+			})
+			if err != nil {
+				return nil, fmt.Errorf("failed to create Slack client: %w", err)
+			}
+			return client.Notify(), nil
+		}
+	}
+
 	labels := github.ResultLabels{}
 	if !c.Config.Terraform.Plan.DisableLabel {
 		a, err := c.renderGitHubLabels()
@@ -190,6 +237,51 @@ func (c *Controller) getPlanNotifier(ctx context.Context) (notifier.Notifier, er
 }
 
 func (c *Controller) getApplyNotifier(ctx context.Context) (notifier.Notifier, error) {
+	// Check if Slack is enabled and configured
+	if c.Config.Slack.Enabled {
+		token := os.Getenv("SLACK_BOT_TOKEN")
+		channelID := os.Getenv("SLACK_CHANNEL_ID")
+		botName := os.Getenv("SLACK_BOT_NAME")
+
+		if token != "" && channelID != "" {
+			// Allow overriding titles and messages via environment variables
+			applyTitle := c.Config.Slack.ApplyTitle
+			if envTitle := os.Getenv("SLACK_APPLY_TITLE"); envTitle != "" {
+				applyTitle = envTitle
+			}
+
+			applyMessage := c.Config.Slack.ApplyMessage
+			if envMessage := os.Getenv("SLACK_APPLY_MESSAGE"); envMessage != "" {
+				applyMessage = envMessage
+			}
+
+			client, err := slack.NewClient(&slack.Config{
+				Token:              token,
+				ChannelID:          channelID,
+				BotName:            botName,
+				CI:                 c.Config.CI,
+				Parser:             c.Parser,
+				Template:           c.Template,
+				ParseErrorTemplate: c.ParseErrorTemplate,
+				Terraform:          c.Config.Terraform,
+				Vars:               c.Config.Vars,
+				Templates:          c.Config.Templates,
+				UseRawOutput:       c.Config.Terraform.UseRawOutput,
+				Title:              c.Config.Slack.Title,
+				Message:            c.Config.Slack.Message,
+				ApplyTitle:         applyTitle,
+				ApplyMessage:       applyMessage,
+				NotifyOnPlanError:  c.Config.Slack.NotifyOnPlanError,
+				NotifyOnApplyError: c.Config.Slack.NotifyOnApplyError,
+				UseThreads:         c.Config.Slack.UseThreads,
+			})
+			if err != nil {
+				return nil, fmt.Errorf("failed to create Slack client: %w", err)
+			}
+			return client.Notify(), nil
+		}
+	}
+
 	if c.Config.Output != "" {
 		// Write output to file instead of github comment
 		client, err := localfile.NewClient(&localfile.Config{
