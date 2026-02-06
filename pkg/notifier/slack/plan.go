@@ -98,6 +98,8 @@ func (s *NotifyService) Plan(ctx context.Context, param *notifier.ParamExec) err
 	// Mask sensitive information
 	body = mask.Mask(body, []*config.Mask{}) // TODO: add masks support if needed
 
+	result.Result = mask.Mask(result.Result, []*config.Mask{}) // TODO: add masks support if needed
+
 	// Prepare the message with title if configured
 	var fullMessage string
 	title := cfg.PlanTitle
@@ -155,7 +157,7 @@ func (s *NotifyService) Plan(ctx context.Context, param *notifier.ParamExec) err
 			return err
 		}
 
-		threadMessage := fmt.Sprintf("```\n%s\n```", body)
+		threadMessage := fmt.Sprintf("```\n%s\n```", result.Result)
 		logrus.WithField("parent_ts", timestamp).Info("Sending error details in thread")
 		return s.postMessage(ctx, threadMessage, &timestamp)
 	}
