@@ -150,6 +150,11 @@ func (c *Controller) getPlanNotifier(ctx context.Context) ([]notifier.Notifier, 
 				planMessage = envMessage
 			}
 
+			useThreads := true
+			if c.Config.Slack.UseThreads != nil {
+				useThreads = *c.Config.Slack.UseThreads
+			}
+
 			client, err := slack.NewClient(&slack.Config{
 				Token:              token,
 				ChannelID:          channelID,
@@ -168,7 +173,7 @@ func (c *Controller) getPlanNotifier(ctx context.Context) ([]notifier.Notifier, 
 				PlanMessage:        planMessage,
 				NotifyOnPlanError:  c.Config.Slack.NotifyOnPlanError,
 				NotifyOnApplyError: c.Config.Slack.NotifyOnApplyError,
-				UseThreads:         c.Config.Slack.UseThreads,
+				UseThreads:         useThreads,
 			})
 			if err != nil {
 				return nil, fmt.Errorf("failed to create Slack client: %w", err)
@@ -241,6 +246,11 @@ func (c *Controller) getApplyNotifier(ctx context.Context) ([]notifier.Notifier,
 				applyMessage = envMessage
 			}
 
+			useThreads := true
+			if c.Config.Slack.UseThreads != nil {
+				useThreads = *c.Config.Slack.UseThreads
+			}
+
 			client, err := slack.NewClient(&slack.Config{
 				Token:              token,
 				ChannelID:          channelID,
@@ -259,7 +269,7 @@ func (c *Controller) getApplyNotifier(ctx context.Context) ([]notifier.Notifier,
 				ApplyMessage:       applyMessage,
 				NotifyOnPlanError:  c.Config.Slack.NotifyOnPlanError,
 				NotifyOnApplyError: c.Config.Slack.NotifyOnApplyError,
-				UseThreads:         c.Config.Slack.UseThreads,
+				UseThreads:         useThreads,
 			})
 			if err != nil {
 				return nil, fmt.Errorf("failed to create Slack client: %w", err)
