@@ -32,11 +32,11 @@ func (c *Controller) Apply(ctx context.Context, command Command) error {
 	if err != nil {
 		return err
 	}
-
-	if ntf == nil {
+	if len(ntf) == 0 {
 		return errors.New("no notifier specified at all")
 	}
 
+	// Execute command once
 	cmd := exec.CommandContext(ctx, command.Cmd, command.Args...) //nolint:gosec
 	cmd.Stdin = os.Stdin
 	stdout := &bytes.Buffer{}
@@ -50,12 +50,23 @@ func (c *Controller) Apply(ctx context.Context, command Command) error {
 	setCancel(cmd)
 	_ = cmd.Run()
 
-	return apperr.NewExitError(cmd.ProcessState.ExitCode(), ntf.Apply(ctx, &notifier.ParamExec{
-		Stdout:         stdout.String(),
-		Stderr:         stderr.String(),
-		CombinedOutput: combinedOutput.String(),
-		CIName:         c.Config.CI.Name,
-		ExitCode:       cmd.ProcessState.ExitCode(),
-		AISummarizer:   c.AISummarizer,
-	}))
+	// Iterate over notifiers
+	var errs error
+	for _, n := range ntf {
+		if err := n.Apply(ctx, &notifier.ParamExec{
+			Stdout:         stdout.String(),
+			Stderr:         stderr.String(),
+			CombinedOutput: combinedOutput.String(),
+			CIName:         c.Config.CI.Name,
+			ExitCode:       cmd.ProcessState.ExitCode(),
+			AISummarizer:   c.AISummarizer,
+		}); err != nil {
+			errs = errors.Join(errs, err)
+		}
+	}
+
+	if errs != nil {
+		return apperr.NewExitError(cmd.ProcessState.ExitCode(), errs)
+	}
+	return apperr.NewExitError(cmd.ProcessState.ExitCode(), nil)
 }
