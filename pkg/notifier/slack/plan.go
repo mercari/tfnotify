@@ -125,9 +125,6 @@ func (s *NotifyService) Plan(ctx context.Context, param *notifier.ParamExec) err
 	if cfg.NotifyOnPlanError && param.ExitCode != 0 {
 		shouldNotify = true
 		logrus.WithField("exit_code", param.ExitCode).Info("Plan failed, notifying Slack (notify_on_plan_error enabled)")
-	} else if result.HasDestroy {
-		shouldNotify = true
-		logrus.Info("Plan has destroy changes, notifying Slack")
 	}
 
 	if !shouldNotify {

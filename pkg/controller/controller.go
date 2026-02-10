@@ -129,7 +129,9 @@ func (c *Controller) renderGitHubLabels() (github.ResultLabels, error) { //nolin
 	return labels, nil
 }
 
-func (c *Controller) getPlanNotifier(ctx context.Context) (notifier.Notifier, error) {
+func (c *Controller) getPlanNotifier(ctx context.Context) ([]notifier.Notifier, error) {
+	var notifiers []notifier.Notifier
+
 	// Check if Slack is enabled and configured
 	if c.Config.Slack.Enabled {
 		token := os.Getenv("SLACK_BOT_TOKEN")
@@ -146,6 +148,11 @@ func (c *Controller) getPlanNotifier(ctx context.Context) (notifier.Notifier, er
 			planMessage := c.Config.Slack.PlanMessage
 			if envMessage := os.Getenv("SLACK_PLAN_MESSAGE"); envMessage != "" {
 				planMessage = envMessage
+			}
+
+			useThreads := true
+			if c.Config.Slack.UseThreads != nil {
+				useThreads = *c.Config.Slack.UseThreads
 			}
 
 			client, err := slack.NewClient(&slack.Config{
@@ -166,12 +173,12 @@ func (c *Controller) getPlanNotifier(ctx context.Context) (notifier.Notifier, er
 				PlanMessage:        planMessage,
 				NotifyOnPlanError:  c.Config.Slack.NotifyOnPlanError,
 				NotifyOnApplyError: c.Config.Slack.NotifyOnApplyError,
-				UseThreads:         c.Config.Slack.UseThreads,
+				UseThreads:         useThreads,
 			})
 			if err != nil {
 				return nil, fmt.Errorf("failed to create Slack client: %w", err)
 			}
-			return client.Notify(), nil
+			notifiers = append(notifiers, client.Notify())
 		}
 	}
 
@@ -183,7 +190,7 @@ func (c *Controller) getPlanNotifier(ctx context.Context) (notifier.Notifier, er
 		}
 		labels = a
 	}
-	var gh *github.NotifyService
+
 	if !c.Config.Terraform.Plan.DisableLabel || c.Config.Output == "" {
 		client, err := github.NewClient(ctx, &github.Config{
 			BaseURL:         c.Config.GHEBaseURL,
@@ -208,35 +215,19 @@ func (c *Controller) getPlanNotifier(ctx context.Context) (notifier.Notifier, er
 			IgnoreWarning:      c.Config.Terraform.Plan.IgnoreWarning,
 			Masks:              c.Config.Masks,
 		})
+		// Fix for getPlanNotifier
 		if err != nil {
 			return nil, err
 		}
-		gh = client.Notify
+		notifiers = append(notifiers, client.Notify)
 	}
-	if c.Config.Output == "" {
-		return gh, nil
-	}
-	// Write output to file instead of github comment
-	client, err := localfile.NewClient(&localfile.Config{
-		OutputFile:         c.Config.Output,
-		Parser:             c.Parser,
-		UseRawOutput:       c.Config.Terraform.UseRawOutput,
-		CI:                 c.Config.CI.Link,
-		Template:           c.Template,
-		ParseErrorTemplate: c.ParseErrorTemplate,
-		Vars:               c.Config.Vars,
-		EmbeddedVarNames:   c.Config.EmbeddedVarNames,
-		Templates:          c.Config.Templates,
-		Masks:              c.Config.Masks,
-		DisableLabel:       c.Config.Terraform.Plan.DisableLabel,
-	}, gh)
-	if err != nil {
-		return nil, err
-	}
-	return client.Notify, nil
+
+	return notifiers, nil
 }
 
-func (c *Controller) getApplyNotifier(ctx context.Context) (notifier.Notifier, error) {
+func (c *Controller) getApplyNotifier(ctx context.Context) ([]notifier.Notifier, error) {
+	var notifiers []notifier.Notifier
+
 	// Check if Slack is enabled and configured
 	if c.Config.Slack.Enabled {
 		token := os.Getenv("SLACK_BOT_TOKEN")
@@ -253,6 +244,11 @@ func (c *Controller) getApplyNotifier(ctx context.Context) (notifier.Notifier, e
 			applyMessage := c.Config.Slack.ApplyMessage
 			if envMessage := os.Getenv("SLACK_APPLY_MESSAGE"); envMessage != "" {
 				applyMessage = envMessage
+			}
+
+			useThreads := true
+			if c.Config.Slack.UseThreads != nil {
+				useThreads = *c.Config.Slack.UseThreads
 			}
 
 			client, err := slack.NewClient(&slack.Config{
@@ -273,12 +269,12 @@ func (c *Controller) getApplyNotifier(ctx context.Context) (notifier.Notifier, e
 				ApplyMessage:       applyMessage,
 				NotifyOnPlanError:  c.Config.Slack.NotifyOnPlanError,
 				NotifyOnApplyError: c.Config.Slack.NotifyOnApplyError,
-				UseThreads:         c.Config.Slack.UseThreads,
+				UseThreads:         useThreads,
 			})
 			if err != nil {
 				return nil, fmt.Errorf("failed to create Slack client: %w", err)
 			}
-			return client.Notify(), nil
+			notifiers = append(notifiers, client.Notify())
 		}
 	}
 
@@ -300,7 +296,8 @@ func (c *Controller) getApplyNotifier(ctx context.Context) (notifier.Notifier, e
 		if err != nil {
 			return nil, err
 		}
-		return client.Notify, nil
+		notifiers = append(notifiers, client.Notify)
+		return notifiers, nil
 	}
 	client, err := github.NewClient(ctx, &github.Config{
 		BaseURL:         c.Config.GHEBaseURL,
@@ -327,5 +324,6 @@ func (c *Controller) getApplyNotifier(ctx context.Context) (notifier.Notifier, e
 	if err != nil {
 		return nil, err
 	}
-	return client.Notify, nil
+	notifiers = append(notifiers, client.Notify)
+	return notifiers, nil
 }

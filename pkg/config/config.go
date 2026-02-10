@@ -73,7 +73,7 @@ type Slack struct {
 	PlanMessage        string `json:"plan_message,omitempty" yaml:"plan_message"`                   // Message template for plan notifications
 	NotifyOnPlanError  bool   `json:"notify_on_plan_error,omitempty" yaml:"notify_on_plan_error"`   // Send Slack notification on plan failures
 	NotifyOnApplyError bool   `json:"notify_on_apply_error,omitempty" yaml:"notify_on_apply_error"` // Send Slack notification on apply failures
-	UseThreads         bool   `json:"use_threads,omitempty" yaml:"use_threads"`                     // Send error details in a thread reply
+	UseThreads         *bool  `json:"use_threads,omitempty" yaml:"use_threads"`                     // Send error details in a thread reply
 }
 
 // Terraform represents terraform configurations
