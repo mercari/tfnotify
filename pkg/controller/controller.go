@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"text/template"
+	"strconv"
 
 	"github.com/mercari/tfnotify/v1/pkg/config"
 	"github.com/mercari/tfnotify/v1/pkg/notifier"
