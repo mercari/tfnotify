@@ -154,6 +154,31 @@ func (c *Controller) getPlanNotifier(ctx context.Context) ([]notifier.Notifier, 
 			if c.Config.Slack.UseThreads != nil {
 				useThreads = *c.Config.Slack.UseThreads
 			}
+			if envUseThreads := os.Getenv("SLACK_USE_THREADS",t); envUseThreads != "" {
+				parsed, err := strconv.ParseBool(envUseThreads)
+				if err != nil {
+					return nil, fmt.Errorf("invalid SLACK_USE_THREADS value %q: %w", envUseThreads, err)
+				}
+				useThreads = parsed
+			}
+
+			notifyOnPlanError := c.Config.Slack.NotifyOnPlanError
+			if envNotifyOnPlanError := os.Getenv("SLACK_NOTIFY_ON_PLAN_ERROR"); envNotifyOnPlanError != "" {
+				parsed, err := strconv.ParseBool(envNotifyOnPlanError)
+				if err != nil {
+					return nil, fmt.Errorf("invalid SLACK_NOTIFY_ON_PLAN_ERROR value %q: %w", envNotifyOnPlanError, err)
+				}
+				notifyOnPlanError = parsed
+			}
+
+			notifyOnApplyError := c.Config.Slack.NotifyOnApplyError
+			if envNotifyOnApplyError := os.Getenv("SLACK_NOTIFY_ON_APPLY_ERROR"); envNotifyOnApplyError != "" {
+				parsed, err := strconv.ParseBool(envNotifyOnApplyError)
+				if err != nil {
+					return nil, fmt.Errorf("invalid SLACK_NOTIFY_ON_APPLY_ERROR value %q: %w", envNotifyOnApplyError, err)
+				}
+				notifyOnApplyError = parsed
+			}
 
 			client, err := slack.NewClient(&slack.Config{
 				Token:              token,
@@ -171,8 +196,8 @@ func (c *Controller) getPlanNotifier(ctx context.Context) ([]notifier.Notifier, 
 				Message:            c.Config.Slack.Message,
 				PlanTitle:          planTitle,
 				PlanMessage:        planMessage,
-				NotifyOnPlanError:  c.Config.Slack.NotifyOnPlanError,
-				NotifyOnApplyError: c.Config.Slack.NotifyOnApplyError,
+				NotifyOnPlanError:  notifyOnPlanError,
+				NotifyOnApplyError: notifyOnApplyError,
 				UseThreads:         useThreads,
 			})
 			if err != nil {
@@ -250,6 +275,31 @@ func (c *Controller) getApplyNotifier(ctx context.Context) ([]notifier.Notifier,
 			if c.Config.Slack.UseThreads != nil {
 				useThreads = *c.Config.Slack.UseThreads
 			}
+			if envUseThreads := os.Getenv("SLACK_USE_THREADS"); envUseThreads != "" {
+				parsed, err := strconv.ParseBool(envUseThreads)
+				if err != nil {
+					return nil, fmt.Errorf("invalid SLACK_USE_THREADS value %q: %w", envUseThreads, err)
+				}
+				useThreads = parsed
+			}
+
+			notifyOnPlanError := c.Config.Slack.NotifyOnPlanError
+			if envNotifyOnPlanError := os.Getenv("SLACK_NOTIFY_ON_PLAN_ERROR"); envNotifyOnPlanError != "" {
+				parsed, err := strconv.ParseBool(envNotifyOnPlanError)
+				if err != nil {
+					return nil, fmt.Errorf("invalid SLACK_NOTIFY_ON_PLAN_ERROR value %q: %w", envNotifyOnPlanError, err)
+				}
+				notifyOnPlanError = parsed
+			}
+
+			notifyOnApplyError := c.Config.Slack.NotifyOnApplyError
+			if envNotifyOnApplyError := os.Getenv("SLACK_NOTIFY_ON_APPLY_ERROR"); envNotifyOnApplyError != "" {
+				parsed, err := strconv.ParseBool(envNotifyOnApplyError)
+				if err != nil {
+					return nil, fmt.Errorf("invalid SLACK_NOTIFY_ON_APPLY_ERROR value %q: %w", envNotifyOnApplyError, err)
+				}
+				notifyOnApplyError = parsed
+			}
 
 			client, err := slack.NewClient(&slack.Config{
 				Token:              token,
@@ -267,8 +317,8 @@ func (c *Controller) getApplyNotifier(ctx context.Context) ([]notifier.Notifier,
 				Message:            c.Config.Slack.Message,
 				ApplyTitle:         applyTitle,
 				ApplyMessage:       applyMessage,
-				NotifyOnPlanError:  c.Config.Slack.NotifyOnPlanError,
-				NotifyOnApplyError: c.Config.Slack.NotifyOnApplyError,
+				NotifyOnPlanError:  notifyOnPlanError,
+				NotifyOnApplyError: notifyOnApplyError,
 				UseThreads:         useThreads,
 			})
 			if err != nil {
