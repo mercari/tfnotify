@@ -151,11 +151,11 @@ func (c *Controller) getPlanNotifier(ctx context.Context) ([]notifier.Notifier, 
 				planMessage = envMessage
 			}
 
-
+			useThreads := true
 			if c.Config.Slack.UseThreads != nil {
 				useThreads = *c.Config.Slack.UseThreads
 			}
-			useThreads := true
+			
 			if s, ok := os.LookupEnv("SLACK_USE_THREADS"); ok {
 			    parsed, err := strconv.ParseBool(s)
 			    if err != nil {
