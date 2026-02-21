@@ -151,16 +151,17 @@ func (c *Controller) getPlanNotifier(ctx context.Context) ([]notifier.Notifier, 
 				planMessage = envMessage
 			}
 
-			useThreads := true
+
 			if c.Config.Slack.UseThreads != nil {
 				useThreads = *c.Config.Slack.UseThreads
 			}
-			if envUseThreads := os.Getenv("SLACK_USE_THREADS",t); envUseThreads != "" {
-				parsed, err := strconv.ParseBool(envUseThreads)
-				if err != nil {
-					return nil, fmt.Errorf("invalid SLACK_USE_THREADS value %q: %w", envUseThreads, err)
-				}
-				useThreads = parsed
+			useThreads := true
+			if s, ok := os.LookupEnv("SLACK_USE_THREADS"); ok {
+			    parsed, err := strconv.ParseBool(s)
+			    if err != nil {
+			        return nil, fmt.Errorf("invalid SLACK_USE_THREADS value %q: %w", s, err)
+			    }
+			    useThreads = parsed
 			}
 
 			notifyOnPlanError := c.Config.Slack.NotifyOnPlanError
