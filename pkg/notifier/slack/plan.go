@@ -158,10 +158,6 @@ func (s *NotifyService) Plan(ctx context.Context, param *notifier.ParamExec) err
 		logrus.WithField("parent_ts", timestamp).Info("Sending error details in thread")
 		return s.postMessage(ctx, threadMessage, &timestamp)
 	}
-
-	// Send single message with full content
-	logrus.Info("Plan has errors or destroy changes, posting to Slack channel")
-	_, err = s.postMessageAndGetTimestamp(ctx, fullMessage, nil)
 	return err
 }
 
