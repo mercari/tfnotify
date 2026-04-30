@@ -151,11 +151,11 @@ func (c *Controller) getPlanNotifier(ctx context.Context) ([]notifier.Notifier, 
 				planMessage = envMessage
 			}
 
-			useThreads := true
+			var useThreads bool
 			if c.Config.Slack.UseThreads != nil {
 				useThreads = *c.Config.Slack.UseThreads
 			}
-			
+
 			if s, ok := os.LookupEnv("SLACK_USE_THREADS"); ok {
 			    parsed, err := strconv.ParseBool(s)
 			    if err != nil {
@@ -165,7 +165,7 @@ func (c *Controller) getPlanNotifier(ctx context.Context) ([]notifier.Notifier, 
 			}
 
 			notifyOnPlanError := c.Config.Slack.NotifyOnPlanError
-			if envNotifyOnPlanError := os.Getenv("SLACK_NOTIFY_ON_PLAN_ERROR"); envNotifyOnPlanError != "" {
+			if envNotifyOnPlanError := os.Getenv("SLACK_NOTIFY_ON_PLAN_ERROR"); envNotifyOnPlanError != "false" {
 				parsed, err := strconv.ParseBool(envNotifyOnPlanError)
 				if err != nil {
 					return nil, fmt.Errorf("invalid SLACK_NOTIFY_ON_PLAN_ERROR value %q: %w", envNotifyOnPlanError, err)
@@ -174,7 +174,7 @@ func (c *Controller) getPlanNotifier(ctx context.Context) ([]notifier.Notifier, 
 			}
 
 			notifyOnApplyError := c.Config.Slack.NotifyOnApplyError
-			if envNotifyOnApplyError := os.Getenv("SLACK_NOTIFY_ON_APPLY_ERROR"); envNotifyOnApplyError != "" {
+			if envNotifyOnApplyError := os.Getenv("SLACK_NOTIFY_ON_APPLY_ERROR"); envNotifyOnApplyError != "false" {
 				parsed, err := strconv.ParseBool(envNotifyOnApplyError)
 				if err != nil {
 					return nil, fmt.Errorf("invalid SLACK_NOTIFY_ON_APPLY_ERROR value %q: %w", envNotifyOnApplyError, err)

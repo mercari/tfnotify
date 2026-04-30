@@ -29,6 +29,11 @@ func (c *Controller) Plan(ctx context.Context, command Command) error {
 		return err
 	}
 
+	if c.Config.Vars == nil {
+		c.Config.Vars = make(map[string]string)
+	}
+	c.Config.Vars["COMMIT_SHA"] = c.Config.CI.SHA
+
 	ntf, err := c.getPlanNotifier(ctx)
 	if err != nil {
 		return err
@@ -40,6 +45,7 @@ func (c *Controller) Plan(ctx context.Context, command Command) error {
 	// Execute command once
 	cmd := exec.CommandContext(ctx, command.Cmd, command.Args...) //nolint:gosec
 	cmd.Stdin = os.Stdin
+	cmd.Env = append(os.Environ(), "COMMIT_SHA="+c.Config.CI.SHA)
 	stdout := &bytes.Buffer{}
 	stderr := &bytes.Buffer{}
 	combinedOutput := &bytes.Buffer{}
