@@ -136,14 +136,7 @@ func (s *NotifyService) Apply(ctx context.Context, param *notifier.ParamExec) er
 	// If using threads, send parent message then error details in thread
 	if cfg.UseThreads {
 		// Send parent summary message
-		parentMessage := ""
-		if title != "" {
-			parentMessage = fmt.Sprintf("*%s*\n\n", title)
-		}
-		if message != "" {
-			parentMessage += fmt.Sprintf("%s\n\n", message)
-		}
-		parentMessage += "❌ Terraform apply failed. See thread for details."
+		parentMessage := buildParentMessage(title, message, "❌ Terraform apply failed. See thread for details.")
 
 		logrus.Info("Sending parent message to Slack")
 		timestamp, err := s.postMessageAndGetTimestamp(ctx, parentMessage, nil)
@@ -151,7 +144,7 @@ func (s *NotifyService) Apply(ctx context.Context, param *notifier.ParamExec) er
 			return err
 		}
 
-		threadMessage := fmt.Sprintf("```\n%s\n```", result.Result)
+		threadMessage := buildThreadMessage(result.Result)
 		logrus.WithField("parent_ts", timestamp).Info("Sending error details in thread")
 		return s.postMessage(ctx, threadMessage, &timestamp)
 	}
@@ -173,7 +166,7 @@ func (s *NotifyService) postMessageAndGetTimestamp(ctx context.Context, text str
 
 	// Build message options
 	options := []slackgo.MsgOption{
-		slackgo.MsgOptionText(text, false),
+		slackgo.MsgOptionText(truncateForSlack(text), false),
 	}
 
 	// Set bot name if configured

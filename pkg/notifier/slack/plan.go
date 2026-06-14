@@ -139,14 +139,7 @@ func (s *NotifyService) Plan(ctx context.Context, param *notifier.ParamExec) err
 	// If using threads, send parent message then error details in thread
 	if cfg.UseThreads && param.ExitCode != 0 {
 		// Send parent summary message
-		parentMessage := fullMessage
-		if title != "" {
-			parentMessage = fmt.Sprintf("*%s*\n\n", title)
-		}
-		if message != "" {
-			parentMessage += fmt.Sprintf("%s\n\n", message)
-		}
-		parentMessage += "❌ Terraform plan failed. See thread for details."
+		parentMessage := buildParentMessage(title, message, "❌ Terraform plan failed. See thread for details.")
 
 		logrus.Info("Sending parent message to Slack")
 		timestamp, err := s.postMessageAndGetTimestamp(ctx, parentMessage, nil)
@@ -154,7 +147,7 @@ func (s *NotifyService) Plan(ctx context.Context, param *notifier.ParamExec) err
 			return err
 		}
 
-		threadMessage := fmt.Sprintf("```\n%s\n```", result.Result)
+		threadMessage := buildThreadMessage(result.Result)
 		logrus.WithField("parent_ts", timestamp).Info("Sending error details in thread")
 		return s.postMessage(ctx, threadMessage, &timestamp)
 	}
