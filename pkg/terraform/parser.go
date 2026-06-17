@@ -31,6 +31,26 @@ type ParseResult struct {
 	ReplacedResources  []string
 	MovedResources     []*MovedResource
 	ImportedResources  []string
+	// ModuleResults is populated only by TerragruntParser when Consolidated=true
+	// and the parsed body contains 2+ modules (or at least one named module).
+	// Consumer templates can use this to render a per-module Create/Update/etc
+	// summary instead of the flat global lists. Nil otherwise; templates should
+	// fall back to the flat lists when nil.
+	ModuleResults []*ModuleResult
+}
+
+// ModuleResult is the per-module breakdown of resource changes in a
+// consolidated Terragrunt run. The Module field carries the module path as
+// seen in the run-all output (e.g. `cluster-citadel-2g/regions/tokyo/shared-vpc`).
+// Root-module changes are labeled "Root module".
+type ModuleResult struct {
+	Module             string
+	CreatedResources   []string
+	UpdatedResources   []string
+	DeletedResources   []string
+	ReplacedResources  []string
+	MovedResources     []*MovedResource
+	ImportedResources  []string
 }
 
 // PlanParser is a parser for terraform plan
@@ -422,6 +442,21 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 		return sec
 	}
 
+	// Per-module Create/Update/etc buckets, in order of first appearance.
+	// Mirrors the flat all*Resources slices but keyed by module so consumer
+	// templates can render a per-module summary in consolidated mode.
+	var moduleResults []*ModuleResult
+	moduleResultIndex := map[string]int{}
+	getModuleResult := func(name string) *ModuleResult {
+		if idx, ok := moduleResultIndex[name]; ok {
+			return moduleResults[idx]
+		}
+		mr := &ModuleResult{Module: name}
+		moduleResultIndex[name] = len(moduleResults)
+		moduleResults = append(moduleResults, mr)
+		return mr
+	}
+
 	currentModule := ""
 
 	for i, line := range lines {
@@ -502,31 +537,44 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 			}
 		}
 
-		// Extract resources
+		// Extract resources. Each match goes to both the flat global slice and
+		// the per-module bucket (the latter drives per-module rendering in
+		// consolidated mode; flat slices stay for templates that haven't migrated).
+		mr := getModuleResult(currentModule)
 		if rsc := extractResource(p.Create, line); rsc != "" {
 			allCreatedResources = append(allCreatedResources, rsc)
+			mr.CreatedResources = append(mr.CreatedResources, rsc)
 		} else if rsc := extractResource(p.Update, line); rsc != "" {
 			allUpdatedResources = append(allUpdatedResources, rsc)
+			mr.UpdatedResources = append(mr.UpdatedResources, rsc)
 		} else if rsc := extractResource(p.Delete, line); rsc != "" {
 			allDeletedResources = append(allDeletedResources, rsc)
+			mr.DeletedResources = append(mr.DeletedResources, rsc)
 		} else if rsc := extractResource(p.Replace, line); rsc != "" {
 			allReplacedResources = append(allReplacedResources, rsc)
+			mr.ReplacedResources = append(mr.ReplacedResources, rsc)
 		} else if rsc := extractResource(p.ReplaceOption, line); rsc != "" {
 			allReplacedResources = append(allReplacedResources, rsc)
+			mr.ReplacedResources = append(mr.ReplacedResources, rsc)
 		} else if rsc := extractResource(p.Import, line); rsc != "" {
 			allImportedResources = append(allImportedResources, rsc)
+			mr.ImportedResources = append(mr.ImportedResources, rsc)
 		} else if rsc := extractResource(p.ImportedFrom, line); rsc != "" {
 			if i > 0 {
 				if toRsc := p.changedResources(lines[i-1]); toRsc != "" {
 					allImportedResources = append(allImportedResources, toRsc)
+					mr.ImportedResources = append(mr.ImportedResources, toRsc)
 				}
 			}
 		} else if rsc := extractMovedResource(p.Move, line); rsc != nil {
 			allMovedResources = append(allMovedResources, rsc)
+			mr.MovedResources = append(mr.MovedResources, rsc)
 		} else if fromRsc := extractResource(p.MovedFrom, line); fromRsc != "" {
 			if i > 0 {
 				if toRsc := p.changedResources(lines[i-1]); toRsc != "" {
-					allMovedResources = append(allMovedResources, &MovedResource{Before: fromRsc, After: toRsc})
+					mvd := &MovedResource{Before: fromRsc, After: toRsc}
+					allMovedResources = append(allMovedResources, mvd)
+					mr.MovedResources = append(mr.MovedResources, mvd)
 				}
 			}
 		}
@@ -579,6 +627,35 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 
 	hasAddOrUpdateOnly := !hasNoChanges && !hasDestroy && !hasError
 
+	// Build ModuleResults only in consolidated mode and only when we have
+	// something useful to render. "Useful" = at least one named module with
+	// changes, OR multiple modules with changes (so the per-module split adds
+	// signal even if all are unnamed). Single-unnamed-module input falls
+	// through to the flat lists.
+	var emitModuleResults []*ModuleResult
+	if consolidated {
+		namedWithChanges := 0
+		withChanges := make([]*ModuleResult, 0, len(moduleResults))
+		for _, mr := range moduleResults {
+			if len(mr.CreatedResources)+len(mr.UpdatedResources)+len(mr.DeletedResources)+
+				len(mr.ReplacedResources)+len(mr.MovedResources)+len(mr.ImportedResources) == 0 {
+				continue
+			}
+			withChanges = append(withChanges, mr)
+			if mr.Module != "" {
+				namedWithChanges++
+			}
+		}
+		if namedWithChanges > 0 || len(withChanges) > 1 {
+			for _, mr := range withChanges {
+				if mr.Module == "" {
+					mr.Module = "Root module"
+				}
+			}
+			emitModuleResults = withChanges
+		}
+	}
+
 	return ParseResult{
 		Result:             strings.TrimSpace(result),
 		ChangedResult:      strings.Join(changeResults, "\n\n"),
@@ -594,6 +671,7 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 		ReplacedResources:  allReplacedResources,
 		MovedResources:     allMovedResources,
 		ImportedResources:  allImportedResources,
+		ModuleResults:      emitModuleResults,
 	}
 }
 

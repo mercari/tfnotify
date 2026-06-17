@@ -88,6 +88,7 @@ func (s *NotifyService) Apply(ctx context.Context, param *notifier.ParamExec) er
 		UpdatedResources:       result.UpdatedResources,
 		DeletedResources:       result.DeletedResources,
 		ReplacedResources:      result.ReplacedResources,
+		ModuleResults:          result.ModuleResults,
 		AISummary:              aiSummary,
 		SummaryEnabled:         param.AISummarizer != nil,
 	})

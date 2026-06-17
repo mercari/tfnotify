@@ -313,6 +313,83 @@ Module /path/to/app2
 	}
 }
 
+func TestTerragruntParser_ConsolidatedModuleResults(t *testing.T) {
+	parser := NewTerragruntParser(true)
+
+	// Two named modules with mixed Create/Update changes, mirroring the
+	// shape mstf-ci produces via `terragrunt run-all plan` with no tfwrapper.
+	// The [module/path] log prefix is what LogModule keys on for attribution.
+	input := `Group 1
+- Module /repo/cluster-citadel-2g/regions/tokyo/shared-vpc
+
+10:23:45.001 STDOUT [cluster-citadel-2g/regions/tokyo/shared-vpc] tf:   # terraform_data.tfnotify_consolidation_canary will be created
+10:23:45.001 STDOUT [cluster-citadel-2g/regions/tokyo/shared-vpc] tf:   # google_project_iam_member.tushar_is_owner will be created
+10:23:45.001 STDOUT [cluster-citadel-2g/regions/tokyo/shared-vpc] tf: Plan: 2 to add, 0 to change, 0 to destroy.
+
+Group 2
+- Module /repo/cluster-spinnaker/regions/tokyo/cluster
+
+10:24:05.222 STDOUT [cluster-spinnaker/regions/tokyo/cluster] tf:   # google_container_node_pool.nodepool["spinnaker-general-t2d-standard-8-preemptible-003"] will be updated in-place
+10:24:05.222 STDOUT [cluster-spinnaker/regions/tokyo/cluster] tf:   # terraform_data.tfnotify_consolidation_canary will be created
+10:24:05.222 STDOUT [cluster-spinnaker/regions/tokyo/cluster] tf: Plan: 1 to add, 1 to change, 0 to destroy.`
+
+	result := parser.Parse(input)
+
+	if len(result.ModuleResults) != 2 {
+		t.Fatalf("ModuleResults length = %d, want 2:\n%+v", len(result.ModuleResults), result.ModuleResults)
+	}
+
+	first := result.ModuleResults[0]
+	if first.Module != "cluster-citadel-2g/regions/tokyo/shared-vpc" {
+		t.Errorf("ModuleResults[0].Module = %q, want shared-vpc path", first.Module)
+	}
+	if len(first.CreatedResources) != 2 {
+		t.Errorf("ModuleResults[0].CreatedResources = %v, want 2 entries", first.CreatedResources)
+	}
+	if len(first.UpdatedResources) != 0 {
+		t.Errorf("ModuleResults[0].UpdatedResources = %v, want 0 entries", first.UpdatedResources)
+	}
+
+	second := result.ModuleResults[1]
+	if second.Module != "cluster-spinnaker/regions/tokyo/cluster" {
+		t.Errorf("ModuleResults[1].Module = %q, want spinnaker cluster path", second.Module)
+	}
+	if len(second.CreatedResources) != 1 {
+		t.Errorf("ModuleResults[1].CreatedResources = %v, want 1 entry", second.CreatedResources)
+	}
+	if len(second.UpdatedResources) != 1 {
+		t.Errorf("ModuleResults[1].UpdatedResources = %v, want 1 entry", second.UpdatedResources)
+	}
+
+	// Flat lists must still total the union (back-compat for older templates).
+	if len(result.CreatedResources) != 3 {
+		t.Errorf("CreatedResources (flat) = %v, want 3 entries", result.CreatedResources)
+	}
+	if len(result.UpdatedResources) != 1 {
+		t.Errorf("UpdatedResources (flat) = %v, want 1 entry", result.UpdatedResources)
+	}
+}
+
+func TestTerragruntParser_ConsolidatedNotEmittedForSingleUnnamed(t *testing.T) {
+	parser := NewTerragruntParser(true)
+
+	// Single-module input with no [module/path] log prefix and no run-all
+	// queue header. Consolidated mode should NOT emit ModuleResults — older
+	// templates would otherwise see a single "Root module" heading for no
+	// observable benefit. They fall back to the flat lists.
+	input := `09:32:46.963 STDOUT terraform:   # null_resource.test will be created
+09:32:46.963 STDOUT terraform: Plan: 1 to add, 0 to change, 0 to destroy.`
+
+	result := parser.Parse(input)
+
+	if result.ModuleResults != nil {
+		t.Errorf("ModuleResults = %+v, want nil for single-unnamed-module input", result.ModuleResults)
+	}
+	if len(result.CreatedResources) != 1 {
+		t.Errorf("CreatedResources (flat) = %v, want 1 entry", result.CreatedResources)
+	}
+}
+
 func TestTerragruntParser_ErrorKeepsDetails(t *testing.T) {
 	parser := NewTerragruntParser(true)
 

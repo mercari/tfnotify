@@ -97,8 +97,13 @@ type CommonTemplate struct {
 	ReplacedResources      []string
 	MovedResources         []*MovedResource
 	ImportedResources      []string
-	AISummary              string
-	SummaryEnabled         bool
+	// ModuleResults is populated by TerragruntParser in consolidated mode when
+	// the parsed body contains multiple Terragrunt modules. The default
+	// `updated_resources` template renders a per-module Create/Update/Delete
+	// summary when this is non-empty, falling back to the flat lists otherwise.
+	ModuleResults []*ModuleResult
+	AISummary      string
+	SummaryEnabled bool
 }
 
 // Template is a default template for terraform commands
@@ -229,6 +234,7 @@ func (t *Template) Execute() (string, error) {
 		"ReplacedResources":      t.ReplacedResources,
 		"MovedResources":         t.MovedResources,
 		"ImportedResources":      t.ImportedResources,
+		"ModuleResults":          t.ModuleResults,
 		"HasDestroy":             t.HasDestroy,
 		"AISummary":              t.AISummary,
 		"SummaryEnabled":         t.SummaryEnabled,
@@ -239,7 +245,9 @@ func (t *Template) Execute() (string, error) {
 		"apply_title": "## {{if and (eq .ExitCode 0) (not .HasError)}}:white_check_mark: Apply Succeeded{{else}}:x: Apply Failed{{end}}{{if .Vars.target}} ({{.Vars.target}}){{end}}",
 		"result":      "{{if .Result}}<pre><code>{{ .Result }}</code></pre>{{end}}",
 		"ai_summary":  "{{if .SummaryEnabled}}{{if .AISummary}}<details><summary>AI Summary (Click me)</summary>\n\n{{avoidHTMLEscape .AISummary}}\n\n</details>{{end}}{{end}}",
-		"updated_resources": `{{if .CreatedResources}}
+		"updated_resources": `{{if .ModuleResults}}{{range .ModuleResults}}
+### {{.Module}}
+{{if .CreatedResources}}
 * Create
 {{- range .CreatedResources}}
   * {{.}}
@@ -263,7 +271,32 @@ func (t *Template) Execute() (string, error) {
 * Move
 {{- range .MovedResources}}
   * {{.Before}} => {{.After}}
-{{- end}}{{end}}`,
+{{- end}}{{end}}
+{{end}}{{else}}{{if .CreatedResources}}
+* Create
+{{- range .CreatedResources}}
+  * {{.}}
+{{- end}}{{end}}{{if .UpdatedResources}}
+* Update
+{{- range .UpdatedResources}}
+  * {{.}}
+{{- end}}{{end}}{{if .DeletedResources}}
+* Delete
+{{- range .DeletedResources}}
+  * {{.}}
+{{- end}}{{end}}{{if .ReplacedResources}}
+* Replace
+{{- range .ReplacedResources}}
+  * {{.}}
+{{- end}}{{end}}{{if .ImportedResources}}
+* Import
+{{- range .ImportedResources}}
+  * {{.}}
+{{- end}}{{end}}{{if .MovedResources}}
+* Move
+{{- range .MovedResources}}
+  * {{.Before}} => {{.After}}
+{{- end}}{{end}}{{end}}`,
 		"deletion_warning": `{{if .HasDestroy}}
 ### :warning: Resource Deletion will happen
 This plan contains resource delete operation. Please check the plan result very carefully!

@@ -86,6 +86,7 @@ func (s *NotifyService) Plan(ctx context.Context, param *notifier.ParamExec) err
 		UpdatedResources:       result.UpdatedResources,
 		DeletedResources:       result.DeletedResources,
 		ReplacedResources:      result.ReplacedResources,
+		ModuleResults:          result.ModuleResults,
 		AISummary:              aiSummary,
 		SummaryEnabled:         param.AISummarizer != nil,
 	})
