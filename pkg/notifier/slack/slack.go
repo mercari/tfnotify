@@ -18,6 +18,45 @@ func escapeSlackText(text string) string {
 	return text
 }
 
+// slackMaxTextLength is the maximum length of a Slack message text field.
+// Slack rejects messages longer than 40,000 characters.
+const slackMaxTextLength = 40000
+
+// truncateForSlack truncates text so it fits in a single Slack message
+func truncateForSlack(text string) string {
+	if len(text) <= slackMaxTextLength {
+		return text
+	}
+	const note = "\n... (output truncated by tfnotify)"
+	return text[:slackMaxTextLength-len(note)] + note
+}
+
+// buildParentMessage builds the parent (summary) message of a thread
+func buildParentMessage(title, message, status string) string {
+	parent := ""
+	if title != "" {
+		parent = fmt.Sprintf("*%s*\n\n", title)
+	}
+	if message != "" {
+		parent += fmt.Sprintf("%s\n\n", message)
+	}
+	return parent + status
+}
+
+// buildThreadMessage wraps the result details in a code block for a thread reply
+func buildThreadMessage(details string) string {
+	if details == "" {
+		details = "(no output captured)"
+	}
+	// Leave room for the code fences and the truncation note so the
+	// closing fence is never cut off.
+	const overhead = 50
+	if len(details) > slackMaxTextLength-overhead {
+		details = details[:slackMaxTextLength-overhead] + "\n... (output truncated by tfnotify)"
+	}
+	return fmt.Sprintf("```\n%s\n```", details)
+}
+
 // Client is a Slack client
 type Client struct {
 	*slackgo.Client

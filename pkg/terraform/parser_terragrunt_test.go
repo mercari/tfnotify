@@ -243,6 +243,221 @@ Module /path/to/app2
 	})
 }
 
+func TestTerragruntParser_ConsolidationMixedNoChanges(t *testing.T) {
+	// A module reporting "No changes." before a module with changes must not
+	// mark the whole run as no-changes (regression test)
+	parser := NewTerragruntParser(true)
+
+	input := `18:13:47.247 STDOUT [cluster/shared-vpc] tfwrapper.sh: No changes. Your infrastructure matches the configuration.
+18:14:11.466 STDOUT [cluster/cluster] tfwrapper.sh: Terraform will perform the following actions:
+18:14:11.466 STDOUT [cluster/cluster] tfwrapper.sh:
+18:14:11.466 STDOUT [cluster/cluster] tfwrapper.sh:   # null_resource.test will be created
+18:14:11.466 STDOUT [cluster/cluster] tfwrapper.sh:   + resource "null_resource" "test" {
+18:14:11.466 STDOUT [cluster/cluster] tfwrapper.sh:       + id = (known after apply)
+18:14:11.466 STDOUT [cluster/cluster] tfwrapper.sh:     }
+18:14:11.466 STDOUT [cluster/cluster] tfwrapper.sh:
+18:14:11.466 STDOUT [cluster/cluster] tfwrapper.sh: Plan: 1 to add, 0 to change, 0 to destroy.`
+
+	result := parser.Parse(input)
+
+	if result.HasParseError {
+		t.Fatalf("unexpected parse error: %v", result.Error)
+	}
+	if result.HasNoChanges {
+		t.Error("HasNoChanges = true, want false (one module has changes)")
+	}
+	if result.Result != "Plan: 1 to add, 0 to change, 0 to destroy." {
+		t.Errorf("Result = %q, want aggregated plan summary", result.Result)
+	}
+	if len(result.CreatedResources) != 1 {
+		t.Errorf("CreatedResources count = %d, want 1", len(result.CreatedResources))
+	}
+	// Module attribution must come from the [module/path] log prefix
+	if !strings.Contains(result.ChangedResult, "cluster/cluster") {
+		t.Errorf("ChangedResult missing module name from log prefix:\n%s", result.ChangedResult)
+	}
+	// Nested diff lines must be preserved
+	if !strings.Contains(result.ChangedResult, "+ id = (known after apply)") {
+		t.Errorf("ChangedResult missing nested diff line:\n%s", result.ChangedResult)
+	}
+	if !strings.Contains(result.ChangedResult, "Plan: 1 to add, 0 to change, 0 to destroy.") {
+		t.Errorf("ChangedResult missing plan summary:\n%s", result.ChangedResult)
+	}
+}
+
+func TestTerragruntParser_ConsolidationAggregatesTotals(t *testing.T) {
+	parser := NewTerragruntParser(true)
+
+	input := `Group 1
+Module /path/to/app1
+
+09:32:46.963 STDOUT terraform:   # null_resource.app1 will be created
+09:32:46.963 STDOUT terraform: Plan: 2 to add, 1 to change, 0 to destroy.
+
+Group 2
+Module /path/to/app2
+
+09:33:12.145 STDOUT terraform:   # null_resource.app2 will be destroyed
+09:33:12.145 STDOUT terraform: Plan: 1 to add, 0 to change, 3 to destroy.`
+
+	result := parser.Parse(input)
+
+	if result.Result != "Plan: 3 to add, 1 to change, 3 to destroy." {
+		t.Errorf("Result = %q, want aggregated totals", result.Result)
+	}
+	if !result.HasDestroy {
+		t.Error("HasDestroy = false, want true")
+	}
+	if result.HasNoChanges {
+		t.Error("HasNoChanges = true, want false")
+	}
+}
+
+func TestTerragruntParser_ConsolidatedModuleResults(t *testing.T) {
+	parser := NewTerragruntParser(true)
+
+	// Two named modules with mixed Create/Update changes, mirroring the
+	// shape mstf-ci produces via `terragrunt run-all plan` with no tfwrapper.
+	// The [module/path] log prefix is what LogModule keys on for attribution.
+	input := `Group 1
+- Module /repo/cluster-citadel-2g/regions/tokyo/shared-vpc
+
+10:23:45.001 STDOUT [cluster-citadel-2g/regions/tokyo/shared-vpc] tf:   # terraform_data.tfnotify_consolidation_canary will be created
+10:23:45.001 STDOUT [cluster-citadel-2g/regions/tokyo/shared-vpc] tf:   # google_project_iam_member.tushar_is_owner will be created
+10:23:45.001 STDOUT [cluster-citadel-2g/regions/tokyo/shared-vpc] tf: Plan: 2 to add, 0 to change, 0 to destroy.
+
+Group 2
+- Module /repo/cluster-spinnaker/regions/tokyo/cluster
+
+10:24:05.222 STDOUT [cluster-spinnaker/regions/tokyo/cluster] tf:   # google_container_node_pool.nodepool["spinnaker-general-t2d-standard-8-preemptible-003"] will be updated in-place
+10:24:05.222 STDOUT [cluster-spinnaker/regions/tokyo/cluster] tf:   # terraform_data.tfnotify_consolidation_canary will be created
+10:24:05.222 STDOUT [cluster-spinnaker/regions/tokyo/cluster] tf: Plan: 1 to add, 1 to change, 0 to destroy.`
+
+	result := parser.Parse(input)
+
+	if len(result.ModuleResults) != 2 {
+		t.Fatalf("ModuleResults length = %d, want 2:\n%+v", len(result.ModuleResults), result.ModuleResults)
+	}
+
+	first := result.ModuleResults[0]
+	if first.Module != "cluster-citadel-2g/regions/tokyo/shared-vpc" {
+		t.Errorf("ModuleResults[0].Module = %q, want shared-vpc path", first.Module)
+	}
+	if len(first.CreatedResources) != 2 {
+		t.Errorf("ModuleResults[0].CreatedResources = %v, want 2 entries", first.CreatedResources)
+	}
+	if len(first.UpdatedResources) != 0 {
+		t.Errorf("ModuleResults[0].UpdatedResources = %v, want 0 entries", first.UpdatedResources)
+	}
+
+	second := result.ModuleResults[1]
+	if second.Module != "cluster-spinnaker/regions/tokyo/cluster" {
+		t.Errorf("ModuleResults[1].Module = %q, want spinnaker cluster path", second.Module)
+	}
+	if len(second.CreatedResources) != 1 {
+		t.Errorf("ModuleResults[1].CreatedResources = %v, want 1 entry", second.CreatedResources)
+	}
+	if len(second.UpdatedResources) != 1 {
+		t.Errorf("ModuleResults[1].UpdatedResources = %v, want 1 entry", second.UpdatedResources)
+	}
+
+	// Flat lists must still total the union (back-compat for older templates).
+	if len(result.CreatedResources) != 3 {
+		t.Errorf("CreatedResources (flat) = %v, want 3 entries", result.CreatedResources)
+	}
+	if len(result.UpdatedResources) != 1 {
+		t.Errorf("UpdatedResources (flat) = %v, want 1 entry", result.UpdatedResources)
+	}
+}
+
+func TestTerragruntParser_ConsolidatedNotEmittedForSingleUnnamed(t *testing.T) {
+	parser := NewTerragruntParser(true)
+
+	// Single-module input with no [module/path] log prefix and no run-all
+	// queue header. Consolidated mode should NOT emit ModuleResults — older
+	// templates would otherwise see a single "Root module" heading for no
+	// observable benefit. They fall back to the flat lists.
+	input := `09:32:46.963 STDOUT terraform:   # null_resource.test will be created
+09:32:46.963 STDOUT terraform: Plan: 1 to add, 0 to change, 0 to destroy.`
+
+	result := parser.Parse(input)
+
+	if result.ModuleResults != nil {
+		t.Errorf("ModuleResults = %+v, want nil for single-unnamed-module input", result.ModuleResults)
+	}
+	if len(result.CreatedResources) != 1 {
+		t.Errorf("CreatedResources (flat) = %v, want 1 entry", result.CreatedResources)
+	}
+}
+
+func TestTerragruntParser_ErrorKeepsDetails(t *testing.T) {
+	parser := NewTerragruntParser(true)
+
+	input := `09:32:46.963 STDOUT terraform: Initializing...
+09:32:46.963 STDERR terraform: Error: Invalid configuration
+09:32:46.963 STDERR terraform:
+09:32:46.963 STDERR terraform: Something went wrong
+09:32:46.963 STDERR terraform: on main.tf line 5`
+
+	result := parser.Parse(input)
+
+	if !result.HasError {
+		t.Fatal("HasError = false, want true")
+	}
+	// The full error details (prefix-stripped) must be preserved, not just the first line
+	if !strings.Contains(result.Result, "Error: Invalid configuration") {
+		t.Errorf("Result missing error headline: %q", result.Result)
+	}
+	if !strings.Contains(result.Result, "Something went wrong") {
+		t.Errorf("Result missing error details: %q", result.Result)
+	}
+	if strings.Contains(result.Result, "STDERR") {
+		t.Errorf("Result should not contain log prefixes: %q", result.Result)
+	}
+}
+
+func TestTerragruntParser_PlanSummaryWithImports(t *testing.T) {
+	// Terraform >= 1.5 prints "Plan: N to import, ..." when import blocks are used
+	parser := NewTerragruntParser(true)
+
+	input := `09:32:46.963 STDOUT terraform:   # null_resource.test will be imported
+09:32:46.963 STDOUT terraform: Plan: 1 to import, 2 to add, 0 to change, 0 to destroy.`
+
+	result := parser.Parse(input)
+
+	if result.HasParseError {
+		t.Fatalf("unexpected parse error: %v", result.Error)
+	}
+	if result.HasNoChanges {
+		t.Error("HasNoChanges = true, want false")
+	}
+	if result.Result != "Plan: 1 to import, 2 to add, 0 to change, 0 to destroy." {
+		t.Errorf("Result = %q, want import-aware plan summary", result.Result)
+	}
+	if len(result.ImportedResources) != 1 {
+		t.Errorf("ImportedResources count = %d, want 1", len(result.ImportedResources))
+	}
+}
+
+func TestTerragruntParser_ApplyConsolidated(t *testing.T) {
+	parser := NewTerragruntParser(true)
+
+	input := `18:13:47.247 STDOUT [app1] tfwrapper.sh: Apply complete! Resources: 2 added, 1 changed, 0 destroyed.
+18:14:11.466 STDOUT [app2] tfwrapper.sh: Apply complete! Resources: 1 added, 0 changed, 1 destroyed.`
+
+	result := parser.Parse(input)
+
+	if result.HasParseError {
+		t.Fatalf("unexpected parse error: %v", result.Error)
+	}
+	if result.HasError {
+		t.Error("HasError = true, want false")
+	}
+	if result.Result != "Apply complete! Resources: 3 added, 1 changed, 1 destroyed." {
+		t.Errorf("Result = %q, want aggregated apply summary", result.Result)
+	}
+}
+
 func TestStripTerragruntPrefix(t *testing.T) {
 	tests := []struct {
 		name  string
