@@ -313,6 +313,36 @@ Module /path/to/app2
 	}
 }
 
+func TestTerragruntParser_ConsolidatedPreservesIndentation(t *testing.T) {
+	parser := NewTerragruntParser(true)
+
+	// Sample terragrunt run-all output where the underlying `tf plan`
+	// emitted standard 2/4/6-space indented diff lines. The prefix regex
+	// must consume only the single separator space between `tf:` and the
+	// wrapped output, leaving terraform's indentation intact.
+	input := `10:23:45.001 STDOUT [shared-vpc] tf: Terraform will perform the following actions:
+10:23:45.001 STDOUT [shared-vpc] tf:
+10:23:45.001 STDOUT [shared-vpc] tf:   # terraform_data.canary will be created
+10:23:45.001 STDOUT [shared-vpc] tf:   + resource "terraform_data" "canary" {
+10:23:45.001 STDOUT [shared-vpc] tf:       + id     = (known after apply)
+10:23:45.001 STDOUT [shared-vpc] tf:     }
+10:23:45.001 STDOUT [shared-vpc] tf:
+10:23:45.001 STDOUT [shared-vpc] tf: Plan: 1 to add, 0 to change, 0 to destroy.`
+
+	result := parser.Parse(input)
+
+	// The Change Result block must keep terraform's 2/4/6-space indentation.
+	if !strings.Contains(result.ChangedResult, "  # terraform_data.canary will be created") {
+		t.Errorf("ChangedResult lost 2-space indent on '# … will be created' line:\n%s", result.ChangedResult)
+	}
+	if !strings.Contains(result.ChangedResult, "  + resource \"terraform_data\" \"canary\" {") {
+		t.Errorf("ChangedResult lost 2-space indent on '+ resource …' line:\n%s", result.ChangedResult)
+	}
+	if !strings.Contains(result.ChangedResult, "      + id     = (known after apply)") {
+		t.Errorf("ChangedResult lost 6-space indent on '+ id …' line:\n%s", result.ChangedResult)
+	}
+}
+
 func TestTerragruntParser_ConsolidatedModuleResults(t *testing.T) {
 	parser := NewTerragruntParser(true)
 

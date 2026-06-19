@@ -705,8 +705,14 @@ func trimBars(list []string) []string {
 	return ret
 }
 
-// terragruntPrefixRe matches Terragrunt timestamp prefixes
-var terragruntPrefixRe = regexp.MustCompile(`^\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR|INFO|ERROR)\s+(?:\[.*?\]\s+)?(?:tfwrapper\.sh|terraform|tf):\s*`)
+// terragruntPrefixRe matches Terragrunt timestamp prefixes.
+// The trailing `: ?` (optional single space) eats exactly the one separator
+// space terragrunt inserts between the colon and the wrapped command's output,
+// but preserves the wrapped command's own indentation. With the previous
+// `:\s*`, the 2/4/6-space indentation of `terraform plan` was eaten too,
+// causing diff lines like `+ field = ...` to render at column 0 in the
+// rendered Change Result block.
+var terragruntPrefixRe = regexp.MustCompile(`^\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR|INFO|ERROR)\s+(?:\[.*?\]\s+)?(?:tfwrapper\.sh|terraform|tf): ?`)
 
 // stripTerragruntPrefix removes Terragrunt timestamp prefixes
 func stripTerragruntPrefix(line string) string {
