@@ -420,6 +420,43 @@ func TestTerragruntParser_ConsolidatedNotEmittedForSingleUnnamed(t *testing.T) {
 	}
 }
 
+func TestTerragruntParser_ConsolidatedRootModuleAttribution(t *testing.T) {
+	parser := NewTerragruntParser(true)
+
+	// Matches terragrunt run-all output where one leaf has a [module/path]
+	// log prefix and the root module does not. Without LogRootModule, the
+	// root's resources would inherit the prior leaf's currentModule and be
+	// misattributed.
+	input := `10:23:45.001 STDOUT [shared-vpc] tf: Terraform will perform the following actions:
+10:23:45.001 STDOUT [shared-vpc] tf:   # terraform_data.shared_vpc_canary will be created
+10:23:45.001 STDOUT [shared-vpc] tf: Plan: 1 to add, 0 to change, 0 to destroy.
+10:23:50.001 STDOUT tf: Terraform will perform the following actions:
+10:23:50.001 STDOUT tf:   # google_project_iam_member.root_iam will be created
+10:23:50.001 STDOUT tf: Plan: 1 to add, 0 to change, 0 to destroy.`
+
+	result := parser.Parse(input)
+
+	if len(result.ModuleResults) != 2 {
+		t.Fatalf("ModuleResults length = %d, want 2:\n%+v", len(result.ModuleResults), result.ModuleResults)
+	}
+
+	leaf := result.ModuleResults[0]
+	if leaf.Module != "shared-vpc" {
+		t.Errorf("ModuleResults[0].Module = %q, want shared-vpc", leaf.Module)
+	}
+	if len(leaf.CreatedResources) != 1 || leaf.CreatedResources[0] != "terraform_data.shared_vpc_canary" {
+		t.Errorf("ModuleResults[0].CreatedResources = %v, want [terraform_data.shared_vpc_canary]", leaf.CreatedResources)
+	}
+
+	root := result.ModuleResults[1]
+	if root.Module != "Root module" {
+		t.Errorf("ModuleResults[1].Module = %q, want \"Root module\"", root.Module)
+	}
+	if len(root.CreatedResources) != 1 || root.CreatedResources[0] != "google_project_iam_member.root_iam" {
+		t.Errorf("ModuleResults[1].CreatedResources = %v, want [google_project_iam_member.root_iam]", root.CreatedResources)
+	}
+}
+
 func TestTerragruntParser_ErrorKeepsDetails(t *testing.T) {
 	parser := NewTerragruntParser(true)
 
