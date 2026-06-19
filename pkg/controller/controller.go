@@ -222,6 +222,31 @@ func (c *Controller) getPlanNotifier(ctx context.Context) ([]notifier.Notifier, 
 		labels = a
 	}
 
+	if c.Config.Output != "" {
+		// Write output to file instead of github comment (plan path).
+		// Mirrors the apply path; without this, `tfnotify --output X plan`
+		// drops the notifier entirely and the caller hits
+		// "no notifier specified at all".
+		client, err := localfile.NewClient(&localfile.Config{
+			OutputFile:         c.Config.Output,
+			Parser:             c.Parser,
+			UseRawOutput:       c.Config.Terraform.UseRawOutput,
+			CI:                 c.Config.CI.Link,
+			Template:           c.Template,
+			ParseErrorTemplate: c.ParseErrorTemplate,
+			Vars:               c.Config.Vars,
+			EmbeddedVarNames:   c.Config.EmbeddedVarNames,
+			Templates:          c.Config.Templates,
+			Masks:              c.Config.Masks,
+			DisableLabel:       c.Config.Terraform.Plan.DisableLabel,
+		}, nil)
+		if err != nil {
+			return nil, err
+		}
+		notifiers = append(notifiers, client.Notify)
+		return notifiers, nil
+	}
+
 	if !c.Config.Terraform.Plan.DisableLabel || c.Config.Output == "" {
 		client, err := github.NewClient(ctx, &github.Config{
 			BaseURL:         c.Config.GHEBaseURL,
