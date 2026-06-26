@@ -97,6 +97,7 @@ type TerragruntParser struct {
 	MovedFrom      *regexp.Regexp
 	ModuleHeader   *regexp.Regexp
 	LogModule      *regexp.Regexp
+	LogRootModule  *regexp.Regexp
 	PlanSummary    *regexp.Regexp
 	ApplySummary   *regexp.Regexp
 	ActionHeader   *regexp.Regexp
@@ -158,6 +159,11 @@ func NewTerragruntParser(consolidated bool) *TerragruntParser {
 		MovedFrom:      regexp.MustCompile(`^` + prefix + ` *# \(moved from (.*?)\)$`),
 		ModuleHeader:   regexp.MustCompile(`^(?:(?:Group \d+)|(?:- )?Module) (.+?)(?:\s+\[run-all\])?$`),
 		LogModule:      regexp.MustCompile(`^\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR|INFO|ERROR)\s+\[(.+?)\]\s`),
+		// LogRootModule: terragrunt log line for the root module — same shape
+		// as LogModule but without a [module/path] bracket. We use it to flip
+		// currentModule back to "" when the run-all output transitions from a
+		// leaf back into the root, so root resources aren't misattributed.
+		LogRootModule:  regexp.MustCompile(`^\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR|INFO|ERROR)\s+(?:tfwrapper\.sh|terraform|tf):`),
 		PlanSummary:    regexp.MustCompile(`^Plan: (?:(\d+) to import, )?(\d+) to add, (\d+) to change, (\d+) to destroy\.`),
 		ApplySummary:   regexp.MustCompile(`^Apply complete! Resources: (\d+) added, (\d+) changed, (\d+) destroyed\.`),
 		ActionHeader:   regexp.MustCompile(`^(?:Terraform|OpenTofu) will perform the following actions:$`),
@@ -458,6 +464,11 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 	}
 
 	currentModule := ""
+	// True when currentModule was last set by a [module/path] log prefix.
+	// We only honour LogRootModule (unbracketed `tf:` line) as a "switch to
+	// root" signal in that case — otherwise unbracketed log lines belonging
+	// to a module declared earlier via `Module <path>` would be misrouted.
+	moduleFromBracket := false
 
 	for i, line := range lines {
 		stripped := stripTerragruntPrefix(line)
@@ -468,12 +479,17 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 		// starts, so headers alone cannot attribute output lines correctly).
 		if m := p.LogModule.FindStringSubmatch(line); len(m) == 2 { //nolint:mnd
 			currentModule = m[1]
+			moduleFromBracket = true
+		} else if moduleFromBracket && p.LogRootModule.MatchString(line) {
+			currentModule = ""
+			moduleFromBracket = false
 		} else if m := p.ModuleHeader.FindStringSubmatch(line); len(m) > 1 {
 			name := m[1]
 			if name == "." {
 				name = ""
 			}
 			currentModule = name
+			moduleFromBracket = false
 			continue
 		}
 
@@ -705,8 +721,14 @@ func trimBars(list []string) []string {
 	return ret
 }
 
-// terragruntPrefixRe matches Terragrunt timestamp prefixes
-var terragruntPrefixRe = regexp.MustCompile(`^\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR|INFO|ERROR)\s+(?:\[.*?\]\s+)?(?:tfwrapper\.sh|terraform|tf):\s*`)
+// terragruntPrefixRe matches Terragrunt timestamp prefixes.
+// The trailing `: ?` (optional single space) eats exactly the one separator
+// space terragrunt inserts between the colon and the wrapped command's output,
+// but preserves the wrapped command's own indentation. With the previous
+// `:\s*`, the 2/4/6-space indentation of `terraform plan` was eaten too,
+// causing diff lines like `+ field = ...` to render at column 0 in the
+// rendered Change Result block.
+var terragruntPrefixRe = regexp.MustCompile(`^\d{2}:\d{2}:\d{2}\.\d{3} (?:STDOUT|STDERR|INFO|ERROR)\s+(?:\[.*?\]\s+)?(?:tfwrapper\.sh|terraform|tf): ?`)
 
 // stripTerragruntPrefix removes Terragrunt timestamp prefixes
 func stripTerragruntPrefix(line string) string {
