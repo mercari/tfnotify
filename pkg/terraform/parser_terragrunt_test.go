@@ -525,6 +525,42 @@ func TestTerragruntParser_ApplyConsolidated(t *testing.T) {
 	}
 }
 
+// TestTerragruntParser_ApplyWithReplanDoesNotDoubleCount is a regression test:
+// a `terragrunt run --all apply` without a saved plan makes terraform print BOTH
+// the plan preview ("Plan: ... to destroy.") and the final result
+// ("Apply complete! ... destroyed.") for the same module. The apply summary is
+// authoritative; the plan preview must NOT be added on top, or the destroyed
+// count doubles (observed: an apply that destroyed 14 reported 28).
+func TestTerragruntParser_ApplyWithReplanDoesNotDoubleCount(t *testing.T) {
+	parser := NewTerragruntParser(true)
+
+	// Mirrors the real consolidated apply: two no-op modules that apply cleanly
+	// plus one module that re-plans (14 to destroy) and then applies (14
+	// destroyed). Expected total destroyed is 14, not 28.
+	input := `09:11:43.164 STDOUT [shared-vpc] tf: Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+09:12:41.496 STDOUT tf: Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+09:13:12.324 STDOUT [cluster] tf: Plan: 0 to add, 0 to change, 14 to destroy.
+09:14:02.273 STDOUT [cluster] tf: Apply complete! Resources: 0 added, 0 changed, 14 destroyed.`
+
+	result := parser.Parse(input)
+
+	if result.HasParseError {
+		t.Fatalf("unexpected parse error: %v", result.Error)
+	}
+	if result.HasError {
+		t.Error("HasError = true, want false")
+	}
+	if result.Result != "Apply complete! Resources: 0 added, 0 changed, 14 destroyed." {
+		t.Errorf("Result = %q, want apply summary only (plan preview must not double-count)", result.Result)
+	}
+	if !result.HasDestroy {
+		t.Error("HasDestroy = false, want true")
+	}
+	if result.HasNoChanges {
+		t.Error("HasNoChanges = true, want false")
+	}
+}
+
 func TestStripTerragruntPrefix(t *testing.T) {
 	tests := []struct {
 		name  string

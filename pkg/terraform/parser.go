@@ -429,7 +429,14 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 	var errorLines []string
 	hasError := false
 
-	var totalImport, totalAdd, totalChange, totalDestroy int
+	// Plan and apply summaries are accumulated separately. A `terragrunt run
+	// --all apply` without a saved plan prints BOTH a "Plan:" preview and an
+	// "Apply complete!" line for the same module; mixing them into one set of
+	// totals double-counts resources (an apply that destroyed 14 reported 28).
+	// We pick which set to report after the loop, based on whether this run is
+	// actually an apply.
+	var planImport, planAdd, planChange, planDestroy int
+	var applyAdd, applyChange, applyDestroy int
 	planSummaryCount := 0
 	applySummaryCount := 0
 	noChangesCount := 0
@@ -508,19 +515,19 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 			add, _ := strconv.Atoi(m[2])
 			change, _ := strconv.Atoi(m[3])
 			destroy, _ := strconv.Atoi(m[4])
-			totalImport += imported
-			totalAdd += add
-			totalChange += change
-			totalDestroy += destroy
+			planImport += imported
+			planAdd += add
+			planChange += change
+			planDestroy += destroy
 			planSummaryCount++
 			summaryLine = true
 		} else if m := p.ApplySummary.FindStringSubmatch(stripped); len(m) == 4 { //nolint:mnd
 			add, _ := strconv.Atoi(m[1])
 			change, _ := strconv.Atoi(m[2])
 			destroy, _ := strconv.Atoi(m[3])
-			totalAdd += add
-			totalChange += change
-			totalDestroy += destroy
+			applyAdd += add
+			applyChange += change
+			applyDestroy += destroy
 			applySummaryCount++
 			summaryLine = true
 		} else if p.HasNoChanges.MatchString(line) {
@@ -601,9 +608,18 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 		}
 	}
 
+	// Apply summaries are authoritative for an apply run; the plan-preview
+	// summaries printed by that same apply must not be added on top. Choose the
+	// totals from whichever phase this run actually is.
+	isApply := applySummaryCount > 0
+	totalImport, totalAdd, totalChange, totalDestroy := planImport, planAdd, planChange, planDestroy
+	if isApply {
+		totalAdd, totalChange, totalDestroy = applyAdd, applyChange, applyDestroy
+	}
+
 	// A run has no changes only when no module reported any change at all
 	hasDestroy := totalDestroy > 0
-	hasNoChanges := !hasError && applySummaryCount == 0 &&
+	hasNoChanges := !hasError && !isApply &&
 		totalImport == 0 && totalAdd == 0 && totalChange == 0 && totalDestroy == 0 &&
 		(noChangesCount > 0 || planSummaryCount > 0)
 
@@ -611,7 +627,7 @@ func (p *TerragruntParser) ParseWithConsolidation(body string, consolidated bool
 	switch {
 	case hasError:
 		result = strings.Join(trimBars(trimLastNewline(errorLines)), "\n")
-	case applySummaryCount > 0:
+	case isApply:
 		result = fmt.Sprintf("Apply complete! Resources: %d added, %d changed, %d destroyed.", totalAdd, totalChange, totalDestroy)
 	case hasNoChanges:
 		result = "No changes. Your infrastructure matches the configuration."
