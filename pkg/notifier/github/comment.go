@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/google/go-github/v74/github"
 	"github.com/shurcooL/githubv4"
@@ -13,6 +15,41 @@ import (
 // methods of GitHub API
 type CommentService service
 
+// githubMaxCommentLength is GitHub's hard limit on a comment body. Posting a
+// longer body fails with a 422, which fails CI even though the underlying
+// plan/apply succeeded.
+const githubMaxCommentLength = 65536
+
+const truncationNotice = "\n\n:warning: **This comment was truncated by tfnotify because it exceeded GitHub's " +
+	"65536-character limit.** :warning:\n"
+
+// truncateComment keeps a comment body within githubMaxCommentLength. The
+// template already does a best-effort truncation per code block, but a
+// consolidated comment can assemble many blocks and still overflow, so this is
+// a final safety net on every GitHub write. It keeps the head of the body (the
+// summary, links and warnings) and preserves the trailing github-comment
+// metadata line, which is what tfnotify uses to find and patch its own comment.
+func truncateComment(body string) string {
+	if utf8.RuneCountInString(body) <= githubMaxCommentLength {
+		return body
+	}
+
+	content, suffix := body, ""
+	if i := strings.LastIndex(body, "\n<!-- github-comment: "); i != -1 && strings.HasSuffix(body, " -->") {
+		content, suffix = body[:i], body[i:]
+	}
+
+	budget := githubMaxCommentLength - utf8.RuneCountInString(suffix) - utf8.RuneCountInString(truncationNotice)
+	if budget < 0 {
+		budget = 0
+	}
+	if utf8.RuneCountInString(content) > budget {
+		content = string([]rune(content)[:budget])
+	}
+
+	return content + truncationNotice + suffix
+}
+
 // PostOptions specifies the optional parameters to post comments to a pull request
 type PostOptions struct {
 	Number   int
@@ -21,6 +58,7 @@ type PostOptions struct {
 
 // Post posts comment
 func (g *CommentService) Post(ctx context.Context, body string, opt *PostOptions) error {
+	body = truncateComment(body)
 	if opt.Number != 0 {
 		_, _, err := g.client.API.IssuesCreateComment(
 			ctx,
@@ -41,6 +79,7 @@ func (g *CommentService) Post(ctx context.Context, body string, opt *PostOptions
 }
 
 func (g *CommentService) Patch(ctx context.Context, body string, commentID int64) error {
+	body = truncateComment(body)
 	_, _, err := g.client.API.IssuesEditComment(
 		ctx,
 		commentID,
